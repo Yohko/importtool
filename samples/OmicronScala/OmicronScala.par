@@ -1,0 +1,168 @@
+;
+;               Omicron SPM Control.
+;           Parameter file for SPM data.
+;
+
+Format                          : 1
+
+Version                         : 5.0
+System                          : SCALA
+
+;
+; User Information.
+;
+
+Date                            : 04.06.2012 12:10
+User                            : SCALA
+Comment                         : loop0,pump off
+
+;
+; Scanner Description.
+;
+
+Name                            : AFM_N.SCA
+VGAP Contact                    : SAMPLE
+
+;
+; Scanner Area Description.
+;
+
+Field X Size in nm              : 0.983477     ;[nm]
+Field Y Size in nm              : 0.983476     ;[nm]
+Image Size in X                 : 256
+Image Size in Y                 : 256
+Increment X                     : 0.00384171     ;[nm]
+Increment Y                     : 0.00384170     ;[nm]
+Scan Angle                      : 0.000000     ;[Degree]
+X Offset                        : 412.147     ;[nm]
+Y Offset                        : -295.001     ;[nm]
+
+;
+; Topographic Channels.
+;
+
+Topographic Channel             : Z   ;Channel
+                                  Forward 
+                                  -32767   ;Minimum raw value
+                                  32766   ;Maximum raw value
+                                  -108.00   ;Minimum value in physical unit
+                                  108.00   ;Maximum value in physical unit
+                                  0.0032959   ;Resolution
+                                  nm   ;Physical unit
+                                  OmicronScala.tf0   ;Filename
+                                  Z   ;Display name
+
+Topographic Channel             : I   ;Channel
+                                  Forward 
+                                  0   ;Minimum raw value
+                                  32768   ;Maximum raw value
+                                  0.00000   ;Minimum value in physical unit
+                                  5.0000   ;Maximum value in physical unit
+                                  0.00015259   ;Resolution
+                                  nA   ;Physical unit
+                                  OmicronScala.tf1   ;Filename
+                                  I   ;Display name
+
+Topographic Channel             : Z   ;Channel
+                                  Backward
+                                  -32767   ;Minimum raw value
+                                  32766   ;Maximum raw value
+                                  -108.00   ;Minimum value in physical unit
+                                  108.00   ;Maximum value in physical unit
+                                  0.0032959   ;Resolution
+                                  nm   ;Physical unit
+                                  OmicronScala.tb0   ;Filename
+                                  Z   ;Display name
+
+Topographic Channel             : I   ;Channel
+                                  Backward
+                                  0   ;Minimum raw value
+                                  32768   ;Maximum raw value
+                                  0.00000   ;Minimum value in physical unit
+                                  5.0000   ;Maximum value in physical unit
+                                  0.00015259   ;Resolution
+                                  nA   ;Physical unit
+                                  OmicronScala.tb1   ;Filename
+                                  I   ;Display name
+
+;
+; Measurement parameters.
+;
+
+SPM Method                      : STM
+Dual mode                       : Off
+Gap Voltage                     : 0.466000     ;[V]
+Feedback Set                    : 0.726200     ;[nA]
+Loop Gain                       : 0.100000     ;[%]
+X Resolution                    : 0     ;Currently not used.
+Y Resolution                    : 0     ;Currently not used.
+Measured Gap Voltage            : 0.000000     ;[V] (at store time)
+Measured Current Setpoint       : 0.000000     ;[nA] (at store time)
+Measured Current                : 0.000000     ;[nA] (at store time)
+Scan Speed                      : 3.65877     ;[nm/s]
+X Drift                         : 0.000000     ;[nm/s]
+Y Drift                         : 0.000000     ;[nm/s]
+Scan Mode                       : Frame
+Scan Direction                  : UP
+Topography Time per Point       : 0
+Spectroscopy Grid Value in X    : 0
+Spectroscopy Grid Value in Y    : 0
+Spectroscopy Points in X        : 256
+Spectroscopy Lines in Y         : 0
+
+;
+; Z Control Parameters.
+;
+
+Z Speed                         : 1000.00     ;[nm/s]
+Z Output Gain                   : 0.100000
+Automatic Z zero                : On
+Z Input Gain                    : 10.0000
+
+;
+; AFM Description.
+;
+
+AFM exists                      : 1
+Amplitude                       : 0.100000     ;[V]
+Delta f sign                    : -1
+Oscillator available?           : Yes
+Oscillator frequency            : 455300.     ;[Hz]
+Calibration FN                  : 10.000000     ;[nN/V]
+Calibration FL                  : 1.0000000     ;[nN/V]
+I Total                         : 0.0021338458     ;[V]
+
+;
+;  Universal Counter Board Settings UCB
+;
+UCB-Sync       :  0.000000[Khz]
+UCB-SyncSource :  
+UCB-SyncMode   :  
+;
+;
+
+UCB_Counter                    :         0/   Description.
+UCB CounterMode                :  
+UCB CounterIntTime             :  0.000000[ms]
+UCB CounterSyncCycles          :  0.000000
+UCB_Counter                    :         1/   Description.
+UCB CounterMode                :  
+UCB CounterIntTime             :  0.000000[ms]
+UCB CounterSyncCycles          :  0.000000
+UCB_Counter                    :         2/   Description.
+UCB CounterMode                :  
+UCB CounterIntTime             :  0.000000[ms]
+UCB CounterSyncCycles          :  0.000000
+UCB_Counter                    :         3/   Description.
+UCB CounterMode                :  
+UCB CounterIntTime             :  0.000000[ms]
+UCB CounterSyncCycles          :  0.000000
+;
+;  OPD Description.
+;
+
+OPD Board exists                : 0
+OPD Version                     : OPD_V1
+Delta Phi Sign                  : 1     ;[0=plus, 1=minus]
+Excitation Gain                 : 0.100000
+
