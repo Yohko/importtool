@@ -16,5 +16,6 @@ Supported formats:
 
 Installation:
 
-Copy the "Igor Procedures" folder to ...
-... for MAX: /Users/"username"/Documents/WaveMetrics/Igor Pro 6 User Files/
+Copy the "Igor Procedures" folder to:
+  - Mac OS X: 	/Users/<user>/Documents/WaveMetrics/Igor Pro 6 User Files/
+  - Windows: 	<My Documents>\WaveMetrics\Igor Pro 6 User Files\
