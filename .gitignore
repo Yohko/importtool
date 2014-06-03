@@ -1,5 +1,5 @@
-
-Igor Procedures/.DS_Store
+*/.DS_Store
+*/*/.DS_Store
 
 Igor Procedures/import tool/import_AFM.ipf
 
@@ -17,14 +17,6 @@ Igor Procedures/import tool/import_XAS.ipf
 
 Igor Procedures/import tool/import_XRD.ipf
 
-Igor Procedures/import tool/import_loader.ipf
-
 Igor Procedures/import tool/import_misc.ipf
 
 Igor Procedures/import tool/example_datafiles.txt
-
-Igor Procedures/import tool/.DS_Store
-
-samples/.DS_Store
-
-samples/OmicronScala/.DS_Store
