@@ -504,3 +504,73 @@ function /S get_valid_line(file, comment_char)
 	endif   
     return line
 end
+
+Structure fourbytes
+ 	char bytes[4]
+endstructure
+
+static Structure myflt
+	float val
+endstructure
+
+
+// function that converts single precision 32-bit floating point in DEC PDP-11
+// format to double
+// good description of the format is at:
+// http://home.kpn.nl/jhm.bonten/computers/bitsandbytes/wordsizes/hidbit.htm
+//
+// TODO: consider this comment from S.M.:
+// PDP-11 F floating point numbers can be converted very easily (and
+// efficently) into standard IEEE 754 format: Swap the higher an lower
+// 16-bit words, cast to float and divide by 4.
+function from_pdp11(pvar)//(const unsigned char* p) // funcktioniert
+	string pvar
+
+	struct fourbytes value
+	struct fourbytes value2
+	struct myflt fltval
+	variable retval	
+	//from pvar to value
+	StructGet/S/B=3 value, pvar
+
+	// (1) Swap the higher an lower 16bit words
+	value2.bytes[0]=value.bytes[2]
+	value2.bytes[1]=value.bytes[3]
+	value2.bytes[2]=value.bytes[0]
+	value2.bytes[3]=value.bytes[1]
+
+	// (2) from value2 to retval (cast to float)
+	StructPut/S/B=3 value2, pvar
+	StructGet/S/B=3 fltval, pvar
+	retval = fltval.val
+
+	// (3) devide by 4
+	retval = retval /4
+	return retval
+
+#if 0
+	variable signn = (str2num(pvar[1]) & 0x80) == 0 ? 1 : -1
+	debugprintf2("Sign: "+num2str(signn),0)
+	//variable exb = ((str2num(pvar[1]) & 0x7F) << 1) + ((str2num(pvar[0]) & 0x80) >> 7)
+	variable exb = shiftleft((str2num(pvar[1]) & 0x7F),1) + shiftright((str2num(pvar[0]) & 0x80),7)
+	debugprintf2("exb: "+num2str(exb),0)
+
+	if (exb == 0)
+		if (signn == -1)
+			// DEC calls it Undefined
+			return NaN//numeric_limits<double>::quiet_NaN();
+		else
+			// either clean-zero or dirty-zero
+			return 0
+		endif
+	endif
+	variable h = str2num(pvar[2]) / 256. / 256. / 256. + str2num(pvar[3]) / 256. / 256. + (128 + (str2num(pvar[0]) & 0x7F)) / 256.
+	return signn*h*2^(exb-128)
+//	#if 0
+//		return ldexp(sign*h, exb-128);
+//	#else
+//    		return sign * h * pow(2., exb-128);
+//	#endif
+
+#endif
+end

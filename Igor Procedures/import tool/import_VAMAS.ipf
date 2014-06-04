@@ -13,7 +13,7 @@
 //  and on the analysis of sample files.
 
 Menu "Macros"
-	submenu "Import Tool "+version
+	submenu "Import Tool "+importloaderversion
 			submenu "PES"
 				"Load VAMAS					*.vms	file... v1.0", Vamas_load_data()
 				"Load and graph CasaXPS reports", Vamas_loadplot_report()
