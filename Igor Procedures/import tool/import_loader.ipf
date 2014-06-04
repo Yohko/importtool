@@ -430,6 +430,21 @@ function /S myreadline(file)
 end
 
 
+function skip_lines(file, count)
+	variable file, count
+	string tmps
+	variable i=0
+	for (i = 0; i < count; i+=1) 
+		FReadLine file, tmps
+		if(strlen(tmps) == 0)
+			Debugprintf2("Unexpected end of file.",0)
+			return -1
+		endif
+	endfor
+	return 0
+end
+
+
 function getkeyval(file, key, val)
 	variable file
 	string &key

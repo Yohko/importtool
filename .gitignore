@@ -1,17 +1,12 @@
+.DS_Store
 */.DS_Store
 */*/.DS_Store
-
-Igor Procedures/import tool/import_AFM.ipf
 
 Igor Procedures/import tool/import_FTIR.ipf
 
 Igor Procedures/import tool/import_PES.ipf
 
 Igor Procedures/import tool/import_PhyMultipakSPE.ipf
-
-Igor Procedures/import tool/import_SpecsLab.ipf
-
-Igor Procedures/import tool/import_VAMAS.ipf
 
 Igor Procedures/import tool/import_XAS.ipf
 
