@@ -13,3 +13,7 @@ Igor Procedures/import tool/import_XAS.ipf
 Igor Procedures/import tool/import_misc.ipf
 
 Igor Procedures/import tool/example_datafiles.txt
+
+Igor Procedures/import tool/import_winspec_spe.ipf
+
+Igor Procedures/import tool/import_gsas.ipf
