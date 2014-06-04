@@ -23,3 +23,9 @@ Copy the "Igor Procedures" folder to:
 **Configuration**:
 
 In order to change the behaviour of the import tool change the settings (importflags) in ``import_loader.ipf``.
+
+**Authors**
+  - Matthias Richter richtmat@yahoo.co.uk
+
+**Credits**:
+  - Parts of the procedures are based on xylib by Marcin Wojdyr
