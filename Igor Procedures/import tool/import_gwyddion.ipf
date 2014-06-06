@@ -108,7 +108,6 @@ static function gwy_importGWYP(file, header)
 	variable file
 	string header
 	Fstatus file
-	variable size =  V_logEOF
 	string tmps=""
 	variable imagecount =0
 	variable fpos =0
@@ -117,7 +116,8 @@ static function gwy_importGWYP(file, header)
 	variable xres=0,yres=0,xreal=0,yreal=0
 	string si_unit_xy=""
 	string si_unit_z=""
-	variable titlefound =0
+	string imagelist = ""
+	string namelist = ""
 	do
 		//gwy_findparam("/0/data",file) //beginn of data of channel 0
 		if(gwy_findparam("/data",file)==true) //beginn of data of channel
@@ -126,16 +126,11 @@ static function gwy_importGWYP(file, header)
 			tmps=gwy_getstring(file)
 			if(strsearch(tmps,"title",0)==0)
 				channelnumber=gwy_getchannelnumber(file,"/data/title ")
-				titlefound = 1
 				mybinread(file,1)//skip only s
 				datatitle = gwy_getstring(file)
-				tmps = getnameforwave(file)+"_ch"+num2str(channelnumber)+"_title"
-				// save channel title in global string variable as they are saved somewhere in the file (todo: put them in the appropriate wave or rename the wave)
-				string /G $tmps 
-				SVAR gStr = $tmps
-				gStr = datatitle
-				Debugprintf2("Exported title of channel "+num2str(channelnumber),0)
-
+				Debugprintf2("Found title of channel "+num2str(channelnumber),1)
+				// save channel title in a list
+				namelist = AddListItem(num2str(channelnumber)+"="+datatitle,namelist, ";", 0)
 			elseif(strsearch(tmps,"oGwyDataField",0)==0)
 				// Found oGwyDataField
 
@@ -196,15 +191,27 @@ static function gwy_importGWYP(file, header)
 				note image, "GWY channel: "+num2str(channelnumber)
 				FBinread/B=3/F=5 file, image
 
-				Debugprintf2("Exported image channel "+num2str(channelnumber),0)
-				
-				titlefound = 0
+				Debugprintf2("... exported image: ch"+num2str(channelnumber),0)
+
+				imagelist = AddListItem(num2str(channelnumber)+"="+tmps,imagelist, ";", 0)
 			endif
 		else
 			break	
 		endif
 		fstatus file
 	while(V_logEOF>V_filePOS)
+	
+	// now assign imagename to image
+	if(ItemsInList(imagelist,";") ==ItemsInList(namelist,";") && ItemsInList(namelist,";") > 0)
+		variable i=0
+		for(i=0;i<ItemsInList(namelist,";");i+=1)
+			tmps = StringFromList(0,StringFromList(i,namelist,";"),"=")
+			if(waveexists($(StringByKey(tmps, imagelist, "=",";"))))
+				Rename $(StringByKey(tmps, imagelist, "=",";")), $(StringByKey(tmps, namelist, "=",";")+"_ch"+tmps)
+			endif
+		endfor
+	endif
+	
 end
 
 function gwy_load_data()
@@ -222,7 +229,7 @@ function gwy_load_data()
 	if (strsearch(identifier, "GWYO", 0) == 0)
 			Debugprintf2("Found a Gwyddion 1.x GWY0 file, not supported yet!",2)
 	elseif (strsearch(identifier, "GWYP", 0) == 0)
-			Debugprintf2("Found a Gwyddion 2.x GWYP file!",0)
+			Debugprintf2("Found a Gwyddion 2.x GWYP file!",1)
 			gwy_importGWYP(file, header)
 	elseif (strsearch(identifier, "GWYQ", 0) == 0)
 			Debugprintf2("Found a Gwyddion GWYQ file, not supported yet!",2)
