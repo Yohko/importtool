@@ -238,31 +238,31 @@ Function/S stripstrfirstlastspaces(str)
 		variable i=0,j=0, length=strlen(str)
 		for(i=0;i<length;i+=1)
 			if(strsearch(str[i]," ",0)==-1)
-				str=str[i,inf]
 				break
 			endif
 		endfor
+		str=str[i,inf]
 		length=strlen(str)
 		for(i=0;i<length;i+=1)
 			if(strsearch(str[i],"	",0)==-1)
-				str=str[i,inf]
 				break
 			endif
 		endfor
+		str=str[i,inf]
 		length=strlen(str)
 		for(i=length-1;i>0;i-=1)
 			if(strsearch(str[i]," ",0)==-1)
-				str=str[0,i]
 				break
 			endif
 		endfor
+		str=str[0,i]
 		length=strlen(str)
 		for(i=length-1;i>0;i-=1)
 			if(strsearch(str[i],"	",0)==-1)
-				str=str[0,i]
 				break
 			endif
 		endfor
+		str=str[0,i]
 		return str		
 end
 
