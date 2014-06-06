@@ -51,7 +51,7 @@ function Spectra_load_data()
 	variable Start = 0,Ende = 0,Schrittweite = 0,Scans = 0,Torzeit = 0,Messpunkte = 0,EPass = 0, ExEnergie = 0
  	variable spalte = 0
 	variable val = 0
-      FReadLine file, Experimentname
+	FReadLine file, Experimentname
 	header+="\rExperimentname: "+ cleanup_(Experimentname)
 
 	If (importieren != 1)

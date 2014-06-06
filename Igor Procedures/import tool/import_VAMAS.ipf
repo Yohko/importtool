@@ -221,12 +221,13 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	variable x_start=0.0, x_step=0.0, i=0, n=0
 	string x_name = "", tmps=""
 	variable excenergy = 0
+	variable dwelltime = 1
+	variable scancount = 1
 
 //	variable cor_var = 0 // # of corresponding variables
 
-	string blockid =read_line_trim(file)+"_count_"+num2str(count)//   
-
-	//Make /O/R/N=(Messpunkte) $Regionname /wave=Detector
+	string blockid =read_line_trim(file)+"_count_"+num2str(count)
+	blockid = cleanname(blockid)
 	Make /O/R/N=(10)  $blockid /wave=ycols
 	Note ycols, headercomment
 	
@@ -422,10 +423,12 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 		note ycols, "signal mode: "+  read_line_trim(file)
 	endif
 	if (includew[33]==1)
-		note ycols, "signal collection time: "+  read_line_trim(file)
+		dwelltime =  read_line_int(file)
+		note ycols, "signal collection time: "+  num2str(dwelltime)//read_line_trim(file)
 	endif
 	if (includew[34]==1)
-		note ycols, "# of scans to compile this blk: "+  read_line_trim(file)
+		scancount =  read_line_int(file)
+		note ycols, "# of scans to compile this blk: "+  num2str(scancount)//read_line_trim(file)
 	endif
 	if (includew[35]==1)
 		note ycols, "signal time correction: "+  read_line_trim(file)
@@ -477,8 +480,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	endif
 
 	if ((cmpstr("UPS",tech) == 0) ||  (cmpstr("XPS",tech) == 0)) 
-	
-		if(strsearch(x_name,"Kinetic Energy",0)!=-1)
+		if(strsearch(x_name,"Kinetic Energy",0,2)!=-1)
 			if(vskineticenergy==0)
 				if (posbinde == 0)
 					SetScale/P  x,x_start-excenergy,x_step,"eV", ycols
@@ -488,7 +490,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 			else
 					SetScale/P  x,x_start,x_step,"eV", ycols
 			endif
-		elseif(strsearch(x_name,"Binding Energy",0)!=-1)
+		elseif(strsearch(x_name,"Binding Energy",0,2)!=-1)
 			if(vskineticenergy==0)
 				if (posbinde == 0)
 					SetScale/P  x,-x_start,-x_step,"eV", ycols
@@ -498,6 +500,9 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 			else
 					SetScale/P  x,excenergy-x_start,x_step,"eV", ycols
 			endif
+		//elseif(strsearch(x_name,"time of day",0,2)!=-1)
+		else
+			SetScale/P  x,x_start,x_step,x_name, ycols
 		endif
 	else
 		SetScale/P  x,x_start,x_step,x_name, ycols
@@ -526,6 +531,14 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 		col = Mod(col+1,cor_var)
 		n = (i+1-mod(i+1,cor_var))/cor_var
 	endfor
+	
+	if (CB_DivScans == 1)
+		ycols/=scancount
+	endif
+	if (CB_DivLifeTime == 1)
+		ycols/=dwelltime
+	endif
+	
 	splitmatrix(ycols, blockid)
 	Debugprintf2("exported: "+blockid,0)
 	return 0
