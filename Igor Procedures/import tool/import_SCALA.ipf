@@ -116,7 +116,7 @@ static function SCALA_read_image_files(file, header,fileheader)
 	variable i=0,fileread
 	string tmps
 	for(i=0;i<fileheader.imagecount;i+=1)
-		tmps=getnameforwave(file)+"_"+num2str(i)
+		tmps=num2str(i)+"_"+fileheader.images[i].channelname+"_"+fileheader.images[i].direction//getnameforwave(file)+"_"+num2str(i)
 		Make /O/R/N=(fileheader.xpixel,fileheader.ypixel)  $tmps /wave=image
 		SetScale/I  x,0,fileheader.xsize, "nm", image
 		SetScale/I  y,0,fileheader.ysize, "nm", image
@@ -132,7 +132,7 @@ static function SCALA_read_image_files(file, header,fileheader)
 		note image, "Min Real Value: "+num2str(fileheader.images[i].minrealval)
 		note image, "Max Real Value: "+num2str(fileheader.images[i].maxrealval)
 		Open/R/Z=2 fileread as filepath+fileheader.images[i].filename
-		print filepath+fileheader.images[i].filename
+		Debugprintf2("... exporting: "+filepath+fileheader.images[i].filename,0)
 		Fbinread/B=1/F=2 fileread, image
 		Duplicate/FREE image, imagetemp
 		image[][]=imagetemp[p][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original picture
