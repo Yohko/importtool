@@ -1,3 +1,4 @@
+// Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 
 // based on http://www.igorexchange.com/node/5692
@@ -13,6 +14,8 @@ end
 
 static structure phiheader
 	variable energy
+	variable Ta
+	variable Tb
 
 	variable NoSpectralReg
 	struct SpectralRegDef SpectralRegDef[100]
@@ -28,14 +31,14 @@ static structure SpectralRegDef
 	variable num1
 	variable num2
 	string name
-	variable scans
+	variable PHI_AtomicNumber
 	variable points
 	variable step
 	variable start1
 	variable ende1
 	variable start2
 	variable ende2
-	variable num3
+	variable dwelltime //collection time
 	variable Epass
 	string str
 	struct spectraheader header
@@ -94,10 +97,10 @@ static structure spectraheader
 	uint32 num16
 	char datatype[4] //f4 --> float; f8 --> double
 	uint32 datalen // points * datatype (bytes)
-	uint32 offset1
+	uint32 datastart // start of datablock
 	uint32 num20
 	uint32 num21
-	uint32 offset2 // datalen+offset1
+	uint32 offset2 // start off additional information
 endstructure
 
 
@@ -237,6 +240,9 @@ Function phimultipak_load_data()
 			case "IntensityCalCoeff": // for calculation of transmission function
 				// T(E) = Epass*( a^2 / ( a^2+ (E/Epass)^2 ) )^b
 				header += "\rIntensityCalCoeff: "+keyval.val // a b
+				phiheader.Ta = str2num(stringfromlist(0,keyval.val," "))
+				phiheader.Tb = str2num(stringfromlist(1,keyval.val," "))
+				Debugprintf2("Ta: "+num2str(phiheader.Ta)+" ; Tb: "+num2str(phiheader.Tb),1)
 				break
 			case "EnergyRecal":
 				header += "\rEnergyRecal: "+keyval.val
@@ -313,14 +319,14 @@ Function phimultipak_load_data()
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num1= str2num(stringfromlist(0,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num2 = str2num(stringfromlist(1,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].name = stringfromlist(2,keyval.val,"_")
-					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].scans = str2num(stringfromlist(3,keyval.val,"_"))
+					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].PHI_AtomicNumber = str2num(stringfromlist(3,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].points = str2num(stringfromlist(4,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].step = str2num(stringfromlist(5,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].start1 = str2num(stringfromlist(6,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].ende1 = str2num(stringfromlist(7,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].start2 = str2num(stringfromlist(8,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].ende2 = str2num(stringfromlist(9,keyval.val,"_"))
-					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num3 = str2num(stringfromlist(10,keyval.val,"_"))
+					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].dwelltime = str2num(stringfromlist(10,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].Epass = str2num(stringfromlist(11,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].str = stringfromlist(12,keyval.val,"_")
 				else
@@ -343,24 +349,22 @@ Function phimultipak_load_data()
 			case "SOFH":
 				Debugprintf2("start of header",1)
 				break
-
 			default:
 				Debugprintf2("Unknown key: "+keyval.key,0)
 				break
 		endswitch
-
-
 		fstatus file
 	while(V_logEOF>V_filePOS && run == 1)
 
 
-
 	//Binary headers
+	Fstatus file
+	variable binstart = V_filePOS // save start of binheader
 
 	//read the binary headers
 	struct binheader binheader
 	fbinread /B=0 file, binheader
-	// for each spectrum 24 uint32 to read
+	// for each spectrum 24 * 4bytes to read
 	struct spectraheader spectraheaderread
 	variable i = 0, tmp=0
 	for(i=0; i < phiheader.NoSpectralReg; i += 1 )
@@ -370,12 +374,13 @@ Function phimultipak_load_data()
 		phiheader.SpectralRegDef[i].header.points = spectraheaderread.points
 		phiheader.SpectralRegDef[i].header.datatype = spectraheaderread.datatype
 		phiheader.SpectralRegDef[i].header.datalen = spectraheaderread.datalen
-		phiheader.SpectralRegDef[i].header.offset1 = spectraheaderread.offset1
+		phiheader.SpectralRegDef[i].header.datastart = spectraheaderread.datastart
 		phiheader.SpectralRegDef[i].header.offset2 =spectraheaderread.offset2
 	endfor
 	
-	variable type = 0
 	
+	variable type = 0
+	variable additionalbytes=0
 
 	//load each spectrum into a separate wave
 	string tmps = ""
@@ -383,8 +388,7 @@ Function phimultipak_load_data()
 	variable vReadVal
 	for( i = 0; i < phiheader.NoSpectralReg; i += 1 )
 		// get datatype of spectra
-		//switch(phiheader.SpectralRegDef[i].header.datalen/phiheader.SpectralRegDef[i].header.points)
-		strswitch(phiheader.SpectralRegDef[i].header.datatype)
+		strswitch(phiheader.SpectralRegDef[i].header.datatype) //switch(phiheader.SpectralRegDef[i].header.datalen/phiheader.SpectralRegDef[i].header.points)
 			// only float or double
 			case "f4"://4:
 				type = 4 // float
@@ -397,19 +401,46 @@ Function phimultipak_load_data()
 				return -1
 				break	
 		endswitch
+
 		// make wave for current spectra
 		tmpS = phiheader.SpectralRegDef[i].name+"_"+num2str(i) ; Make /O/D/N=(phiheader.SpectralRegDef[i].header.points) $tmpS ; wave data = $tmpS
+
+		// goto start of spectrum
+		fsetpos file, binstart + phiheader.SpectralRegDef[i].header.datastart
+		
 		//read spectrum
-		FBinRead/B=0/F=(type) file, data
-		//read 4 bytes at end of spectrum
-		if(phiheader.SpectralRegDef[i].header.offset2!=0) // todo: consider offset differences
-			FBinRead/B=0/F=4 file, vReadVal // compare to SpectralRegDef.num3
-		endif	
+		FBinRead/B=0/F=(type) file, data // compared to vms import of same file in CasaXPS there is a difference in countrate?? cps vs. pure counts..
+		// CasaXPS --> pure counts
+		// cps saved in spe (check yunit == c/s)
+		//data *=phiheader.SpectralRegDef[i].dwelltime // now the counts are the same as in CasaXPS, but we need cps
+		
+		// are there bytes at the end of the spectrum? Read them?
+		if(phiheader.SpectralRegDef[i].header.offset2 != 0)
+			fsetpos file, binstart + phiheader.SpectralRegDef[i].header.offset2
+			if(i==phiheader.NoSpectralReg-1) // last spectrum
+				additionalbytes = V_logEOF-binstart - phiheader.SpectralRegDef[i].header.offset2
+			else
+				additionalbytes = phiheader.SpectralRegDef[i+1].header.datastart - phiheader.SpectralRegDef[i].header.offset2
+			endif
+			//mybinread(file, additionalbytes)		
+		endif
+
+#if 0
+		// calculating Transmission function
+		tmpS = phiheader.SpectralRegDef[i].name+"_"+num2str(i)+"_Trans" ; Make /O/D/N=(phiheader.SpectralRegDef[i].header.points) $tmpS ; wave TF = $tmpS
+		// Transmission function depends on kinetic energy
+		SetScale/I  x,phiheader.energy-phiheader.SpectralRegDef[i].start1,phiheader.energy-phiheader.SpectralRegDef[i].ende1, "eV", TF
+		// http://www.casaxps.com/release/release2312_/CasaXPS.HLP/SpectrumProcessing/FAQ9.htm
+		// T(E) = Epass*( a^2 / ( a^2+ (E/Epass)^2 ) )^b
+		TF[]=(phiheader.SpectralRegDef[i].Epass*(phiheader.Ta^2+(x/phiheader.SpectralRegDef[i].Epass)^2)^phiheader.Tb)
+		// here the calculated TE is somehow different??
+#endif		
+		
 		// set the scale etc.
 		if(posbinde==1)
-			SetScale/I  x,phiheader.SpectralRegDef[i].start1,phiheader.SpectralRegDef[i].ende1, "eV", data
+			SetScale/I  x,phiheader.SpectralRegDef[i].start1,phiheader.SpectralRegDef[i].ende1, "eV", data//, TF
 		else
-			SetScale/I  x,-phiheader.SpectralRegDef[i].start1,-phiheader.SpectralRegDef[i].ende1, "eV", data
+			SetScale/I  x,-phiheader.SpectralRegDef[i].start1,-phiheader.SpectralRegDef[i].ende1, "eV", data//, TF
 		endif
 		note data,header
 		
