@@ -50,19 +50,14 @@ function LKHREELS_load_data()
 		if(tmp2==0) //new spectrum begins
 			tmp2=tmp
 			tmpc=1
-			tmps2="region_X"
-			Make /O/R/N=(tmpc)  $tmps2 /wave=detectorX
-			tmps2="region_Y"
-			Make /O/R/N=(tmpc)  $tmps2 /wave=detectorY
-			note detectorX, header
-			note detectorY, header
+			tmps2="region_X" ; Make /O/R/N=(tmpc)  $tmps2 /wave=detectorX ; note detectorX, header
+			tmps2="region_Y" ; Make /O/R/N=(tmpc)  $tmps2 /wave=detectorY ; note detectorY, header
 		else
 			tmpc+=1
 			redimension /N=(tmpc) detectorX
 			redimension /N=(tmpc) detectorY
 			SetScale d, 0,0,"cps", detectorY
 			SetScale d, 0,0,"meV", detectorX
-
 		endif
 
 		detectorX[tmpc-1]=str2num(StringFromList(2,tmps,"_"))
@@ -73,9 +68,7 @@ function LKHREELS_load_data()
 	
 	// convert to wavenumbers
 	if(converttoWN==1)
-		tmps2="region_X_WN"
-		Duplicate/O detectorX, $tmps2
-		wave detectorXWN=$tmps2
+		tmps2="region_X_WN" ; Duplicate/O detectorX, $tmps2 ; wave detectorXWN=$tmps2
 		detectorXWN=detectorX/1000*8065.54468111324// /(heV*clight*100)
 		SetScale d, 0,0,"cm-1", detectorXWN
 	endif

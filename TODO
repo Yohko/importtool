@@ -1,3 +1,5 @@
 - VAMAS: include peak fitting parameters saved by CasaXPS
 - SpecsLab2 XML: include SFAT mode
+
+done:
 - VAMAS: convert to cps

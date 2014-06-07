@@ -47,12 +47,9 @@ function LKAES_load_data()
 		if(tmp!=tmp2) //new spectrum begins
 			tmp2=tmp
 			tmpc=1
-			tmps2="region_"+num2str(tmp)+"_X"
-			Make /O/R/N=(tmpc)  $tmps2 /wave=detectorX
-			tmps2="region_"+num2str(tmp)+"_Y"
-			Make /O/R/N=(tmpc)  $tmps2 /wave=detectorY
-			tmps2="region_"+num2str(tmp)+"_T"
-			Make /O/R/N=(tmpc)  $tmps2 /wave=detectorT
+			tmps2="region_"+num2str(tmp)+"_X" ; Make /O/R/N=(tmpc)  $tmps2 /wave=detectorX
+			tmps2="region_"+num2str(tmp)+"_Y" ; Make /O/R/N=(tmpc)  $tmps2 /wave=detectorY
+			tmps2="region_"+num2str(tmp)+"_T" ; Make /O/R/N=(tmpc)  $tmps2 /wave=detectorT
 			note detectorX, header
 			note detectorY, header
 			note detectorT, header

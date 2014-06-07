@@ -1,19 +1,5 @@
 .DS_Store
 */.DS_Store
 */*/.DS_Store
-
-Igor Procedures/import tool/import_FTIR.ipf
-
-Igor Procedures/import tool/import_PES.ipf
-
-Igor Procedures/import tool/import_XAS.ipf
-
-Igor Procedures/import tool/import_misc.ipf
-
-Igor Procedures/import tool/example_datafiles.txt
-
-Igor Procedures/import tool/import_winspec_spe.ipf
-
-Igor Procedures/import tool/import_gsas.ipf
-
-Igor Procedures/import tool/import_pdcif.ipf
+samples/todo/*
+Igor Procedures/import tool/todo/*
