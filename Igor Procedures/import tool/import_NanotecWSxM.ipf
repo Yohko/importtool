@@ -68,7 +68,7 @@ function WSxM_load_data()
 
 	do
 		tmps=myreadline(file)
-		tmps = WSxM_getparams(cleanup_(tmps))
+		tmps = WSxM_getparams(mycleanupstr(tmps))
 		strswitch(StringFromList(0, tmps, "#"))
 			case "[Header end]":
 				headerread = 0

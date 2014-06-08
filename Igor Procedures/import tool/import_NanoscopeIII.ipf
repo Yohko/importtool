@@ -98,7 +98,7 @@ function nanoscopeIII_load_data()
 		return -1
 	endif
 
-	if(cmpstr(cleanup_(myreadline(file)),"\*File list")!=0)
+	if(cmpstr(mycleanupstr(myreadline(file)),"\*File list")!=0)
 		Debugprintf2("Wrong file!",0)
 		loaderend(impname,1,file, dfSave)
 		return -1
@@ -112,7 +112,7 @@ function nanoscopeIII_load_data()
 
 	// read ascii header
 	do
-		nanoscopeIII_getparams(cleanup_(myreadline(file)), keyval)
+		nanoscopeIII_getparams(mycleanupstr(myreadline(file)), keyval)
 		strswitch(keyval.key)
 			case "*File list end":
 				Debugprintf2("End of ASCII header!",1)

@@ -27,7 +27,7 @@ function WVASE32_load_data()
 	variable points = 1, i=0
 
 	FReadLine file, tmps
-	tmps = cleanup_(tmps)
+	tmps = mycleanupstr(tmps)
 	If (strlen(tmps)==0)
 		return 0
 	endif
@@ -35,7 +35,7 @@ function WVASE32_load_data()
 	header+="\rnComment: "+tmps
 	
 	FReadLine file, tmps
-	tmps = cleanup_(tmps)
+	tmps = mycleanupstr(tmps)
 	If (strlen(tmps)==0)
 		return 0
 	endif
@@ -50,13 +50,13 @@ function WVASE32_load_data()
 	endfor
 
 	FReadLine file, tmps
-	tmps = cleanup_(tmps)
+	tmps = mycleanupstr(tmps)
 	If (strlen(tmps)==0)
 		return 0
 	endif
 	header+="\rOriginal name: "+tmps[strsearch(tmps,"[",0)+1,strlen(tmps)-2]
 	FReadLine file, tmps
-	tmps = cleanup_(tmps)
+	tmps = mycleanupstr(tmps)
 	If (strlen(tmps)==0)
 		return 0
 	endif
@@ -72,7 +72,7 @@ function WVASE32_load_data()
 	
 	do
 		FReadLine file, tmps
-		tmps = cleanup_(tmps)
+		tmps = mycleanupstr(tmps)
 		If (strlen(tmps)==0)
 			return 0
 		endif

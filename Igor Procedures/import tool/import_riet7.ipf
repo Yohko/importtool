@@ -36,8 +36,8 @@ static function Riet7_check(file)
 		if(strlen(line)==0)
 			return 0
 		endif
-		line=cleanup_(line)
-		line = aufspalten(line," ")
+		line=mycleanupstr(line)
+		line = splitintolist(line," ")
 		n=0
 		for(count=0; count < itemsinlist(line,"_"); count+=1)
 			if(numtype(str2num(stringfromlist(count,line,"_")))==0)
@@ -47,9 +47,9 @@ static function Riet7_check(file)
 		if (n < 3)
 			continue
 		endif
-		start = str2num(stringfromlist(0,aufspalten(line," "),"_"))
-		step = str2num(stringfromlist(1,aufspalten(line," "),"_"))
-		stop = str2num(stringfromlist(2,aufspalten(line," "),"_"))
+		start = str2num(stringfromlist(0,splitintolist(line," "),"_"))
+		step = str2num(stringfromlist(1,splitintolist(line," "),"_"))
+		stop = str2num(stringfromlist(2,splitintolist(line," "),"_"))
 		
 		if(numtype(start)!=0|| numtype(step)!=0 || numtype(stop)!=0)
 			continue
@@ -63,7 +63,7 @@ static function Riet7_check(file)
 		if(strlen(line)==0)
 			return 0
 		endif
-		line=cleanup_(line)
+		line=mycleanupstr(line)
 		n2=0
 		for(count=0; count < itemsinlist(line,"_"); count+=1)
 			if(numtype(str2num(stringfromlist(count,line,"_")))==0)
@@ -97,9 +97,9 @@ function Riet7_load_data()
 		if(strlen(line)==0)
 			return 0
 		endif
-		line=cleanup_(line)
+		line=mycleanupstr(line)
 		tmps2=line
-		line = aufspalten(line," ")
+		line = splitintolist(line," ")
 		n=0
 		for(count=0; count < itemsinlist(line,"_"); count+=1)
 			tmps=stringfromlist(count,line,"_")
@@ -112,9 +112,9 @@ function Riet7_load_data()
 			comment += cleanupname(tmps2,1)+"\r" // they have illegal chars in header
 			continue
 		endif
-		start = str2num(stringfromlist(0,aufspalten(line," "),"_"))
-		step = str2num(stringfromlist(1,aufspalten(line," "),"_"))
-		stop = str2num(stringfromlist(2,aufspalten(line," "),"_"))
+		start = str2num(stringfromlist(0,splitintolist(line," "),"_"))
+		step = str2num(stringfromlist(1,splitintolist(line," "),"_"))
+		stop = str2num(stringfromlist(2,splitintolist(line," "),"_"))
 		if(numtype(start)!=0|| numtype(step)!=0 || numtype(stop)!=0)
 			comment += cleanupname(tmps2,1)+"\r"  // they have illegal chars in header
 			continue
@@ -154,15 +154,15 @@ function Riet7_load_data()
 		if(strlen(line)==0)
 			break
 		endif
-		line=cleanup_(line)
+		line=mycleanupstr(line)
 		if(strsearch(line,sep,0)!=-1)
 			line= stripstr(line," ","")
 		else
 			if(strsearch(line,"\t",0)==-1)
-				line=aufspalten(line, " ")
+				line=splitintolist(line, " ")
 				sep = "_"
 			else
-				line=aufspalten(line, "\t")
+				line=splitintolist(line, "\t")
 				sep = "_"
 			endif
 		endif

@@ -1,6 +1,5 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
-strconstant version = "0.43.29"
 strconstant importloaderversion = "0.43.29"
 
 #pragma version=importloaderversion
@@ -73,7 +72,7 @@ function /S loaderstart(name, filestr,file,dfSave)
 	else
 		newexpname = dfSave+ExperimentName
 	endif
-	Debugprintf2(newexpname,0)
+	Debugprintf2(".. exporting to: "+newexpname,0)
 	if(DataFolderExists(newexpname))
 		Debugprintf2("Folder exists, adding suffix!",0)
 		ExperimentName += suffix
@@ -137,7 +136,7 @@ end
 
 
 //make a string into a list separated by trennzeichen
-function /S aufspalten(buffer, trennzeichen)
+function /S splitintolist(buffer, trennzeichen)
 	string buffer,trennzeichen
 	string buffer2 = ""
 	variable i
@@ -178,7 +177,7 @@ function /S mybinread(file, count)
 end
 
 
-Function /S cleanup_(name)
+Function /S mycleanupstr(name)
 	string name
 	if(cmpstr(name[strlen(name)-1],"\r") == 0)
 		name = name[0,strlen(name)-2]
@@ -187,6 +186,7 @@ Function /S cleanup_(name)
 end
 
 
+// check to see if we have aquidistante energy scale
 Function checkEnergyScale(w, eps)
 		Wave w
 		variable eps
@@ -338,7 +338,7 @@ function /S read_line_trim(file)
 		Debugprintf2("Unexpected end of file.",0)
 		return "-1"
 	endif
-	line = cleanup_(line)
+	line = mycleanupstr(line)
 	return line
 end
 
@@ -426,7 +426,7 @@ function /S myreadline(file)
 		close file
 		return "-1"
 	endif
-	return cleanup_(str)
+	return mycleanupstr(str)
 end
 
 
@@ -454,7 +454,7 @@ function getkeyval(file, key, val)
 	If (strlen(tmps)==0)
 		return -1
 	endif
-	tmps = cleanup_(tmps)
+	tmps = mycleanupstr(tmps)
 	tmps=stripstrfirstlastspaces(tmps)
 	if(strsearch(tmps,"=",0)!=-1)
 		key = stripstrfirstlastspaces(tmps[0,strsearch(tmps,"=",0)-1])
@@ -483,7 +483,7 @@ function /S get_valid_line(file, comment_char)
 		if(strlen(line) == 0)
 			return "-1"
 		endif
-		line = cleanup_(line)
+		line = mycleanupstr(line)
 		tmps=line
 		tmps=stripstr(tmps," ","")
 		if((strlen(tmps)!=0) && (strsearch(tmps,comment_char,0)!=0))

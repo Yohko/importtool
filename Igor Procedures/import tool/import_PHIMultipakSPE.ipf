@@ -135,7 +135,7 @@ Function phimultipak_load_data()
 	
 	// reading the ascii header
 	do
-		phimultipak_getparams(cleanup_(myreadline(file)), keyval)
+		phimultipak_getparams(mycleanupstr(myreadline(file)), keyval)
 		strswitch(keyval.key)
 			case "Platform":
 				header += "\rPlatform: "+keyval.val
@@ -314,7 +314,7 @@ Function phimultipak_load_data()
 				phiheader.NoSpectralReg=str2num(keyval.val)
 				break
 			case "SpectralRegDef":
-				keyval.val = aufspalten(keyval.val, " ")
+				keyval.val = splitintolist(keyval.val, " ")
 				if(str2num(stringfromlist(0,keyval.val,"_")) == str2num(stringfromlist(1,keyval.val,"_")) && ItemsInList(keyval.val,"_")==13)
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num1= str2num(stringfromlist(0,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num2 = str2num(stringfromlist(1,keyval.val,"_"))

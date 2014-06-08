@@ -85,7 +85,7 @@ function Vamas_load_data()
 			Debugprintf2("Unexpected end of VMS-file.",0)
 			return -1
 		endif
-		tmps=cleanup_(tmps)
+		tmps=mycleanupstr(tmps)
 		headercomment += "comment #"+num2str(i+1)+": "+tmps+"\r"
 	endfor
 	
@@ -120,7 +120,7 @@ function Vamas_load_data()
 		headercomment += "experimental variable label " + num2str(i) + ": " + read_line_trim(file) + "\r"
 		headercomment += "experimental variable unit " + num2str(i) + ": "+ read_line_trim(file) + "\r"
 	endfor
-	headercomment=cleanup_(headercomment)
+	headercomment=mycleanupstr(headercomment)
 	// fill `include' table
 	// This next line is a relic of an earlier version of the format.
 	// In that version, this line contained an integer whose value indicated a number of optional features to follow.
@@ -265,7 +265,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 				Debugprintf2("Unexpected end of VMS-file.",0)
 				return -1
 			endif
-			tmps=cleanup_(tmps)
+			tmps=mycleanupstr(tmps)
 			note ycols, "Comment #"+num2str(i+1)+": "+stripstrfirstlastspaces(tmps)
 		endfor
 //		if(Vamas_skip_lines(file, cmt_lines)==-1)

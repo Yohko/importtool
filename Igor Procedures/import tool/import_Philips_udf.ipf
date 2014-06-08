@@ -107,7 +107,7 @@ function Udf_load_data()
 		if(strlen(line) == 0)
 			break
 		endif
-		line = cleanup_(line)
+		line = mycleanupstr(line)
 		line = stripstr(line," ","") // last line with last value 
 		line = stripstr(line,"\r","")
 		line = stripstr(line,"\t","")

@@ -100,7 +100,7 @@ function Cpi_load_data()
 		if(strlen(s) == 0)
 			break
 		endif
-		s=cleanup_(s)
+		s=mycleanupstr(s)
 		ycols[i] = str2num(s)	
 		i+=1	
 		fstatus file

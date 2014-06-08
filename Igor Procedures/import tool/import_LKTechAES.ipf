@@ -30,14 +30,14 @@ function LKAES_load_data()
 		If (strlen(tmps)==0)
 			return 0
 		endif
-		tmps=cleanup_(tmps)
+		tmps=mycleanupstr(tmps)
 		if(strsearch(tmps,"#",0)==0)
 			tmp+=1
 			header+="\rComment"+num2str(tmp)+": "+stripstrfirstlastspaces(tmps[strsearch(tmps,"#",0)+1,inf])
 			continue
 		endif
 
-		tmps=aufspalten(tmps, " ")
+		tmps=splitintolist(tmps, " ")
 		if (itemsinlist(tmps,"_") != 4)
 			Debugprintf2("Wrong number of items in value list!",2)
 			break

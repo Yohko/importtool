@@ -89,16 +89,16 @@ static function Dbws_load_data()
 		if(strlen(s)==0)
 			break
 		endif
-		s=cleanup_(s)
+		s=mycleanupstr(s)
 		// numbers delimited by commas or spaces.
 		if(strsearch(s,sep,0)!=-1)
 			s= stripstr(s," ","")
 		else
 			if(strsearch(s,"\t",0)==-1)
-				s=aufspalten(s, " ")
+				s=splitintolist(s, " ")
 				sep = "_"
 			else
-				s=aufspalten(s, "\t")
+				s=splitintolist(s, "\t")
 				sep = "_"
 			endif
 		endif

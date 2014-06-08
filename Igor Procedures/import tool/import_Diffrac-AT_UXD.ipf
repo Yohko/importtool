@@ -83,10 +83,10 @@ static function Uxd_add_values_from_str(str, sep, ycol,xcol, ncols)
 		str = stripstr(str, " ","")
 	else
 		if(strsearch(str,"\t",0)==-1)
-			str=aufspalten(str, " ")//only whitespaces as sep
+			str=splitintolist(str, " ")//only whitespaces as sep
 			sep = "_"
 		else
-			str=aufspalten(str, "\t")//only whitespaces as sep
+			str=splitintolist(str, "\t")//only whitespaces as sep
 			sep = "_"
 		endif
 	endif

@@ -17,7 +17,7 @@ function Spectra_check(file)
 	string line
 	line = read_line_trim(file) // first line should be experimentname
 	
-	line = aufspalten(read_line_trim(file), " ")// second line should be parameters
+	line = splitintolist(read_line_trim(file), " ")// second line should be parameters
 	if ( strlen(line)==0 || strlen(line) > 200 || itemsinlist(line,"_") != 8)
 		return 0
 	endif
@@ -52,7 +52,7 @@ function Spectra_load_data()
  	variable spalte = 0
 	variable val = 0
 	FReadLine file, Experimentname
-	header+="\rExperimentname: "+ cleanup_(Experimentname)
+	header+="\rExperimentname: "+ mycleanupstr(Experimentname)
 
 	If (importieren != 1)
 		Anzahlregionen = 0		
@@ -66,11 +66,11 @@ function Spectra_load_data()
 				endif					
 				Break  
 			Endif
-		      	buffer = cleanup_(buffer)
+		      	buffer = mycleanupstr(buffer)
 			AnzahlRegionen +=1
 			Debugprintf2("Import Region: "+ num2str(AnzahlRegionen),1)
 			Debugprintf2("Header: "+buffer,1)
-			buffer= aufspalten(buffer," ")
+			buffer= splitintolist(buffer," ")
 
 			if (ItemsInList(buffer,"_") != 8)
 				importieren = 1
@@ -101,7 +101,7 @@ function Spectra_load_data()
 				importieren = 1
 				break
 			endif
-		     Regionname = cleanup_(Regionname)
+		     Regionname = mycleanupstr(Regionname)
 		     If (strlen(Regionname)==0)
 				importieren = 1
 				break
@@ -121,7 +121,7 @@ function Spectra_load_data()
 					importieren = 1
 					break
 				Endif
-		  		buffer = cleanup_(buffer)
+		  		buffer = mycleanupstr(buffer)
 
 				val=str2num(buffer)
 				if(numtype(val) != 0)

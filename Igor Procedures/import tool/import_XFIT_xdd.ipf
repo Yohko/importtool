@@ -26,7 +26,7 @@ static function /S XfitXdd_skip_c_style_comments(file)
 		Debugprintf2("Unexpected end of file",0)
 		return "-1"
 	endif
-	line=cleanup_(line)
+	line=mycleanupstr(line)
 	if(strsearch(line,"/*",0)==-1)
 		return line
 	endif
@@ -37,7 +37,7 @@ static function /S XfitXdd_skip_c_style_comments(file)
 			Debugprintf2("Unexpected end of file",0)
 			return "-1"
 		endif
-		line=cleanup_(line)
+		line=mycleanupstr(line)
 		if(strsearch(line,"*/",0)!=-1)
 			comment += cleanupname(line[0,strsearch(line,"*/",0)-1],1)  //  header can have illegal characters
 			return comment+"####"+line[strsearch(line,"*/",0)+2,inf]
@@ -67,15 +67,15 @@ static function XfitXdd_check(file)
 	if(strlen(line)==0)
 		return 0
 	endif
-	line=cleanup_(line)
+	line=mycleanupstr(line)
 	if(strsearch(line,sep,0)!=-1)
 		line= stripstr(line," ","")
 	else
 		if(strsearch(line,"\t",0)==-1)
-			line=aufspalten(line, " ")
+			line=splitintolist(line, " ")
 			sep = "_"
 		else
-			line=aufspalten(line, "\t")
+			line=splitintolist(line, "\t")
 			sep = "_"
 		endif
 	endif
@@ -127,15 +127,15 @@ function XfitXdd_load_data()
 		return -1
 		close file
 	endif
-	line=cleanup_(line)
+	line=mycleanupstr(line)
 	if(strsearch(line,sep,0)!=-1)
 		line= stripstr(line," ","")
 	else
 		if(strsearch(line,"\t",0)==-1)
-			line=aufspalten(line, " ")
+			line=splitintolist(line, " ")
 			sep = "_"
 		else
-			line=aufspalten(line, "\t")
+			line=splitintolist(line, "\t")
 			sep = "_"
 		endif
 	endif
@@ -168,15 +168,15 @@ function XfitXdd_load_data()
 		if(strlen(line)==0)
 			break
 		endif
-		line=cleanup_(line)
+		line=mycleanupstr(line)
 		if(strsearch(line,sep,0)!=-1)
 			line= stripstr(line," ","")
 		else
 			if(strsearch(line,"\t",0)==-1)
-				line=aufspalten(line, " ")
+				line=splitintolist(line, " ")
 				sep = "_"
 			else
-				line=aufspalten(line, "\t")
+				line=splitintolist(line, "\t")
 				sep = "_"
 			endif
 		endif

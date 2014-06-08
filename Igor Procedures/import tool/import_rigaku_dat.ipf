@@ -96,7 +96,7 @@ function Rigaku_load_data()
 				run = 0
 				break
 			endif
-			line=cleanup_(line)
+			line=mycleanupstr(line)
 			linecheck = stripstr(line," ","")
 			if ((strsearch(linecheck,"#",0)!=0) && (strlen(linecheck) !=0))
 				break
