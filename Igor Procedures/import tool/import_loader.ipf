@@ -160,7 +160,7 @@ Function Debugprintf2(out,deb)
 		elseif(deb==2)
 			print out
 			DoAlert 0, out
-		endif		
+		endif
 end
 
 
