@@ -48,7 +48,7 @@ function Dbws_load_data_info(importloader)
 end
 
 
-static function Dbws_load_data([optfile])
+function Dbws_load_data([optfile])
 	variable optfile
 	optfile = paramIsDefault(optfile) ? -1 : optfile
 	struct importloader importloader

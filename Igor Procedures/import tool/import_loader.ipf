@@ -33,12 +33,14 @@ constant true				= 1
 //ende importflags ##############################################
 
 structure importloader
-	string name //name of importer
-	string filestr //file endings "*.xxx,*.xxx"
-	variable file
-	string dfSave
-	variable success
-	string header
+	string name 		//name of importer
+	string filestr 		//file endings "*.xxx,*.xxx"
+	variable file		// holds reference to file
+	string dfSave		// holds reference to original folder
+	variable success	
+	string header		// for some file information
+	variable isbinary	// binary file??
+	string category		// AFM, PES, XRD, ...
 endstructure
 
 structure importloaderopt
@@ -63,14 +65,18 @@ function loaderstart(importloader,[optfile])
 		SetDataFolder root:
 	endif
 	variable  i=0
-	String fileFilters = importloader.name+" Files ("+importloader.filestr+"):"+ReplaceString("*",importloader.filestr,"")+";"
-	fileFilters += "All Files:.*;"
-	open/z=2/F=fileFilters/P=myimportpath/m="Looking for a "+importloader.name+" file"/r importloader.file
-	if(V_flag==-1)
-		Debugprintf2("No file given!",0)
-		return -1
+	fstatus optfile
+	if(V_flag)
+		importloader.file = optfile
+	else	
+		String fileFilters = importloader.name+" Files ("+importloader.filestr+"):"+ReplaceString("*",importloader.filestr,"")+";"
+		fileFilters += "All Files:.*;"
+		open/z=2/F=fileFilters/P=myimportpath/m="Looking for a "+importloader.name+" file"/r importloader.file
+		if(V_flag==-1)
+			Debugprintf2("No file given!",0)
+			return -1
+		endif
 	endif
-
 	//CleanupName
 	string ExperimentName = ReplaceString(" ",getnameforwave(importloader.file),"")
 	ExperimentName = ReplaceString(",",ExperimentName,"")
