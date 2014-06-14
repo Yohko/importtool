@@ -37,6 +37,7 @@ function WSxM_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Nanotec WSxM"
 	importloader.filestr = "*.stp"
+	importloader.category = "AFM"
 end
 
 

@@ -51,6 +51,7 @@ function Cpi_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Sietronics Sieray CPI"
 	importloader.filestr =  "*.cpi"
+	importloader.category = "XRD"
 end
 
 

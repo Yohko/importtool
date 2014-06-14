@@ -17,6 +17,7 @@ function LKAES_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "LK-Tech AES"
 	importloader.filestr = "*.dat"
+	importloader.category = "AES"
 end
 
 

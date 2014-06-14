@@ -17,6 +17,7 @@ function WVASE32_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "WVASE32"
 	importloader.filestr = "*.dat"
+	importloader.category = "VASE"
 end
 
 

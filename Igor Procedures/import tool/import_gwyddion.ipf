@@ -219,6 +219,7 @@ function gwy_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Gwyddion GWY"
 	importloader.filestr = "*.gwy"
+	importloader.category = "AFM"
 end
 
 

@@ -123,6 +123,7 @@ function phimultipak_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Multipak files"
 	importloader.filestr = "*.spe"
+	importloader.category = "PES"
 end
 
 

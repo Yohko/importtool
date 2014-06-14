@@ -45,6 +45,7 @@ function Dbws_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "DBWS"
 	importloader.filestr = "*.dbw,*.rit,*.neu"
+	importloader.category = "XRD"
 end
 
 

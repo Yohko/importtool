@@ -33,6 +33,7 @@ function Vamas_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name =  "VAMAS"
 	importloader.filestr = "*.vms"
+	importloader.category = "PES"
 end
 
 
@@ -557,6 +558,7 @@ function Vamasrpt_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Vamas report (CasaXPS)"
 	importloader.filestr = "*.txt"
+	importloader.category = "PES"
 end
 
 

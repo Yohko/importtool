@@ -60,6 +60,7 @@ function VeecoHDF_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Hierarchical Data Format"
 	importloader.filestr = "*.hdf"
+	importloader.category = "AFM"
 end
 
 

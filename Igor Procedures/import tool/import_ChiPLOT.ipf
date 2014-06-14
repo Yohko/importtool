@@ -90,6 +90,7 @@ function ChiPlot_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "ChiPlot"
 	importloader.filestr = "*.chi"
+	importloader.category = "plot"
 end
 
 

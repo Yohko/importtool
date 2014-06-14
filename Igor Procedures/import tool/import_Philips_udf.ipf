@@ -37,6 +37,7 @@ function Udf_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Philips UDF"
 	importloader.filestr = "*.udf"
+	importloader.category = "XRD"
 end
 
 

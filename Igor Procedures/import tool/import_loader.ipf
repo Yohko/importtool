@@ -41,6 +41,7 @@ structure importloader
 	string header		// for some file information
 	variable isbinary	// binary file??
 	string category		// AFM, PES, XRD, ...
+	string version		// version
 endstructure
 
 structure importloaderopt

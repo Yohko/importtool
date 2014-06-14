@@ -17,6 +17,7 @@ function LKHREELS_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "LK-Tech HREELS"
 	importloader.filestr =  "*.dat"
+	importloader.category = "EELS"
 end
 
 

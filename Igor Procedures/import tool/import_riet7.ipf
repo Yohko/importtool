@@ -84,6 +84,7 @@ function Riet7_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "RIET7"
 	importloader.filestr = "*.dat"
+	importloader.category = "XRD"
 end
 
 

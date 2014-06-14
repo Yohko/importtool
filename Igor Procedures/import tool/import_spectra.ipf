@@ -38,6 +38,7 @@ function Spectra_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Omicron-Spectra"
 	importloader.filestr = "*.1,*.2,*.3,*.4,*.5,*.6,*.7,*.8,*.9"
+	importloader.category = "PES"
 end
 
 

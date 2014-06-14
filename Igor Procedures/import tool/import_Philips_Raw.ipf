@@ -39,6 +39,7 @@ function PhilipsRaw_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Philips RD raw scan"
 	importloader.filestr = "*.rd,*sd"
+	importloader.category = "XRD"
 end
 
 

@@ -88,6 +88,7 @@ function CanberraCnf_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Canberra CNF"
 	importloader.filestr = "*.cnf"
+	importloader.category = "XRD"
 end
 
 

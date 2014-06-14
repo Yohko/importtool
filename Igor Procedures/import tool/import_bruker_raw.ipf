@@ -50,6 +50,7 @@ function BruckerRaw_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Siemens/Bruker Diffrac-AT Raw"
 	importloader.filestr = "*.raw"
+	importloader.category = "XRD"
 end
 
 

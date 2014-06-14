@@ -85,6 +85,7 @@ function SCALA_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Omicron SCALA"
 	importloader.filestr = "*.par"
+	importloader.category = "AFM"
 end
 
 

@@ -97,6 +97,7 @@ function XfitXdd_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "FOURYA/XFIT/Koalariet XDD"
 	importloader.filestr = "*.xdd"
+	importloader.category = "XRD"
 end
 
 

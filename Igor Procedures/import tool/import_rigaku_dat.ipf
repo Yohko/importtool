@@ -68,6 +68,7 @@ function Rigaku_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Rigaku"
 	importloader.filestr = "*.dat"
+	importloader.category = "XRD"
 end
 
 

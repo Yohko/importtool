@@ -142,6 +142,7 @@ function Uxd_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Siemens/Bruker Diffrac-AT UXD"
 	importloader.filestr = "*.uxd"
+	importloader.category = "XRD"
 end
 
 

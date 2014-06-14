@@ -33,6 +33,7 @@ function CanberraMca_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Canberra AccuSpec MCA"
 	importloader.filestr = "*.mca,*.dat"
+	importloader.category = "XRD"
 end
 
 
