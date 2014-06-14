@@ -79,15 +79,24 @@ static function Riet7_check(file)
 	return 0
 end
 
-function Riet7_load_data()
-	string dfSave=""
-	variable file
-	string impname="RIET7"
-	string filestr="*.dat"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+
+function Riet7_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "RIET7"
+	importloader.filestr = "*.dat"
+end
+
+
+function Riet7_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Riet7_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	variable start=0, stop=0, step=0, n=0, count =0, dcount =0
 	variable tmp=0,i=0
@@ -179,7 +188,8 @@ function Riet7_load_data()
 			size+=1
 		endfor
 	while(size<dcount)
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

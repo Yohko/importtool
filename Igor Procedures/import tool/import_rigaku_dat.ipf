@@ -64,17 +64,23 @@ static function Rigaku_check(file)
 end
 
 
-function Rigaku_load_data()
-	string dfSave=""
-	variable file
-	string impname="Rigaku"
-	string filestr="*.dat"
-	string header0 = loaderstart(impname, filestr,file,dfSave)
-		if (strlen(header0)==0)
+function Rigaku_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Rigaku"
+	importloader.filestr = "*.dat"
+end
+
+
+function Rigaku_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Rigaku_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-
-	header0+="\r"
+	string header0 = importloader.header+"\r"
+	variable file = importloader.file
 
 	variable i=0
 	string header = ""
@@ -192,7 +198,8 @@ function Rigaku_load_data()
 		Debugprintf2("block count different from expected",0)
 	endif
                   
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 // ###################### Rigaku END ######################

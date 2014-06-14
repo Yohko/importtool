@@ -214,15 +214,24 @@ static function gwy_importGWYP(file, header)
 	
 end
 
-function gwy_load_data()
-	string dfSave=""
-	variable file
-	string impname="Gwyddion GWY"
-	string filestr="*.gwy"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+
+function gwy_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Gwyddion GWY"
+	importloader.filestr = "*.gwy"
+end
+
+
+function gwy_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	gwy_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	string identifier = mybinread(file, 4)
 	
@@ -235,7 +244,8 @@ function gwy_load_data()
 			Debugprintf2("Found a Gwyddion GWYQ file, not supported yet!",2)
 	endif
 	
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 // ###################### Gwyddion gwy END ######################

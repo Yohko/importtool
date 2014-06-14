@@ -33,18 +33,24 @@ end
 // ...
 // 442/ # last data ends with a '/'
 
-function Udf_load_data()
-	string dfSave=""
-	variable file
-	string impname="Philips UDF"
-	string filestr="*.udf"
-	string header = loaderstart(impname, filestr,file,dfSave)
-		if (strlen(header)==0)
+function Udf_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Philips UDF"
+	importloader.filestr = "*.udf"
+end
+
+
+function Udf_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Udf_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header +"\r"
+	variable file = importloader.file
 
-	header+= "\r"
-	
 	variable x_start = 0
 	variable x_step = 0
 	string key = "", val = "", val2 = ""
@@ -136,7 +142,8 @@ function Udf_load_data()
 		fstatus file
 	while(V_logEOF>V_filePOS)
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

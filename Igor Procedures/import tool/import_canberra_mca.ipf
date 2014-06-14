@@ -29,15 +29,24 @@ end
 // Canberra Accuspec (*.dat). In ver. 0.9 .dat extension was added.
 
 
-function CanberraMca_load_data()
-	string dfSave=""
-	variable file
-	string impname="Canberra AccuSpec MCA"
-	string filestr="*.mca,*.dat"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function CanberraMca_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Canberra AccuSpec MCA"
+	importloader.filestr = "*.mca,*.dat"
+end
+
+
+function CanberraMca_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	CanberraMca_load_data_info(importloader)
+	 if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
+
 
 	variable file_size = 2*512+2048*4
 	FStatus file
@@ -84,7 +93,8 @@ function CanberraMca_load_data()
 		ycol[i-1]=yval
 	endfor
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 #if 0

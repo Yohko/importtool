@@ -32,33 +32,42 @@ static function /S WSxM_getparams(str)
 	return type+"#"+val+"#"+unit
 end
 
-function WSxM_load_data()
-	string dfSave=""
-	variable file
-	string impname="Nanotec WSxM"
-	string filestr="*.stp"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+
+function WSxM_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Nanotec WSxM"
+	importloader.filestr = "*.stp"
+end
+
+
+function WSxM_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	WSxM_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-	
+	string header = importloader.header
+	variable file = importloader.file
+
 	// checking for the file type
 	if(strsearch(myreadline(file),"WSxM file copyright Nanotec Electronica",0)!=0)
 		Debugprintf2("Wrong header!",0)	
-		loaderend(impname,1,file, dfSave)
+		loaderend(importloader)
  		return -1
 	endif
 
 	if(strsearch(myreadline(file),"SxM Image file",0)!=0)
 		Debugprintf2("Wrong header!",0)	
-		loaderend(impname,1,file, dfSave)
+		loaderend(importloader)
  		return -1
 	endif
 	
 	string tmps=myreadline(file)
 	if(strsearch(tmps,"Image header size: ",0)!=0)
 		Debugprintf2("Wrong header!",0)	
-		loaderend(impname,1,file, dfSave)
+		loaderend(importloader)
  		return -1
 	endif
 
@@ -174,7 +183,7 @@ function WSxM_load_data()
 					break
 				default:
 					Debugprintf2("Could not guess the type!",0)	
-					loaderend(impname,1,file, dfSave)
+					loaderend(importloader)
 					return -1
 	 				break
 			endswitch
@@ -210,7 +219,8 @@ function WSxM_load_data()
 
 	Duplicate/FREE image, imagetemp
 	image[][]=imagetemp[DimSize(image, 0)-p-1][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original picture
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 // ###################### Nanotec WSxM END ######################

@@ -46,15 +46,24 @@ static function BruckerRaw_check(file)
 end
 
 
-function BruckerRaw_load_data()
-	string dfSave=""
-	variable file
-	string impname="Siemens/Bruker Diffrac-AT Raw"
-	string filestr="*.raw"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function BruckerRaw_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Siemens/Bruker Diffrac-AT Raw"
+	importloader.filestr = "*.raw"
+end
+
+
+
+function BruckerRaw_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	BruckerRaw_load_data_info(importloader)
+	 if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	header+="\r"
 
@@ -71,8 +80,8 @@ function BruckerRaw_load_data()
 	else // head[3] == '1'
 		BruckerRaw_load_version1_01(file,header)
 	endif
-	
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

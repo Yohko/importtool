@@ -29,21 +29,28 @@ static strconstant techs = "AES diff;AES dir;EDX;ELS;FABMS;FABMS energy spec;ISS
 static strconstant scans = "REGULAR;IRREGULAR;MAPPING"
 
 
+function Vamas_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name =  "VAMAS"
+	importloader.filestr = "*.vms"
+end
+
+
 // Vamas file is organized as
 // file_header block_header block_data [block_header block_data] ...
 // There is only a value in every line without a key or label; the meaning is
 // determined by its position and values in preceding lines
-function Vamas_load_data()
-	string dfSave=""
-	variable file
-	string impname="VAMAS"
-	string filestr="*.vms"
-	string headercomment =	loaderstart(impname, filestr,file,dfSave)
-	if (strlen(headercomment)==0)
+function Vamas_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Vamas_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string headercomment = importloader.header+"\r"
+	variable file = importloader.file
 	
-	headercomment+= "\r"
 	variable i=0, optf=0
 	string tmps=""
 	// sometimes there are empty lines at the beginning
@@ -67,7 +74,7 @@ function Vamas_load_data()
 		Fstatus file
 		if(V_logEOF<=V_filePOS)
 			Debugprintf2("Unexpected end of VMS-file (header).",0)
-			loaderend(impname,1,file, dfSave)
+			loaderend(importloader)
 			return -1
 		endif
 	while (V_logEOF>V_filePOS)  	
@@ -165,14 +172,14 @@ function Vamas_load_data()
 	// list any manually entered items
 	n = read_line_int(file)
 	if(skip_lines(file, n)==-1)
-		loaderend(impname,1,file, dfSave)
+		loaderend(importloader)
 		return -1
 	endif
 	// list any future experiment upgrade entries
 	variable exp_fue = read_line_int(file)
 	variable blk_fue = read_line_int(file) //new
 	if(skip_lines(file, exp_fue)==-1)
-		loaderend(impname,1,file, dfSave)
+		loaderend(importloader)
 		return -1
 	endif
 //	variable blk_fue = read_line_int(file)
@@ -196,14 +203,15 @@ function Vamas_load_data()
 		endif
 	
 		if(Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment,i, cor_var)==-1)
-			loaderend(impname,1,file, dfSave)
+			loaderend(importloader)
 			return -1
 		endif
 
 	endfor
 	killwaves includew
 	killwaves inclusionlist
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 
@@ -545,15 +553,23 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 end
 
 
-function Vamas_loadplot_report()
-	string dfSave=""
-	variable file
-	string impname="Vamas report (CasaXPS)"
-	string filestr="*.txt"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function Vamasrpt_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Vamas report (CasaXPS)"
+	importloader.filestr = "*.txt"
+end
+
+
+function Vamasrpt_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Vamasrpt_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 	header+="Line 1: "+myreadline(file)+"\r"
 	header+="Line 2: "+myreadline(file)+"\r"
 	header+="Line 2: "+myreadline(file)
@@ -647,6 +663,7 @@ function Vamas_loadplot_report()
 	
 	Legend /W=$windowname/C/N=text0/M/A=LT/X=0.00/Y=0.00
 	
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 

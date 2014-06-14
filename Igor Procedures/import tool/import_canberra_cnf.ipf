@@ -84,16 +84,24 @@ static function  CanberraCnf_convert_time(file)
 end
 
 
-function CanberraCnf_load_data()
-	string dfSave=""
-	variable file
-	string impname="Canberra CNF"
-	string filestr="*.cnf"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function CanberraCnf_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Canberra CNF"
+	importloader.filestr = "*.cnf"
+end
+
+
+function CanberraCnf_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	CanberraCnf_load_data_info(importloader)
+	 if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-	
+	string header = importloader.header
+	variable file = importloader.file
+
 	Fstatus file
 	string file_string = ""
 	variable beg_=0
@@ -267,7 +275,8 @@ function CanberraCnf_load_data()
 		y = read_uint32_le(file)
 		ycols[i]=y
 	endfor
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

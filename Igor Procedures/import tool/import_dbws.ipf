@@ -40,15 +40,26 @@ static function Dbws_check(file)
 	return 1
 end
 
-static function Dbws_load_data()
-	string dfSave=""
-	variable file
-	string impname="DBWS"
-	string filestr="*.dbw,*.rit,*.neu"
-	string header = loaderstart(impname, filestr,file,dfSave)
-		if (strlen(header)==0)
+
+function Dbws_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "DBWS"
+	importloader.filestr = "*.dbw,*.rit,*.neu"
+end
+
+
+static function Dbws_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Dbws_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
+	
+	
 	
 	string s
 	s=read_line_trim(file) // first line
@@ -120,6 +131,7 @@ static function Dbws_load_data()
 		Debugprintf2("Datacount different from expected!"+num2str(size)+ " <> " +num2str((stop-start)/step+1),0)
 	endif
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 // ###################### DBWS data file END ######################

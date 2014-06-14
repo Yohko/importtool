@@ -47,15 +47,23 @@ static function Cpi_check(file)
 end
 
 
-function Cpi_load_data()
-	string dfSave=""
-	variable file
-	string impname="Sietronics Sieray CPI"
-	string filestr="*.cpi"
-	string header = loaderstart(impname, filestr,file,dfSave)
-		if (strlen(header)==0)
+function Cpi_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Sietronics Sieray CPI"
+	importloader.filestr =  "*.cpi"
+end
+
+
+function Cpi_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Cpi_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	string s
 	read_line_trim(file) // first line
@@ -109,7 +117,8 @@ function Cpi_load_data()
 	if(i != ncount)
 		Debugprintf2("Datacount different from expected!"+num2str(i)+ " <> " +num2str(ncount),0)
 	endif
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

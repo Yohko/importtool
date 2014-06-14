@@ -13,16 +13,23 @@ Menu "Macros"
 end
 
 
-function LKHREELS_load_data()
-	string dfSave=""
-	variable file
-	string impname="LK-Tech HREELS"
-	string filestr="*.dat"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function LKHREELS_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "LK-Tech HREELS"
+	importloader.filestr =  "*.dat"
+end
+
+
+function LKHREELS_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	LKHREELS_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-
+	string header = importloader.header
+	variable file = importloader.file
 
 	string tmps="", tmps2=""
 	variable tmp=0, tmp2=0, tmpc=0
@@ -73,6 +80,7 @@ function LKHREELS_load_data()
 		SetScale d, 0,0,"cm-1", detectorXWN
 	endif
 	
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 

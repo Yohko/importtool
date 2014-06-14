@@ -34,15 +34,23 @@ function Spectra_check(file)
 end
 
 
-function Spectra_load_data()
-	string dfSave=""
-	variable file
-	string impname="Omicron-Spectra"
-	string filestr="*.1,*.2,*.3,*.4,*.5,*.6,*.7,*.8,*.9"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function Spectra_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Omicron-Spectra"
+	importloader.filestr = "*.1,*.2,*.3,*.4,*.5,*.6,*.7,*.8,*.9"
+end
+
+
+function Spectra_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Spectra_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 	fstatus file
  	variable  AnzahlRegionen = 0
  	string Experimentname = "", Regionname = ""
@@ -167,7 +175,8 @@ function Spectra_load_data()
 	if (importieren == 2)
 		print "Import succeeded but empty line at the end (bug??)!"
 	endif
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 // ###################### Omicron Spectra END ######################

@@ -35,16 +35,23 @@ static function PhilipsRaw_check(file)
 end
 
 
-function PhilipsRaw_load_data()
-	string dfSave=""
-	variable file
-	string impname="Philips RD raw scan"
-	string filestr="*.rd,*sd"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function PhilipsRaw_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Philips RD raw scan"
+	importloader.filestr = "*.rd,*sd"
+end
+
+
+function PhilipsRaw_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	PhilipsRaw_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-	header +="\r"
+	string header = importloader.header+"\r"
+	variable file = importloader.file
 	 
 	string tmps=""
 
@@ -114,7 +121,8 @@ function PhilipsRaw_load_data()
 		ycols[i]=y
 	endfor
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

@@ -119,15 +119,23 @@ static function /S phimultipak_getparams(str, keyval)
 end
 
 
-Function phimultipak_load_data()
-	string dfSave=""
-	variable file
-	string impname="Multipak files"
-	string filestr="*.spe"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function phimultipak_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Multipak files"
+	importloader.filestr = "*.spe"
+end
+
+
+Function phimultipak_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	phimultipak_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	struct phiheader phiheader
 	struct keyval keyval
@@ -447,5 +455,6 @@ Function phimultipak_load_data()
 		Debugprintf2("... exporting spectra "+num2str(i)+": "+phiheader.SpectralRegDef[i].name,0)
 	endfor
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 End 

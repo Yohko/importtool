@@ -93,16 +93,23 @@ static function XfitXdd_check(file)
 end
 
 
-function XfitXdd_load_data()
-	string dfSave=""
-	variable file
-	string impname="FOURYA/XFIT/Koalariet XDD"
-	string filestr="*.xdd"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function XfitXdd_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "FOURYA/XFIT/Koalariet XDD"
+	importloader.filestr = "*.xdd"
+end
+
+
+function XfitXdd_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	XfitXdd_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-	header+="\r"
+	string header = importloader.header +"\r"
+	variable file = importloader.file
 
 
 	string line = XfitXdd_skip_c_style_comments(file)
@@ -194,7 +201,8 @@ function XfitXdd_load_data()
 		endfor
 	while(size<counts)
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 // ###################### FOURYA/XFIT/Koalariet XDD file END ######################

@@ -56,17 +56,26 @@ static structure Header
 endstructure
 
 
-function VeecoHDF_load_data()
-	string dfSave=""
-	variable file
-	string impname="Hierarchical Data Format"
-	string filestr="*.hdf"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function VeecoHDF_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Hierarchical Data Format"
+	importloader.filestr = "*.hdf"
+end
+
+
+function VeecoHDF_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	VeecoHDF_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 	VeecoHDF_read(file,header)
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

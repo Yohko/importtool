@@ -88,19 +88,27 @@ static function /S nanoscopeIII_getparams(str, keyval)
 end
 
 
-function nanoscopeIII_load_data()
-	string dfSave=""
-	variable file
-	string impname="Veeco Nanoscope III"
-	string filestr="*.000,*.001,*.002,*.003,*.004,*.005,*.006,*.007,*.008,*.009"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function nanoscopeIII_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Veeco Nanoscope III"
+	importloader.filestr =  "*.000,*.001,*.002,*.003,*.004,*.005,*.006,*.007,*.008,*.009"
+end
+
+
+function nanoscopeIII_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	nanoscopeIII_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	if(cmpstr(mycleanupstr(myreadline(file)),"\*File list")!=0)
 		Debugprintf2("Wrong file!",0)
-		loaderend(impname,1,file, dfSave)
+		loaderend(importloader)
 		return -1
 	endif
 
@@ -147,7 +155,7 @@ function nanoscopeIII_load_data()
 							break	
 						default:
 							Debugprintf2("Unnown datatype!",0)
-							loaderend(impname,1,file, dfSave)
+							loaderend(importloader)
 							return -1
 							break					
 					endswitch
@@ -358,6 +366,7 @@ function nanoscopeIII_load_data()
 		note image, "Tip y width correction factor sigma: "+num2str(nanoscopeheader.imageobject[i].Tipywidthcorrectionfactorsigma)
 	endfor
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 

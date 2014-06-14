@@ -81,16 +81,23 @@ static Structure scalaheader
 endstructure
 
 
-function SCALA_load_data()
-	string dfSave=""
-	variable file
-	string impname="Omicron SCALA"
-	string filestr="*.par"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function SCALA_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Omicron SCALA"
+	importloader.filestr = "*.par"
+end
+
+
+function SCALA_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	SCALA_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-
+	string header = importloader.header
+	variable file = importloader.file
 
 	struct scalaheader fileheader
 	//read the header file
@@ -103,7 +110,8 @@ function SCALA_load_data()
 	// height and current
 	//*.tb* --> current
 	//*.tf* --> height
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 

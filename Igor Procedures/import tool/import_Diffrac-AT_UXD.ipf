@@ -138,16 +138,23 @@ static function Uxd_add_values_from_str(str, sep, ycol,xcol, ncols)
 end
 
 
-function Uxd_load_data()
-	string dfSave=""
-	variable file
-	string impname="Siemens/Bruker Diffrac-AT UXD"
-	string filestr="*.uxd"
-	string comments0 = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(comments0)==0)
+function Uxd_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "Siemens/Bruker Diffrac-AT UXD"
+	importloader.filestr = "*.uxd"
+end
+
+
+function Uxd_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	Uxd_load_data_info(importloader)
+	 if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-	comments0+="\r"
+	string comments0 = importloader.header+"\r"
+	variable file = importloader.file
 	
 	variable ncols = 0
 	string line
@@ -232,7 +239,8 @@ function Uxd_load_data()
 		fstatus file
 	while(V_logEOF>V_filePOS)
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
 
 // ###################### Diffrac-AT UXD END ######################

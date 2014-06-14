@@ -32,12 +32,24 @@ constant true				= 1
 	
 //ende importflags ##############################################
 
-function /S loaderstart(name, filestr,file,dfSave)
+structure importloader
 	string name //name of importer
 	string filestr //file endings "*.xxx,*.xxx"
-	variable &file
-	String &dfSave
-	
+	variable file
+	string dfSave
+	variable success
+	string header
+endstructure
+
+structure importloaderopt
+	string header
+endstructure
+
+
+function loaderstart(importloader,[optfile])
+	struct importloader &importloader
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
 	// workaround for a bug in OSX 10.9
 	NewDatafolder /O root:Packages
 	NewDatafolder /O root:Packages:Import_Tool
@@ -45,22 +57,22 @@ function /S loaderstart(name, filestr,file,dfSave)
 	SVAR mypath = root:Packages:Import_Tool:mypath
 	newpath /O/Q myimportpath , mypath
 	Debugprintf2("##########################",0)
-	Debugprintf2("Start new "+name+" File Import",0)
-	dfSave = GetDataFolder(1)
+	Debugprintf2("Start new "+importloader.name+" File Import",0)
+	importloader.dfSave = GetDataFolder(1)
 	if(importtoroot==1)
 		SetDataFolder root:
 	endif
 	variable  i=0
-	String fileFilters = name+" Files ("+filestr+"):"+ReplaceString("*",filestr,"")+";"
+	String fileFilters = importloader.name+" Files ("+importloader.filestr+"):"+ReplaceString("*",importloader.filestr,"")+";"
 	fileFilters += "All Files:.*;"
-	open/z=2/F=fileFilters/P=myimportpath/m="Looking for a "+name+" file"/r file
+	open/z=2/F=fileFilters/P=myimportpath/m="Looking for a "+importloader.name+" file"/r importloader.file
 	if(V_flag==-1)
-		Debugprintf2("No file given, aborting",0)
-		return ""
+		Debugprintf2("No file given!",0)
+		return -1
 	endif
 
 	//CleanupName
-	string ExperimentName = ReplaceString(" ",getnameforwave(file),"")
+	string ExperimentName = ReplaceString(" ",getnameforwave(importloader.file),"")
 	ExperimentName = ReplaceString(",",ExperimentName,"")
 	ExperimentName = ReplaceString("(",ExperimentName,"")
 	ExperimentName = ReplaceString(")",ExperimentName,"")
@@ -70,7 +82,7 @@ function /S loaderstart(name, filestr,file,dfSave)
 	if(importtoroot==1)
 		newexpname = "root:"+ExperimentName
 	else
-		newexpname = dfSave+ExperimentName
+		newexpname = importloader.dfSave+ExperimentName
 	endif
 	Debugprintf2(".. exporting to: "+newexpname,0)
 	if(DataFolderExists(newexpname))
@@ -82,7 +94,7 @@ function /S loaderstart(name, filestr,file,dfSave)
 			if(importtoroot==1)
 				newexpname = "root:"+Experimentname + num2str(i)
 			else
-				newexpname = dfSave+Experimentname + num2str(i)
+				newexpname = importloader.dfSave+Experimentname + num2str(i)
 			endif
 		while(DataFolderExists(newexpname))
 		Experimentname +=num2str(i)
@@ -91,28 +103,32 @@ function /S loaderstart(name, filestr,file,dfSave)
 		NewDataFolder/s root:$(ExperimentName)
 		SetDataFolder root:$(ExperimentName)
 	else
-		NewDataFolder/s $(dfSave+ExperimentName)
-		SetDataFolder $(dfSave+ExperimentName)
+		NewDataFolder/s $(importloader.dfSave+ExperimentName)
+		SetDataFolder $(importloader.dfSave+ExperimentName)
 	endif
-	fstatus file
-	string header = "Fileinfo: " + S_path + S_filename
+	fstatus importloader.file
+	importloader.header = "Fileinfo: " + S_path + S_filename
 	mypath=S_path // save the last filepath (workaround for a bug)
-	return header
+	return 0
 end
 
 
-function loaderend(name,success,file, dfSave)
-	variable file
-	string name
-	variable success 
-	String dfSave
-	if(success==1)
-		close file
-	endif
+function loaderend(importloader)
+	struct importloader &importloader
+	switch(importloader.success)
+		case 0:
+			break
+		case 1:
+			close importloader.file
+			break
+		default:
+			close importloader.file
+			break
+	endswitch
 	if(importtoroot==1)
-	 	setdatafolder $(dfSave)
+	 	setdatafolder $(importloader.dfSave)
 	endif
-	Debugprintf2("Finished "+name+" File Import",0)
+	Debugprintf2("Finished "+importloader.name+" File Import",0)
 	Debugprintf2("##########################",0)
 end
 

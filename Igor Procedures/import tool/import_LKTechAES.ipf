@@ -12,15 +12,24 @@ Menu "Macros"
 	end
 end
 
-function LKAES_load_data()
-	string dfSave=""
-	variable file
-	string impname="LK-Tech AES"
-	string filestr="*.dat"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+
+function LKAES_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "LK-Tech AES"
+	importloader.filestr = "*.dat"
+end
+
+
+function LKAES_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	LKAES_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	string tmps="", tmps2=""
 	variable tmp=0, tmp2=0, tmpc=0
@@ -70,5 +79,6 @@ function LKAES_load_data()
 		Fstatus file
 	while (V_logEOF>V_filePOS)  	
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end

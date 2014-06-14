@@ -13,15 +13,24 @@ Menu "Macros"
 end
 
 
-function WVASE32_load_data()
-	string dfSave=""
-	variable file
-	string impname="WVASE32"
-	string filestr="*.dat"
-	string header = loaderstart(impname, filestr,file,dfSave)
-	if (strlen(header)==0)
+function WVASE32_load_data_info(importloader)
+	struct importloader &importloader
+	importloader.name = "WVASE32"
+	importloader.filestr = "*.dat"
+end
+
+
+
+function WVASE32_load_data([optfile])
+	variable optfile
+	optfile = paramIsDefault(optfile) ? -1 : optfile
+	struct importloader importloader
+	WVASE32_load_data_info(importloader)
+	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
+	string header = importloader.header
+	variable file = importloader.file
 
 	string tmps= "", tmps2=""
 	variable points = 1, i=0
@@ -101,5 +110,6 @@ function WVASE32_load_data()
 	rename $(name+"_spk3"), $(name+"_psi") 
 	rename $(name+"_spk4"), $(name+"_delta") 
 
-	loaderend(impname,1,file, dfSave)
+	importloader.success = 1
+	loaderend(importloader)
 end
