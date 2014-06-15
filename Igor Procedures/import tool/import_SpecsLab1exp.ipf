@@ -222,10 +222,10 @@ static function Specslabexp_getdata(file, expinfo, groupc)
 			return 0
 		endif
 		detector[i]=str2num(mycleanupstr(tmps))
-		if(CB_DivScans==1)
+		if(str2num(get_flags("CB_DivScans"))==1)
 			detector[i]/=expinfo.scans
 		endif
-		If(CB_DivLifeTime ==1)
+		If(str2num(get_flags("CB_DivLifeTime")) ==1)
 			detector[i]/=expinfo.dwell
 		endif
 	endfor

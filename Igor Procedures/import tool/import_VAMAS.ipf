@@ -490,8 +490,8 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 
 	if ((cmpstr("UPS",tech) == 0) ||  (cmpstr("XPS",tech) == 0)) 
 		if(strsearch(x_name,"Kinetic Energy",0,2)!=-1)
-			if(vskineticenergy==0)
-				if (posbinde == 0)
+			if(str2num(get_flags("vskineticenergy"))==0)
+				if(str2num(get_flags("posbinde")) == 0)
 					SetScale/P  x,x_start-excenergy,x_step,"eV", ycols
 				else
 					SetScale/P  x,-x_start+excenergy,-x_step,"eV", ycols
@@ -500,8 +500,8 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 					SetScale/P  x,x_start,x_step,"eV", ycols
 			endif
 		elseif(strsearch(x_name,"Binding Energy",0,2)!=-1)
-			if(vskineticenergy==0)
-				if (posbinde == 0)
+			if(str2num(get_flags("vskineticenergy"))==0)
+				if(str2num(get_flags("posbinde")) == 0)
 					SetScale/P  x,-x_start,-x_step,"eV", ycols
 				else
 					SetScale/P  x,x_start,x_step,"eV", ycols
@@ -541,10 +541,10 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 		n = (i+1-mod(i+1,cor_var))/cor_var
 	endfor
 	
-	if (CB_DivScans == 1)
+	if(str2num(get_flags("CB_DivScans")) == 1)
 		ycols/=scancount
 	endif
-	if (CB_DivLifeTime == 1)
+	if(str2num(get_flags("CB_DivLifeTime")) == 1)
 		ycols/=dwelltime
 	endif
 	
@@ -623,7 +623,7 @@ function Vamasrpt_load_data([optfile])
 			endif
 		endif
 		if(i>1)
-			if (posbinde == 0)
+			if(str2num(get_flags("posbinde")) == 0)
 				SetScale/I  x,-ebinstart,-ebinend,"eV", w
 			else
 				SetScale/I  x,ebinstart,ebinend,"eV", w

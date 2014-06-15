@@ -138,16 +138,16 @@ function Spectra_load_data([optfile])
 					importieren = 1
 					break
 				endif
-				if(CB_DivLifeTime==true)
+				if(str2num(get_flags("CB_DivLifeTime"))==true)
 					val=val/Torzeit
 				endif
-				if(CB_DivScans==true)
+				if(str2num(get_flags("CB_DivScans"))==true)
 					val=val/Scans
 				endif
 				Detector[spalte] = val
 			 	spalte +=1
 			while (spalte != Messpunkte)
-			if (posbinde == 0)
+			if(str2num(get_flags("posbinde")) == 0)
 				SetScale/I  x,start-Exenergie,ende-Exenergie,"eV", Detector
 			else
 				SetScale/I  x,-start+Exenergie,-ende+Exenergie,"eV", Detector

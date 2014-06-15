@@ -14,22 +14,57 @@ constant true				= 1
 
 
 //importflags #################################################
-	constant includeADC 			= 1			// Include ADC channels
-	constant CB_DivScans 			= 1			// Devide counts by #Scans
-	constant CB_DivLifeTime 		= 1			// Devide counts by lifetime (dwelltime)
-	constant DivDetectorGain   		= 1			// Devide counts of Detectors by Gain
-	constant Interpolieren 			= 1			// 0 .. like in Origin 1 .. Schmei§er interpolation (omicron method)
-	constant ChanneltronEinzeln 	= 0			// Export each channel as a single wave --> DLD has up to 1000 channels!!! 
-	strconstant suffix 				= "_new"	// Attach if the Region... already exists
-	constant posbinde 				= 0 		// Positive (1) or negative (0) binding energy
-	constant singlescans				= 0			// Export each scan as a single spectrum
-	constant importtoroot			= 1			// Import into root (1) or into active directory (0)
-	constant converttoWN			= 1			// Convert eV to Wavenumber (cm-1)
-	constant includetransmission	= 0			// Include transmission function of the detector
-	constant vskineticenergy		= 0			// Plot against kinetic or binding energy
-	constant askforappenddet		= 0			// Ask for a different name to be added to detector
-	constant justdetector			= 1			// export just the detector (only for Dsets)
-	
+function init_flags()
+	NewDatafolder /O root:Packages
+	NewDatafolder /O root:Packages:Import_Tool
+	NewDatafolder /O root:Packages:Import_Tool:flags
+	string mypath = "root:Packages:Import_Tool:flags"
+	if(exists(mypath+":includeADC")!=2)
+		variable /G  $(mypath+":includeADC") 				= 1			// Include ADC channels
+	endif
+	if(exists(mypath+":CB_DivScans")!=2)
+		variable /G  $(mypath+":CB_DivScans") 			= 1			// Devide counts by #Scans
+	endif
+	if(exists(mypath+":CB_DivLifeTime")!=2)
+		variable /G  $(mypath+":CB_DivLifeTime") 		= 1			// Devide counts by lifetime (dwelltime)
+	endif
+	if(exists(mypath+":DivDetectorGain")!=2)
+		variable /G  $(mypath+":DivDetectorGain") 		= 1			// Devide counts of Detectors by Gain
+	endif
+	if(exists(mypath+":Interpolieren")!=2)
+		variable /G  $(mypath+":Interpolieren") 			= 1			// 0 .. like in Origin 1 .. Schmei§er interpolation (omicron method)
+	endif
+	if(exists(mypath+":ChanneltronEinzeln")!=2)
+		variable /G  $(mypath+":ChanneltronEinzeln") 		= 0			// Export each channel as a single wave --> DLD has up to 1000 channels!!! 
+	endif
+	if(exists(mypath+":suffix")!=2)
+		string /G  $(mypath+":suffix") 						= "_new"	// Attach if the Region... already exists
+	endif
+	if(exists(mypath+":posbinde")!=2)
+		variable /G  $(mypath+":posbinde") 				= 0 		// Positive (1) or negative (0) binding energy
+	endif
+	if(exists(mypath+":singlescans")!=2)
+		variable /G  $(mypath+":singlescans") 				= 0			// Export each scan as a single spectrum
+	endif
+	if(exists(mypath+":importtoroot")!=2)
+		variable /G  $(mypath+":importtoroot") 			= 1			// Import into root (1) or into active directory (0)
+	endif
+	if(exists(mypath+":converttoWN")!=2)
+		variable /G  $(mypath+":converttoWN") 			= 1			// Convert eV to Wavenumber (cm-1)
+	endif
+	if(exists(mypath+":includetransmission")!=2)
+		variable /G  $(mypath+":includetransmission") 	= 0			// Include transmission function of the detector
+	endif
+	if(exists(mypath+":vskineticenergy")!=2)
+		variable /G  $(mypath+":vskineticenergy") 			= 0			// Plot against kinetic or binding energy
+	endif
+	if(exists(mypath+":askforappenddet")!=2)
+		variable /G  $(mypath+":askforappenddet") 			= 0			// Ask for a different name to be added to detector
+	endif
+	if(exists(mypath+":justdetector")!=2)
+		variable /G  $(mypath+":justdetector") 			= 0			// export just the detector (only for Dsets)
+	endif
+end
 //ende importflags ##############################################
 
 structure importloader
@@ -44,6 +79,7 @@ structure importloader
 	string version		// version
 endstructure
 
+
 structure importloaderopt
 	string header
 endstructure
@@ -53,6 +89,7 @@ function loaderstart(importloader,[optfile])
 	struct importloader &importloader
 	variable optfile
 	optfile = paramIsDefault(optfile) ? -1 : optfile
+	init_flags()
 	// workaround for a bug in OSX 10.9
 	NewDatafolder /O root:Packages
 	NewDatafolder /O root:Packages:Import_Tool
@@ -62,7 +99,7 @@ function loaderstart(importloader,[optfile])
 	Debugprintf2("##########################",0)
 	Debugprintf2("Start new "+importloader.name+" File Import",0)
 	importloader.dfSave = GetDataFolder(1)
-	if(importtoroot==1)
+	if(str2num(get_flags("importtoroot"))==1)
 		SetDataFolder root:
 	endif
 	variable  i=0
@@ -86,7 +123,7 @@ function loaderstart(importloader,[optfile])
 	ExperimentName = ReplaceString(".",ExperimentName,"")	
 	ExperimentName = cleanname(ExperimentName)
 	string newexpname =""
-	if(importtoroot==1)
+	if(str2num(get_flags("importtoroot"))==1)
 		newexpname = "root:"+ExperimentName
 	else
 		newexpname = importloader.dfSave+ExperimentName
@@ -94,11 +131,11 @@ function loaderstart(importloader,[optfile])
 	Debugprintf2(".. exporting to: "+newexpname,0)
 	if(DataFolderExists(newexpname))
 		Debugprintf2("Folder exists, adding suffix!",0)
-		ExperimentName += suffix
+		ExperimentName += get_flags("suffix")
 		i=0
 		do
 			i+=1
-			if(importtoroot==1)
+			if(str2num(get_flags("importtoroot"))==1)
 				newexpname = "root:"+Experimentname + num2str(i)
 			else
 				newexpname = importloader.dfSave+Experimentname + num2str(i)
@@ -106,7 +143,7 @@ function loaderstart(importloader,[optfile])
 		while(DataFolderExists(newexpname))
 		Experimentname +=num2str(i)
 	endif
-	if(importtoroot==1)
+	if(str2num(get_flags("importtoroot"))==1)
 		NewDataFolder/s root:$(ExperimentName)
 		SetDataFolder root:$(ExperimentName)
 	else
@@ -132,7 +169,7 @@ function loaderend(importloader)
 			close importloader.file
 			break
 	endswitch
-	if(importtoroot==1)
+	if(str2num(get_flags("importtoroot"))==1)
 	 	setdatafolder $(importloader.dfSave)
 	endif
 	Debugprintf2("Finished "+importloader.name+" File Import",0)
@@ -596,4 +633,79 @@ function from_pdp11(pvar)//(const unsigned char* p) // funcktioniert
 //	#endif
 
 #endif
+end
+
+
+function /S get_flags(type)
+	string type
+	
+	NVAR myincludeADC = root:Packages:Import_Tool:flags:includeADC
+	NVAR myCB_DivScans = root:Packages:Import_Tool:flags:CB_DivScans
+	NVAR myCB_DivLifetime = root:Packages:Import_Tool:flags:CB_DivLifeTime
+	NVAR myDivDetectorGain = root:Packages:Import_Tool:flags:DivDetectorGain
+	NVAR myInterpolieren = root:Packages:Import_Tool:flags:Interpolieren
+	NVAR myChanneltronEinzeln = root:Packages:Import_Tool:flags:ChanneltronEinzeln
+	SVAR mysuffix = root:Packages:Import_Tool:flags:suffix
+	NVAR myposbinde = root:Packages:Import_Tool:flags:posbinde
+	NVAR mysinglescans = root:Packages:Import_Tool:flags:singlescans
+	NVAR myimporttoroot = root:Packages:Import_Tool:flags:importtoroot
+	NVAR myconverttoWN = root:Packages:Import_Tool:flags:converttoWN
+	NVAR myincludetransmission = root:Packages:Import_Tool:flags:includetransmission
+	NVAR myvskineticenergy = root:Packages:Import_Tool:flags:vskineticenergy
+	NVAR myaskforappenddet = root:Packages:Import_Tool:flags:askforappenddet
+	NVAR myjustdetector = root:Packages:Import_Tool:flags:justdetector
+	
+	strswitch(type)
+		case "includeADC":
+			return num2str(myincludeADC)
+			break
+		case "CB_DivScans":
+			return num2str(myCB_DivScans)
+			break
+		case "CB_DivLifeTime":
+			return num2str(myCB_DivLifeTime)
+			break
+		case "DivDetectorGain":
+			return num2str(myDivDetectorGain)
+			break
+		case "Interpolieren":
+			return num2str(myInterpolieren)
+			break
+		case "ChanneltronEinzeln":
+			return num2str(myChanneltronEinzeln)
+			break
+		case "suffix":
+			return mysuffix
+			break
+		case "posbinde":
+			return num2str(myposbinde)
+			break
+		case "singlescans":
+			return num2str(mysinglescans)
+			break
+		case "importtoroot":
+			return num2str(myimporttoroot)
+			break
+		case "converttoWN":
+			return num2str(myconverttoWN)
+			break
+		case "includetransmission":
+			return num2str(myincludetransmission)
+			break
+		case "vskineticenergy":
+			return num2str(myvskineticenergy)
+			break
+		case "askforappenddet":
+			return num2str(myaskforappenddet)
+			break
+		case "justdetector":
+			return num2str(myjustdetector)
+			break
+		default:
+			debugprintf2("Unknown Flag: "+type,1)
+			return "-1"
+			break
+	endswitch
+	
+	return "-1"
 end

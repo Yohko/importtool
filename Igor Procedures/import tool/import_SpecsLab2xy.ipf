@@ -294,7 +294,7 @@ Function SpecslabXY_load_data([optfile])
 								case "FixedAnalyzerTransmission":
 									startx = xw[0]-str2num(excEnergy)
 									stepx = xw[1] - xw[0]
-									if (posbinde == 0)
+									if(str2num(get_flags("posbinde")) == 0)
 										SetScale/P  x,startx,stepx,"eV", yw
 									else
 										SetScale/P  x,-startx,-stepx,"eV", yw
@@ -328,7 +328,7 @@ Function SpecslabXY_load_data([optfile])
 								case "Snapshot (FAT)":
 									startx = xw[0]-str2num(excEnergy)
 									stepx = xw[1] - xw[0]
-									if (posbinde == 0)
+									if(str2num(get_flags("posbinde")) == 0)
 										SetScale/P  x,startx,stepx,"eV", yw
 									else
 										SetScale/P  x,-startx,-stepx,"eV", yw

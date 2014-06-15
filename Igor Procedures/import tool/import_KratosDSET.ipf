@@ -1597,7 +1597,7 @@ static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 	if(scaleflag==0) // normal spectrum
 		if(strsearch(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 5)],"Kinetic Energy",0)==0)	
 			tmps=Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 6)]
-			if (posbinde == 0)
+			if(str2num(get_flags("posbinde")) == 0)
 				SetScale/P  x,-str2num(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 3080)])+Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 4)], tmps, savewave
 			else
 				SetScale/P  x,str2num(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 3080)])-Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3)],-Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 4)], tmps, savewave
@@ -1608,11 +1608,11 @@ static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 			SetScale/P  x,Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 4)], tmps, savewave
 		endif
 		// normalize countrate
-		if(CB_DivScans==1)
+		if(str2num(get_flags("CB_DivScans"))==1)
 			savewave/=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 99)])
 		endif
 		
-		if(CB_DivLifeTime==1)
+		if(str2num(get_flags("CB_DivLifeTime"))==1)
 			savewave/=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 7)])
 		endif
 	elseif(scaleflag==2) // mapping image
@@ -1657,7 +1657,7 @@ static function KratosDSET_saveobject(Dsetobject)
 				KratosDSET_savewave(twave, shortname(Dsetobject.objectname, len)+"_"+num2str(Dsetobject.id)+dsetobject.appendtodetector, Dsetobject, 0)
 			endif
 		else
-			if(justdetector==0)
+			if(str2num(get_flags("justdetector"))==0)
 				KratosDSET_savewave(twave, shortname(Dsetobject.objectname, len)+"_"+num2str(Dsetobject.id)+"_"+ReplaceString(Gtmpwavename,tmpwave,""), Dsetobject, -1)
 			endif
 			//Debugprintf2("Data wave "+tmpwave+" not known! Just killing it!",0)
@@ -1968,7 +1968,7 @@ function KratosDSET_load_data([optfile])
 
 
 	Dsetobject.appendtodetector = "_detector"
-	if(askforappenddet)
+	if(str2num(get_flags("askforappenddet")))
 		tmps = Dsetobject.appendtodetector
 		prompt tmps, "What string to append to detector spectra?"
 		doprompt "Import flags!", tmps

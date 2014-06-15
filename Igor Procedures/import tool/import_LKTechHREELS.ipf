@@ -76,7 +76,7 @@ function LKHREELS_load_data([optfile])
 	while (V_logEOF>V_filePOS)
 	
 	// convert to wavenumbers
-	if(converttoWN==1)
+	if(str2num(get_flags("converttoWN"))==1)
 		tmps2="region_X_WN" ; Duplicate/O detectorX, $tmps2 ; wave detectorXWN=$tmps2
 		detectorXWN=detectorX/1000*8065.54468111324// /(heV*clight*100)
 		SetScale d, 0,0,"cm-1", detectorXWN

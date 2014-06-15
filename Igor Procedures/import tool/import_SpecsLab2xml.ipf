@@ -185,7 +185,12 @@ static function SpecsXML_savedetector(myRegionInfo)
 		return 0
 	endif
 	
-
+	variable myinterpolieren = str2num(get_flags("interpolieren"))
+	variable myDivDetectorGain = str2num(get_flags("DivDetectorGain"))
+	variable myChanneltronEinzeln = str2num(get_flags("ChanneltronEinzeln"))
+	variable myCB_DivScans = str2num(get_flags("CB_DivScans"))
+	variable myCB_DivLifeTime = str2num(get_flags("CB_DivLifeTime"))
+	variable mysinglescans = str2num(get_flags("singlescans"))
 	variable GetMaxPositiveDetektorShift = -1E100
 	variable i = 0
 	for (i=0;i<myRegionInfo.detector.numdetectors;i+=1)
@@ -198,9 +203,9 @@ static function SpecsXML_savedetector(myRegionInfo)
  	string tmps = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),16),"_Detector")
  	Make /O/R/N=(myRegionInfo.values_per_curve) $tmps /wave=Detector
 
-       IF (ChanneltronEinzeln == 1)
+       if(myChanneltronEinzeln  == 1)
 	 	Make /O/R/N=(myRegionInfo.values_per_curve,myRegionInfo.detector.numdetectors) $tmps+"CHE" /wave=DetectorCHE
-       	if(singlescans==1)
+       	if(mysinglescans==1)
 		 	Make /O/R/N=(myRegionInfo.values_per_curve,myRegionInfo.detector.numdetectors,myRegionInfo.num_scans) $tmps+"CHE" /wave=DetectorCHES
 		endif
 	endif
@@ -269,7 +274,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 				break 
 				
 			endswitch
-			if ((interpolieren == 1) && (strsearch(myRegionInfo.scanmode,"Snapshot (FAT)",0) != 0))
+			if ((myinterpolieren == 1) && (strsearch(myRegionInfo.scanmode,"Snapshot (FAT)",0) != 0))
 				// OMICRON-Methode: Zaehlrate am aktuellen Messpunkt aus den rechts und links davon liegenden Channeltron-Zaehlraten interpolieren
 				// Zunaechst mal muss ich ermittel, ob er ab- oder aufgerundet hat, beim bestimmen des Index
 				if (abs(mod(myRegionInfo.detector.shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))<0.5)
@@ -284,7 +289,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 				InterpolationsDetektor = InterpolationsDetektor * SIGN(mod(myRegionInfo.detector.shift[j],1))// Der Detektor-Versatz kann ja positiv oder negativ sein. Bei negativem Versatz muss ich die Richtung umkehren !
 				if (InterpolationsDetektor == 0)
 
-					if(DivDetectorGain == 0)
+					if(myDivDetectorGain == 0)
 						TmpR = TmpR + Countliste[Index]// Zaehlraten der Einzelchanneltrons addieren
 					else
 						TmpR = TmpR + CountListe[Index]*myRegionInfo.detector.gain[j] // Zaehlraten der Einzelchanneltrons addieren
@@ -292,7 +297,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 
 
  				else
-					if(DivDetectorGain == 0)
+					if(myDivDetectorGain == 0)
 						TmpR = TmpR + HauptAnteil * CountListe[Index]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
 					else
 						TmpR = TmpR + HauptAnteil * CountListe[Index]*myRegionInfo.detector.gain[j] // Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
@@ -302,7 +307,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 					If((Index + InterpolationsDetektor*myRegionInfo.detector.numdetectors) < 0 || (Index + InterpolationsDetektor*myRegionInfo.detector.numdetectors) > (myRegionInfo.numcounts-1)) //todo ||
 						InterpolationsDetektor = 0// Sollte der Datenpunkt ausserhalb der Liste liegen, also nicht mitgemessen worden sein, dass nehme ich einfach den mit Index spezifizierten Punkt zu 100%
 					endif
-					if(DivDetectorGain == 0)
+					if(myDivDetectorGain == 0)
 						TmpR = TmpR + (1-HauptAnteil) * CountListe[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
 					else
 				             TmpR = TmpR + (1-HauptAnteil) * CountListe[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]*myRegionInfo.detector.gain[j]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
@@ -311,7 +316,7 @@ static function SpecsXML_savedetector(myRegionInfo)
  				endif
   			else
  				// Specs-Methode: nicht interpolieren, sondern die Channeltron-Zaehlrate, die dem aktuellen Messpunkt am naehesten liegt voll dem Messpunkt zuordnen
-				if(DivDetectorGain == 0)
+				if(myDivDetectorGain == 0)
 					TmpR = TmpR + CountListe[Index]//Zaehlraten der Einzelchanneltrons addieren
 				else
 					TmpR = TmpR + CountListe[Index]*myRegionInfo.detector.gain[j] //Zaehlraten der Einzelchanneltrons addieren
@@ -321,27 +326,27 @@ static function SpecsXML_savedetector(myRegionInfo)
 			
 			
 			
-		       IF (ChanneltronEinzeln == 1)
+		       if(myChanneltronEinzeln == 1)
 		       // detector shift berücksichtigen ....
-				if(DivDetectorGain == 0)
+				if(myDivDetectorGain == 0)
 					TmpCH[j] = CountListe[Index]//Falls Zaehlraten der Einzelchanneltrons auch gewuenscht, dann diese aufheben
 				else
 					TmpCH[j] = CountListe[Index]*myRegionInfo.detector.gain[j]//Falls Zaehlraten der Einzelchanneltrons auch gewuenscht, dann diese aufheben
 				endif
 				
-				if (CB_DivScans == 1)
+				if(myCB_DivScans == 1)
      					DetectorCHE[i][j]=TmpCH[j] /myRegionInfo.num_scans
 				endif
-				if (CB_DivLifeTime == 1)
+				if(myCB_DivLifeTime == 1)
      					DetectorCHE[i][j]=TmpCH[j] / myRegionInfo.dwell_time
 				endif
 
-		       	if(singlescans==1)
+		       	if(mysinglescans ==1)
 		       		for(k=0;k<myRegionInfo.num_scans;k+=1)
-						if (CB_DivScans == 1)
+						if(myCB_DivScans == 1)
      							DetectorCHES[i][j][k]=CountlisteS[Index][k] /myRegionInfo.num_scans
 						endif
-						if (CB_DivLifeTime == 1)
+						if(myCB_DivLifeTime == 1)
      							DetectorCHES[i][j][k]=CountlisteS[Index][k] / myRegionInfo.dwell_time
 						endif
 					endfor
@@ -364,10 +369,10 @@ static function SpecsXML_savedetector(myRegionInfo)
 		else
 			Detector[i] = tmpr
 		endif
-		if (CB_DivScans == 1)
+		if(myCB_DivScans == 1)
 		     	Detector[i] = Detector[i] /myRegionInfo.num_scans
 		endif
-		if (CB_DivLifeTime == 1)
+		if(myCB_DivLifeTime == 1)
 		     	Detector[i] = Detector[i] / myRegionInfo.dwell_time
 		endif
 	endfor
@@ -424,8 +429,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 		SetScale d, 0,0,"cps", savewave
 		strswitch(myRegionInfo.scanmode)
 			case "FixedAnalyzerTransmission":
-				if(vskineticenergy==0)
-					if (posbinde == 0)
+				if(str2num(get_flags("vskineticenergy"))==0)
+					if(str2num(get_flags("posbinde")) == 0)
 						SetScale/P  x,myRegionInfo.kinetic_energy-myRegionInfo.excitation_energy,myRegionInfo.scan_delta,"eV",  savewave
 					else
 						SetScale/P  x,-myRegionInfo.kinetic_energy+myRegionInfo.excitation_energy,-myRegionInfo.scan_delta,"eV",  savewave
@@ -459,8 +464,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 				Note  savewave, "y-axis: intensity"
 			break 
 			case "Snapshot (FAT)":
-				if(vskineticenergy==0)
-					if (posbinde == 0)
+				if(str2num(get_flags("vskineticenergy"))==0)
+					if(str2num(get_flags("posbinde")) == 0)
 						SetScale/P  x,myRegionInfo.kinetic_energy-myRegionInfo.excitation_energy,myRegionInfo.scan_delta,"eV",  savewave
 					else
 						SetScale/P  x,-myRegionInfo.kinetic_energy+myRegionInfo.excitation_energy,-myRegionInfo.scan_delta,"eV",  savewave
@@ -490,8 +495,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 			SetScale d, 0,0,"cps", savewave
 			strswitch(myRegionInfo.scanmode)
 				case "FixedAnalyzerTransmission":
-					if(vskineticenergy==0)
-						if (posbinde == 0)
+					if(str2num(get_flags("vskineticenergy"))==0)
+						if(str2num(get_flags("posbinde")) == 0)
 							SetScale/P  x,myRegionInfo.YCurve_start-myRegionInfo.excitation_energy,myRegionInfo.YCurve_delta,"eV", savewave
 							//SetScale/P  x,myRegionInfo.YCurve_start-myRegionInfo.excitation_energy,myRegionInfo.YCurve_delta,"eV", savewave
 						else
@@ -529,8 +534,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 					Note savewave, "y-axis: intensity"
 					break 
 				case "Snapshot (FAT)":
-					if(vskineticenergy==0)
-						if (posbinde == 0)
+					if(str2num(get_flags("vskineticenergy"))==0)
+						if(str2num(get_flags("posbinde")) == 0)
 							//SetScale/P  x,myRegionInfo.YCurve_start-ExEnergie,myRegionInfo.YCurve_delta,"eV", savewave
 							SetScale/P  x,myRegionInfo.YCurve_start-myRegionInfo.excitation_energy,myRegionInfo.YCurve_delta,"eV", savewave
 						else
@@ -943,7 +948,11 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 					tmps2 = SpecsXML_checkdblwavename(cleanname(myRegionInfo.RegionName), "_"+cleanname(myRegionInfo.YCurve_name))
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
-					SpecsXML_savewave($tmps2, myRegionInfo, 2)
+					if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
+						SpecsXML_savewave($tmps2, myRegionInfo, 2)
+					else
+						killwaves $tmps2
+					endif
 					break
 				case "scaling_factors":
 					redimension /N=(seq.length, -1) $scalinglist
@@ -962,7 +971,11 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 					tmps2 = SpecsXML_checkdblwavename(cleanname(myRegionInfo.RegionName), "_transm")
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
-					SpecsXML_savewave($tmps2, myRegionInfo, 3)
+					if(str2num(get_flags("includetransmission"))==1 && str2num(get_flags("justdetector"))==0)
+						SpecsXML_savewave($tmps2, myRegionInfo, 3)
+					else
+						killwaves $tmps2
+					endif
 					break
 				default:
 					Debugprintf2("Unknown DoubleSeq!!!",0)
@@ -1142,7 +1155,7 @@ static function SpecsXML_readstruct(file, givenstruct, savewave, savepos, myRegi
 						string newAktGroupName = myRegionInfo.folder+AktGroupName
 						SetDataFolder $(myRegionInfo.folder)
 						if(DataFolderExists(newAktGroupName))
-							AktGroupName += suffix
+							AktGroupName += get_flags("suffix")
 							variable i=0
 							do
 								i+=1

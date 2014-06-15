@@ -446,7 +446,7 @@ Function phimultipak_load_data([optfile])
 #endif		
 		
 		// set the scale etc.
-		if(posbinde==1)
+		if(str2num(get_flags("posbinde"))==1)
 			SetScale/I  x,phiheader.SpectralRegDef[i].start1,phiheader.SpectralRegDef[i].ende1, "eV", data//, TF
 		else
 			SetScale/I  x,-phiheader.SpectralRegDef[i].start1,-phiheader.SpectralRegDef[i].ende1, "eV", data//, TF
