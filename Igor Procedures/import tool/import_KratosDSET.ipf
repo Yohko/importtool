@@ -307,8 +307,8 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,60,0,"Etch table","","","")//FID_etch_table
 	//KratosDSET_initaddobject(Dsetobject,61,3,"Loop index limit","","","")//AID_counter_limit
 	//KratosDSET_initaddobject(Dsetobject,62,0,"Map geometry","","","")//FID_map_geometry
-	//KratosDSET_initaddobject(Dsetobject,63,5,"Pre-etch delay","","","")//FID_pre_etch_delay
-	//KratosDSET_initaddobject(Dsetobject,64,5,"Post etch delay","","","")//FID_post_etch_delay
+	KratosDSET_initaddobject(Dsetobject,63,5,"Pre-etch delay","","","")//FID_pre_etch_delay // check this against 174.dset
+	KratosDSET_initaddobject(Dsetobject,64,5,"Post etch delay","","","")//FID_post_etch_delay // check this against 174.dset
 	//KratosDSET_initaddobject(Dsetobject,65,0,"Registration coords","","","")//FID_registration
 	//KratosDSET_initaddobject(Dsetobject,66,0,"Multi-point","","","")//FID_multi_point
 	//KratosDSET_initaddobject(Dsetobject,67,0,"Control","","","")//FID_control
