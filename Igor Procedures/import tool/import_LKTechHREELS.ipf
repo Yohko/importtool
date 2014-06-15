@@ -51,8 +51,9 @@ function LKHREELS_load_data([optfile])
 
 		tmps=splitintolist(tmps, " ")
 		if (itemsinlist(tmps,"_") != 3)
-			Debugprintf2("Wrong number of items in value list!",2)
-			break
+			Debugprintf2("Wrong number of items in value list!",0)
+			loaderend(importloader)
+			return -1
 		endif
 		tmp=str2num(StringFromList(0,tmps,"_")) // number of spektrum 
 		if(tmp2==0) //new spectrum begins
