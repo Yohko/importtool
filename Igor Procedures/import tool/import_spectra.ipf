@@ -12,24 +12,32 @@ end
 // ###################### Omicron Spectra ########################
 
 
-function Spectra_check(file)
+function Spectra_check_file(file)
 	variable file
-	string line
-	line = read_line_trim(file) // first line should be experimentname
-	
+	fsetpos file, 0
+	string line = ""
+	line = read_line_trim(file)// first line should be experimentname
 	line = splitintolist(read_line_trim(file), " ")// second line should be parameters
 	if ( strlen(line)==0 || strlen(line) > 200 || itemsinlist(line,"_") != 8)
-		return 0
+		fsetpos file, 0
+		return -1
 	endif
-	line = read_line_trim(file) // third line should be spectrumname
+	line = read_line_trim(file)// third line should be spectrumname
 	// check that the next few lines have only single integer number
 	variable i=0
 	for (i = 0; i != 3; i+=1)
 		line = read_line_trim(file)
 		if ( strlen(line)==0|| strlen(line) > 30 || numtype(str2num(line)) != 0)
-			return 0
+			fsetpos file, 0
+			return -1
+		endif
+		fstatus file
+		if(V_logEOF<=V_filePOS)
+			fsetpos file, 0
+			return -1
 		endif
     endfor
+    fsetpos file, 0
     return 1
 end
 
@@ -168,7 +176,7 @@ function Spectra_load_data([optfile])
 				break
 			endif
 			Fstatus file
-		While (V_logEOF>V_filePOS)
+		While(V_logEOF>V_filePOS)
 	Endif
 	if (importieren == 1)
 		print "somthing went wrong!!"
