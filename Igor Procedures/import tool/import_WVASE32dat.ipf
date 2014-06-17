@@ -13,13 +13,43 @@ Menu "Macros"
 end
 
 
+function WVASE32_check_file(file)
+	variable file
+	fsetpos file, 0
+	string line = ""
+	FReadLine file, line // skip first line, just check for empy file
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)
+	if(strsearch(line,"VASEmethod[",0)!=0 || strsearch(line,"WVASE=",0)==-1 || strsearch(line,"EllipsometerType=",0)==-1)
+		return -1
+	endif
+	FReadLine file, line
+	fsetpos file, 0
+	if(strlen(line) == 0)
+		return -1
+	endif
+	line = mycleanupstr(line)
+	if(strsearch(line,"Original[",0)!=0)
+		return -1
+	endif
+	return 1
+end
+
+
 function WVASE32_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "WVASE32"
 	importloader.filestr = "*.dat"
 	importloader.category = "VASE"
 end
-
 
 
 function WVASE32_load_data([optfile])
