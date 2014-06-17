@@ -23,15 +23,15 @@ static Structure SSEread
 endStructure
 
 
-static function PhilipsRaw_check(file)
+function PhilipsRaw_check_file(file)
 	variable file
-	string head = mybinread(file, 4)//"1234"
-	//Fbinread file,head //	string head = read_string(f, 4);
+	fsetpos file, 0
+	string head = mybinread(file, 4)
+	fsetpos file, 0
 	if( StringMatch(head,"V3RD")==1 || StringMatch(head,"V5RD")==1)
 		return 1
 	endif
-	return 0
-	// return head == "V3RD" || head == "V5RD"
+	return -1
 end
 
 
