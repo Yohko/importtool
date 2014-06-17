@@ -33,6 +33,22 @@ end
 // ...
 // 442/ # last data ends with a '/'
 
+function Udf_check_file(file)
+	variable file
+	fsetpos file, 0
+	string head=""
+	FReadLine /N=11 file, head
+	fsetpos file, 0
+	if(strlen(head) == 0)
+		return -1
+	endif
+	if(cmpstr(head, "SampleIdent")!=0)
+		return -1
+	endif
+	return 1
+end
+
+
 function Udf_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Philips UDF"
