@@ -119,6 +119,34 @@ static function /S phimultipak_getparams(str, keyval)
 end
 
 
+function phimultipak_check_file(file)
+	variable file
+	fsetpos file, 0
+	string tmps = mycleanupstr(myreadline(file))
+	if(cmpstr(tmps, "SOFH")!=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps, "Platform",0)!=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps, "Technique",0)!=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps, "FileType",0)!=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function phimultipak_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Multipak files"
