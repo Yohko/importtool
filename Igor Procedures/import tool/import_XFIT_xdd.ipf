@@ -49,12 +49,14 @@ static function /S XfitXdd_skip_c_style_comments(file)
 end
 
 
-static function XfitXdd_check(file)
+function XfitXdd_check_file(file)
 	variable file
+	fsetpos file, 0
 	string line = XfitXdd_skip_c_style_comments(file)
 	line = line[strsearch(line,"####",0)+4,inf]
 	if(cmpstr(line,"-1")==0)
-		return 0
+		fsetpos file, 0
+		return -1
 	endif
 	string templine = stripstr(line," ","")
 	templine = stripstr(line,"\t","")
@@ -65,7 +67,8 @@ static function XfitXdd_check(file)
 	// it should be one of the first (max_headers+1) lines
 	string sep=","
 	if(strlen(line)==0)
-		return 0
+		fsetpos file, 0
+		return -1
 	endif
 	line=mycleanupstr(line)
 	if(strsearch(line,sep,0)!=-1)
@@ -80,15 +83,18 @@ static function XfitXdd_check(file)
 		endif
 	endif
 	if(itemsinlist(line,sep)<3)
-		return 0
+		fsetpos file, 0
+		return -1
 	endif
 	variable start = str2num(stringfromlist(0,line,sep))
 	variable step = str2num(stringfromlist(1,line,sep))
 	variable stop = str2num(stringfromlist(2,line,sep))
 	variable counts = (stop-start)/step+1
 	if(numtype(start) != 0 || numtype(stop) != 0 || numtype(step) != 0 || numtype(counts) != 0)
-		return 0
+		fsetpos file, 0
+		return -1
 	endif
+	fsetpos file, 0
 	return 1
 end
 
