@@ -60,30 +60,73 @@ end
 // 10 -2.6e-2
 
 
+static function ChiPlot_get_dataline(line)
+	string &line
+	line = stripstrfirstlastspaces(line)
+	if(strlen(line)==0)
+		return -1
+	endif	
+	if(strsearch(line, ",",0)!=-1)
+		line = ReplaceString(" ",line,"") // remove space
+		line = ReplaceString("\t",line,"") // remove tabs
+		line = splitintolist(line, ",")
+	else
+		line = splitintolist(line, " ")
+	endif
+	variable i=0
+	for(i=0;i<itemsinlist(line,"_");i+=1)
+		if(numtype(str2num(stringfromlist(i,line,"_")))!=0)
+			return -1
+		endif	
+	endfor	
+	return 1
+end
 
-static function ChiPlot_check(file)
+
+function ChiPlot_check_file(file)
 	variable file
+	fsetpos file, 0
 	string line = ""
-	variable i = 0
-	for (i = 0; i != 4; i+=1)
+	variable i=0
+	for(i = 0; i < 4; i+=1)
 		FReadLine file, line
 		if(strlen(line) == 0)
-			Debugprintf2("Unexpected end of file.",0)
-			return 0
+			fsetpos file, 0
+			return -1
 		endif
 	endfor
 	// check 4. line
-	//line = read_line_trim(file) //was already read in loop
-	if((numtype(str2num(StringFromList(0,line,","))) != 0) || (str2num(StringFromList(0,line,",")) <= 0))
-		return 0
+	line = mycleanupstr(line)
+	if(ChiPlot_get_dataline(line)==-1)
+		fsetpos file, 0
+		return -1
 	endif
+	if(itemsinlist(line,"_") < 1 || itemsinlist(line,"_") > 2) // max two cols
+		fsetpos file, 0
+		return -1
+	endif
+	variable n_points = str2num(StringFromList(0,line,","))
+	variable n_ycols = 1
+	if(itemsinlist(line,"_")>1)
+		n_ycols = str2num(StringFromList(1,line,","))
+	endif
+	if(n_points <= 0 || n_ycols <= 0) // expect positive number
+		fsetpos file, 0
+		return -1
+	endif 
 	// check 5. line
-	line = read_line_trim(file)
-	if( (numtype(str2num(StringFromList(0,line,","))) != 0) || (numtype(str2num(StringFromList(1,line,","))) != 0))
-		return 0
+	FReadLine file, line
+	fsetpos file, 0
+	if(strlen(line) == 0)
+		return -1
+	endif
+	line = mycleanupstr(line)
+	if(ChiPlot_get_dataline(line)==-1)
+		return -1
 	endif
 	return 1
 end
+
 
 
 function ChiPlot_load_data_info(importloader)
@@ -106,52 +149,50 @@ function ChiPlot_load_data([optfile])
 	variable file = importloader.file
 	
 	header+="\r"
-	variable i=0
 
 	string graph_title = read_line_trim(file)
 	string x_label = read_line_trim(file)
 	string y_label = read_line_trim(file)
 	string line = read_line_trim(file)
-
-	variable n_points, n_ycols
-	
-	n_points = str2num(StringFromList(0,line,","))
-	n_ycols = str2num(StringFromList(1,line,","))
-	if (itemsinlist(line,",") == 1)
-		n_ycols = 1
-	elseif (itemsinlist(line,",") != 2)
-		Debugprintf2("expected number(s) in line 4",0)
-		close file
+	if(ChiPlot_get_dataline(line)==-1)
+		loaderend(importloader)
 		return -1
 	endif
-	
-	if (n_points <= 0 || n_ycols <= 0)
+	if(itemsinlist(line,"_") < 1 ||itemsinlist(line,"_") > 2)
+		Debugprintf2("expected 1 or 2 number(s) in line 4",0)
+		loaderend(importloader)
+		return -1
+	endif
+	variable n_points = str2num(StringFromList(0,line,","))
+	variable n_ycols = 1
+	if(itemsinlist(line,"_")>1)
+		n_ycols = str2num(StringFromList(1,line,","))
+	endif
+	if(n_points <= 0 || n_ycols <= 0)
 		Debugprintf2("expected positive number(s) in line 4",0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif 
 	
 	Make /O/R/N=(n_points,n_ycols+1)  $graph_title /wave=ycols
 	note ycols, header
 
-	variable val,j
+	variable i=0,j=0
 	for (i = 0; i != n_points; i+=1) 
 		line = read_line_trim(file)
-
+		if(ChiPlot_get_dataline(line)==-1)
+			Debugprintf2("Error in line " + num2str(5+i) + ", column " + num2str(j+1),0)
+			loaderend(importloader)
+			return -1
+		endif
 		for (j = 0; j != n_ycols + 1; j+=1) 
-			val = str2num(StringFromList(j,line,","))
-			if (strlen(StringFromList(j,line,","))==0)
-				Debugprintf2("line " + num2str(5+i) + ", column " + num2str(j+1),0)
-				close file
-				return -1
-			endif
-			ycols[i][j]=val
+			ycols[i][j]=str2num(StringFromList(j,line,"_"))
 		endfor
 	endfor
 	Note ycols, "Graph title: " + graph_title
 	Note ycols, "x_label: " + x_label
 	Note ycols, "y_label: " + y_label
-
+	splitmatrix(ycols,"spectra")
 	importloader.success = 1
 	loaderend(importloader)
 end
