@@ -36,14 +36,20 @@ end
 // ...
 // 
 
-static function Cpi_check(file)
+function Cpi_check_file(file)
 	variable file
+	fsetpos file, 0
 	string line
-	line = read_line_trim(file)
-	if(cmpstr(line,"SIETRONICS XRD SCAN")==0)
+	FReadLine file, line
+	fsetpos file, 0
+	if(strlen(line) == 0)
+		return -1
+	endif
+	line = mycleanupstr(line)
+	if(strsearch(line,"SIETRONICS XRD SCAN",0)==0)
 		return 1
 	endif
-	return 0
+	return -1
 end
 
 
