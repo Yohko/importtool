@@ -15,27 +15,29 @@ end
 
 // ###################### DBWS data file ########################
 
-static function Dbws_check(file)
+function Dbws_check_file(file)
 	variable file
+	fsetpos file, 0
 	string line
 	line=read_line_trim(file) // first line
+	fsetpos file, 0
 	if(strlen(line)<3*8)
-		return 0
+		return -1
 	endif
 	// the first line should be in format (3F8.2, A48), but sometimes
 	// the number of digits after the decimal point is 3 or 4
 	if( (numtype(str2num(line[0,7]))!=0) || (numtype(str2num(line[8,15]))!=0) || (numtype(str2num(line[16,23]))!=0))
-		return 0
+		return -1
 	endif
 	variable start = str2num(line[0,7])
 	variable step = str2num(line[8,15])
 	variable stop = str2num(line[16,23])
 	if (step <0 || (start+step) > stop)
-		return 0
+		return -1
 	endif
 	variable count = (stop-start)/step+1
 	if((floor(count+0.5)-count) > 1e-6)
-		return 0
+		return -1
 	endif
 	return 1
 end
