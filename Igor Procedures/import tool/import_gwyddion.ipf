@@ -215,6 +215,25 @@ static function gwy_importGWYP(file, header)
 end
 
 
+function gwy_check_file(file)
+	variable file
+	fsetpos file, 0
+	string identifier = mybinread(file, 4)
+	if (strsearch(identifier, "GWYO", 0) == 0)
+		fsetpos file, 0
+		return 1
+	elseif (strsearch(identifier, "GWYP", 0) == 0)
+		fsetpos file, 0
+		return 1
+	elseif (strsearch(identifier, "GWYQ", 0) == 0)
+		fsetpos file, 0
+		return 1
+	endif
+	fsetpos file, 0
+	return -1
+end
+
+
 function gwy_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Gwyddion GWY"
