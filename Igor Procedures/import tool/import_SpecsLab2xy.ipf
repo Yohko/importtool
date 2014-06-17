@@ -18,17 +18,6 @@ end
 // Import Filter for xy files produced by SpecsLab2
 
 
-
-static function SpecslabXY_check(file)
-	variable file
-	string line = read_line_trim(file) 
-	if(strsearch(line,"# Created by: SpecsLab2, Version 2.",0) != 0)
-		return 0
-	endif
-	return 1
-end
-
-
 static Function SpecslabXY_grepDataTitle(str)
 		string str
 
@@ -159,6 +148,19 @@ static Function/S SpecslabXY_removeTrailingCR(str)
 			str = str[0,strlen(str)-2]
 		endif
 		return str
+end
+
+
+function SpecslabXY_check_file(file)
+	variable file
+	fsetpos file, 0
+	string tmps = read_line_trim(file) 
+	if(strsearch(tmps,"# Created by:        SpecsLab2, Version 2.",0) != 0)
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, 0
+	return 1
 end
 
 
