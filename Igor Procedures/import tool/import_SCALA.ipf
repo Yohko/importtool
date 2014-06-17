@@ -81,6 +81,39 @@ static Structure scalaheader
 endstructure
 
 
+function SCALA_check_file(file)
+	variable file
+	fsetpos file, 0
+	string line
+	variable i=0
+	variable found =0
+	for(i = 0; i < 20; i+=1)
+		FReadLine file, line
+		if(strlen(line) == 0)
+			fsetpos file, 0
+			return -1
+		endif
+		line = mycleanupstr(line)
+		if(strsearch(line,"Omicron SPM Control.",0)!=-1)
+			found +=1
+		elseif(strsearch(line,"Parameter file for SPM data.",0)!=-1)
+			found +=1
+		elseif(strsearch(line,"Format",0)==0)
+			found +=1
+		elseif(strsearch(line,"Version",0)==0)
+			found +=1
+		elseif(strsearch(line,"System",0)==0 && strsearch(line,"SCALA",0)!=-1)
+			found +=1
+		endif
+	endfor
+	fsetpos file, 0
+	if(found !=5)
+		return -1
+	endif
+	return 1
+end
+
+
 function SCALA_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Omicron SCALA"
