@@ -79,6 +79,71 @@ static function VersaStudio_getparam(str, param)
 end
 
 
+function VersaStudio_check_file(file)
+	variable file
+	fsetpos file, 0
+	string line = ""
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)	
+	if(strsearch(line, "<Application>",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)	
+	if(strsearch(line, "Name=VersaStudio",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)	
+	if(strsearch(line, "Version=",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)	
+	if(strsearch(line, "LoggedIn=",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)	
+	if(strsearch(line, "</Application>",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function VersaStudio_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "VersaStudio data"
