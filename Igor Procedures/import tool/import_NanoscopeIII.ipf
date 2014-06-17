@@ -88,6 +88,22 @@ static function /S nanoscopeIII_getparams(str, keyval)
 end
 
 
+function nanoscopeIII_check_file(file)
+	variable file
+	fsetpos file, 0
+	if(cmpstr(mycleanupstr(myreadline(file)),"\*File list")!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	if(strsearch(mycleanupstr(myreadline(file)),"\Version",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function nanoscopeIII_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Veeco Nanoscope III"
