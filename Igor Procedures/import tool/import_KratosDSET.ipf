@@ -1938,6 +1938,26 @@ static function KratosDSET_read_header(file, Dsetobjectlist)
 end
 
 
+function KratosDSET_check_file(file)
+	variable file
+	fsetpos file, 0
+	variable majorrelease, magicnumber, offsetdynamic0, offsetcomments, startofobjectlist, maxobjects
+	// reading header
+	Fbinread /U/B=2/F=3 file, magicnumber 					// 1st line - magic number (56833)
+	Fbinread /U/B=2/F=3 file, majorrelease 					// 2nd line - major release number (2) -  possible the major release number of the Vision software
+	Fbinread /U/B=2/F=3 file, offsetcomments					// 3rd line - random number; comments ???
+	Fbinread /U/B=2/F=3 file, offsetdynamic0					// 4th line - offset to a dynamic offset for offsetblocks
+	Fbinread /U/B=2/F=3 file, startofobjectlist					// 5th line - offset to a first object list block (1036)
+	Fbinread /U/B=2/F=3 file, maxobjects						// 6th line - number of actual number of blocks (max offsets; how many offsets (objectblocks) do we actually have)
+	if(majorrelease!=2 || magicnumber!=56833 || startofobjectlist!=1036)//Dsetobjectlist.maxobjects==0)
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function KratosDSET_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Kratos Vision DSET"
