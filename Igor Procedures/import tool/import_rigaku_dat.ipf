@@ -53,14 +53,16 @@ end
 
 
 // return true if is this type, false otherwise
-static function Rigaku_check(file)
+function Rigaku_check_file(file)
 	variable file
-	string head 
+	fsetpos file, 0
+	string head = "" 
 	FReadLine /N=5 file, head
+	fsetpos file , 0
 	if(cmpstr(head,"*TYPE")==0)
 		return 1
 	endif
-	return 0
+	return -1
 end
 
 
