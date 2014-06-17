@@ -33,6 +33,26 @@ static function /S WSxM_getparams(str)
 end
 
 
+function WSxM_check_file(file)
+	variable file
+	fsetpos file, 0
+	if(strsearch(myreadline(file),"WSxM file copyright Nanotec Electronica",0)!=0)
+		fsetpos file, 0
+ 		return -1
+	endif
+	if(strsearch(myreadline(file),"SxM Image file",0)!=0)
+		fsetpos file, 0
+ 		return -1
+	endif
+	if(strsearch(myreadline(file),"Image header size: ",0)!=0)
+		fsetpos file, 0
+ 		return -1
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function WSxM_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Nanotec WSxM"
