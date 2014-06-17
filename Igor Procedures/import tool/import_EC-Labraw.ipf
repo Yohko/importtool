@@ -890,14 +890,9 @@ static function BIOLOGICmpr_read_datamodule(file, mprhdr)
 	
 	// check for consistency
 	fstatus file
-	variable readpos1 = V_filePOS 
-	fsetpos file, oldpos
-	mybinread(file, mprhdr.length)
-	fstatus file
-	variable readpos2 = V_filePOS
-	if(readpos1 != readpos2)
+	if(V_filePOS != (oldpos+mprhdr.length))
 		Debugprintf2("Something is wrong!",0)
-		sprintf tmps,"%08.0f != %08.0f \r", readpos1, readpos2
+		sprintf tmps,"%08.0f != %08.0f \r", V_filePOS, (oldpos+mprhdr.length)
 		Debugprintf2(tmps,0)
 		return -1
 	endif
@@ -944,8 +939,8 @@ static function BIOLOGICmpr_read_setmodule(file, mprhdr)
 	fbinread /B=3/U/f=4 file, tmpd ; print "Equivalent Weight: ",tmpd
 	fbinread /B=3/U/f=4 file, tmpd ; print "Density: ",tmpd
 
-	fsetpos file, oldpos
-	mybinread(file, mprhdr.length)
+	fstatus file
+	mybinread(file, (mprhdr.length-(V_filePOS-oldpos)))
 	return 0
 end
 
@@ -1036,9 +1031,28 @@ static function BIOLOGICmpr_read_logmodule(file, mprhdr)
 	fbinread /B=3/U/f=4 file, tmpd// ; print "??: ",tmpd
 	fbinread /B=3/U/f=4 file, tmpd// ; print "??: ",tmpd
 
-	fsetpos file, oldpos
-	mybinread(file, mprhdr.length)
+	fstatus file
+	mybinread(file, (mprhdr.length-(V_filePOS-oldpos)))
 	return 0
+end
+
+
+function BIOLOGICmpr_check_file(file)
+	variable file
+	fsetpos file, 0
+	string tmps = mybinread(file, 48)
+	variable tmpd = 1
+	Fbinread /B=3/F=3 file, tmpd	// 4x NULL
+	if(cmpstr(tmps, "BIO-LOGIC MODULAR FILE                         ")!=0 && tmpd !=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	tmps = mybinread(file, 6)
+	fsetpos file, 0
+	if(cmpstr(tmps,"MODULE")!=0)
+		return -1
+	endif
+	return 1
 end
 
 
