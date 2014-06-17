@@ -13,6 +13,31 @@ Menu "Macros"
 end
 
 
+function BIOLOGICmpt_check_file(file)
+	variable file
+	fsetpos file, 0
+	string tmps = mycleanupstr(myreadline(file))
+	if(cmpstr(tmps, "EC-Lab ASCII FILE")!=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	tmps = mycleanupstr(myreadline(file))
+	variable headerlines = 0
+	if(strsearch(tmps, "Nb header lines",0)!=-1)
+		headerlines = str2num(tmps[strsearch(tmps, ":",0)+1,inf])
+		if(numtype(headerlines)!=0)
+			fsetpos file, 0
+			return -1	
+		endif
+	else
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function BIOLOGICmpt_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "EC-Lab text"
