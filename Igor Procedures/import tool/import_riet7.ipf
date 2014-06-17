@@ -26,15 +26,17 @@ end
 // (if they have the same format, it's more likely xy format)
 
 
-static function Riet7_check(file)
+function Riet7_check_file(file)
 	variable file
+	fsetpos file, 0
 	variable i=0, n=0, count =0, dcount =0,n2=0
 	variable start=0, stop=0, step=0
 	string line = ""
 	for(i = 0; i < 6; i+=1)
 		FReadLine file, line
 		if(strlen(line)==0)
-			return 0
+			fsetpos file, 0
+			return -1
 		endif
 		line=mycleanupstr(line)
 		line = splitintolist(line," ")
@@ -61,7 +63,8 @@ static function Riet7_check(file)
 		endif
 		FReadLine file, line
 		if(strlen(line)==0)
-			return 0
+			fsetpos file, 0
+			return -1
 		endif
 		line=mycleanupstr(line)
 		n2=0
@@ -71,19 +74,22 @@ static function Riet7_check(file)
 			endif
 		endfor
 		if(n2!=n)
+			fsetpos file, 0
 			return 1
 		else
-			return 0
+			fsetpos file, 0
+			return -1
 		endif
 	endfor
-	return 0
+	fsetpos file, 0
+	return -1
 end
 
 
 function Riet7_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "RIET7"
-	importloader.filestr = "*.dat"
+	importloader.filestr = "*.dat,*.rit"
 	importloader.category = "XRD"
 end
 
