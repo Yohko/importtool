@@ -38,6 +38,46 @@ static Structure SpecsLabexpinfo
 endstructure
 
 
+function Specslabexp_check_file(file)
+	variable file
+	fsetpos file, 0
+	variable i=0,found=0
+	string line = ""
+	for(i = 0; i < 15; i+=1)
+		FReadLine file, line
+		if(strlen(line) == 0)
+			fsetpos file, 0
+			return -1
+		endif
+		line = mycleanupstr(line)
+		if(strsearch(line,"region:",0)==0)
+			found +=1
+		elseif(strsearch(line,"method:",0)==0)
+			found +=1
+		elseif(strsearch(line,"active:",0)==0)
+			found +=1
+		elseif(strsearch(line,"range:",0)==0)
+			found +=1
+		elseif(strsearch(line,"scans:",0)==0)
+			found +=1
+		elseif(strsearch(line,"dwell:",0)==0)
+			found +=1
+		elseif(strsearch(line,"x_shift:",0)==0)
+			found +=1
+		elseif(strsearch(line,"x_gain:",0)==0)
+			found +=1
+		elseif(strsearch(line,"work_function:",0)==0)
+			found +=1
+		endif
+	endfor
+	fsetpos file, 0
+	if(found !=9)
+		return -1
+	endif
+	return 1
+end
+
+
 function Specslabexp_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "SpecsLab1"
