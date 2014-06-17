@@ -79,6 +79,49 @@ static function /S BessyEMPU49_getparams(str, keyval)
 end
 
 
+function BessyEMPU49_check_file(file)
+	variable file
+	fsetpos file, 0
+	string tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "Comment",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "Probe",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "FileName",0)!=0 && strsearch(tmps, "CfgTyp",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "Fileform",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "Date",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "Program",0)!=0 && strsearch(tmps, "EMP",0) ==-1)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+	if(strsearch(tmps, "Version",0)!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, 0	
+	return 1
+end
+
+
 function BessyEMPU49_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "BESSYII EMP"
@@ -96,7 +139,8 @@ function BessyEMPU49_load_data([optfile])
 		return -1
 	endif
 	variable file = importloader.file
-
+	string header = importloader.header
+	
 	string tmps
 	struct keyval keyval
 	struct empheader empheader
@@ -283,8 +327,7 @@ function BessyEMPU49_load_data([optfile])
 	//print cleanup_(myreadline(file)) // should be END
 	
 	// save notes to wave
-	tmps = importloader.header
-	note ycols, tmps
+	note ycols, header
 
 
 	// check for equally spaced energy scale
