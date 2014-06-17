@@ -1495,6 +1495,47 @@ static function SpecsXML_getsq(str, seq)
 end
 
 
+function SpecsXML_check_file(file)
+	variable file
+	fsetpos file, 0
+	variable i=0
+	string tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps,"<?xml version=\"1.0\"?>",0) != 0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps,"<!-- CORBA XML document created by XMLSerializer",0) != 0)
+		fsetpos file, 0
+		return -1
+	endif
+	tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps,"<!DOCTYPE any [",0) != 0)
+		fsetpos file, 0
+		return -1
+	endif
+	// now check for beginning of data
+	for(i=0;i<50;i+=1) // maybe increase the number
+		tmps = mycleanupstr(myreadline(file))
+		If (strlen(tmps)==0)
+			fsetpos file, 0
+			return -1
+		endif
+		If(strsearch(tmps,"<any version=\"1.6\">",0) == 0 || strsearch(tmps,"<any version=\"1.3\">",0) == 0 )
+			fsetpos file, 0
+			return 1
+		endif  
+		fstatus file
+		if(V_logEOF<=V_filePOS)
+			fsetpos file, 0
+			return -1
+		endif
+	endfor	
+	fsetpos file, 0
+	return -1
+end
+
+
 function SpecsXML_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "SpecsLab2 XML"
