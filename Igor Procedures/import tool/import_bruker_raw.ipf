@@ -30,19 +30,22 @@ end
 
 
 
-static function BruckerRaw_check(file)
+function BruckerRaw_check_file(file)
 	variable file
+	fsetpos file, 0
 	string head = mybinread(file,4)
+	string head2 = mybinread(file,3)
+	fsetpos file, 0
 	if (cmpstr(head,"RAW ")==0)
-			return 1
+		return 1
 	elseif (cmpstr(head,"RAW2")==0)
-			return 1
-	elseif (cmpstr(head,"RAW1")==0 && cmpstr(mybinread(file,3),".01")==0)
-			return 1
+		return 1
+	elseif (cmpstr(head,"RAW1")==0 && cmpstr(head2,".01")==0)
+		return 1
 	else
-		return 0
+		return -1
 	endif
-	return 0
+	return -1
 end
 
 
@@ -52,7 +55,6 @@ function BruckerRaw_load_data_info(importloader)
 	importloader.filestr = "*.raw"
 	importloader.category = "XRD"
 end
-
 
 
 function BruckerRaw_load_data([optfile])
