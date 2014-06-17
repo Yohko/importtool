@@ -49,25 +49,27 @@ end
 // In particular, two column data, e.g. angle and counts, are supported.
 
 
-static function Uxd_check(file)
+function Uxd_check_file(file)
 	variable file
-	string line
-	do
-		line = read_line_trim(file)
-		line =stripstr(line," ","")
-		line =stripstr(line,"\t","")
-		line =stripstr(line,"\r","")
-		line =stripstr(line,"\n","")
-		
-		if(strsearch(line,"_FILEVERSION",0)!=0)
+	fsetpos file, 0
+	string line = ""
+	variable i = 0
+	for(i=0;i<50;i+=1)
+		line = stripstrfirstlastspaces(mycleanupstr(myreadline(file)))
+		if(strsearch(line,";",0)!=0)
 			break
 		endif
 		fstatus file
-	while(V_logEOF>V_filePOS)
-    if(strsearch(line,"_FILEVERSION",0)==0)
+		if(V_logEOF<=V_filePOS)
+			fsetpos file, 0
+			return -1
+		endif
+	endfor
+	fsetpos file, 0
+	if(strsearch(line,"_FILEVERSION",0)==0)
 		return 1
 	endif
-    return 0
+	return -1
 end
 
 
@@ -125,9 +127,9 @@ static function Uxd_add_values_from_str(str, sep, ycol,xcol, ncols)
 		
 		if (ncols!=1)
 			if (n==0)
-				ycol[size]=val
-			else
 				xcol[size]=val
+			else
+				ycol[size]=val
 			endif
 		else
 			ycol[size]=val
