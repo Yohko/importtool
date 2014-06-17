@@ -29,6 +29,35 @@ static strconstant techs = "AES diff;AES dir;EDX;ELS;FABMS;FABMS energy spec;ISS
 static strconstant scans = "REGULAR;IRREGULAR;MAPPING"
 
 
+function Vamas_check_file(file)
+	variable file
+	fsetpos file, 0
+	variable i = 0
+	string key="", val=""
+	for(i=0;i<50;i+=1)
+		if (getkeyval(file, key, val)==-1)
+			return -1 // end of file
+		endif
+		if(strsearch(key,"VAMAS Surface Chemical Analysis Standard Data Transfer Format 1988 May 4",0)==0)
+			fsetpos file, 0
+			return 1
+		endif
+		if(strsearch(key,"VAMAS",0)==0)
+			fsetpos file, 0
+			return 1 // maybe not really because could be non standard
+		endif
+		key=""
+		val=""
+		Fstatus file
+		if(V_logEOF<=V_filePOS)
+			return -1
+		endif
+	endfor
+	fsetpos file, 0
+	return -1
+end
+
+
 function Vamas_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name =  "VAMAS"
@@ -59,7 +88,9 @@ function Vamas_load_data([optfile])
 	string key="", val=""
 	do 
 		if (getkeyval(file, key, val)==-1)
-			break
+			Debugprintf2("Unexpected end of VMS-file (header).",0)
+			loaderend(importloader)
+			return -1
 		endif
 
 		if(strsearch(key,"VAMAS Surface Chemical Analysis Standard Data Transfer Format 1988 May 4",0)==0)
