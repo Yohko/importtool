@@ -13,6 +13,19 @@ Menu "Macros"
 end
 
 
+function LKHREELS_check_file(file)
+	variable file
+	fsetpos file, 0
+	string tmps = mycleanupstr(myreadline(file))
+	if(strsearch(tmps, "# eels MCA data file:",0)!=0)
+		fsetpos file, 0
+		return -1	
+	endif
+	fsetpos file, 0
+	return 1
+end
+
+
 function LKHREELS_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "LK-Tech HREELS"
