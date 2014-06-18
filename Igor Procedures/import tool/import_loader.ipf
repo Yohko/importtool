@@ -395,7 +395,7 @@ function /S read_line_trim(file)
 	string line
 	FReadLine file, line
 	if(strlen(line) == 0)
-		Debugprintf2("Unexpected end of file.",0)
+		Debugprintf2("Unexpected end of file.",1)
 		return "-1"
 	endif
 	line = mycleanupstr(line)

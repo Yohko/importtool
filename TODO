@@ -1,6 +1,7 @@
 - VAMAS: include peak fitting parameters saved by CasaXPS
 - SpecsLab2 XML: include SFAT mode
 - add check function to every file format to enable automatic detection
+- Riet7 and dbws: the same?
 
 done:
 - VAMAS: convert to cps

@@ -9,6 +9,7 @@ Menu "Macros"
 end
 
 
+// -------- function prototypes; start
 function multiLoader_protoload_data_info(importloader)
 	struct importloader &importloader
 	return 0
@@ -21,29 +22,43 @@ function multiLoader_protoload_data([optfile])
 end
 
 
-function multiLoader_loader(funcname)
-	string funcname
-	if(strlen(stringfromlist(0,funcname,";"))==0 || strlen(stringfromlist(1,funcname,";"))==0)
-		return -1
-	endif
+function multiLoader_proto_check_file(file)
+	variable file
+	return 0
+end
+// -------- function prototypes; end
+
+
+function /S multiLoader_select_files(fileFilters)
+	string fileFilters
 	NewDatafolder /O root:Packages
 	NewDatafolder /O root:Packages:Import_Tool
 	string /G  root:Packages:Import_Tool:mypath
 	SVAR mypath = root:Packages:Import_Tool:mypath
 	newpath /O/Q myimportpath , mypath
-
-	struct importloader importloader
-	FUNCREF multiLoader_protoload_data_info f = $(stringfromlist(1,funcname,";"))
-	importloader.category = "misc"
-	f(importloader)
-
-	String fileFilters = importloader.name+" Files ("+importloader.filestr+"):"+ReplaceString("*",importloader.filestr,"")+";"
-	fileFilters += "All Files:.*;"
 	//open/z=2/F=fileFilters/P=myimportpath/m="Looking for a "+importloader.name+" file"/r importloader.file
-	Open /D /R /MULT=1 /F=fileFilters /M="Select one or more files" file
+	Open /D /R /MULT=1 /F=fileFilters/P=myimportpath/M="Select one or more files" file
 	String outputPaths = S_fileName
-	if(V_flag==-1 || strlen(outputPaths) == 0)
+	if(strlen(outputPaths) == 0)
 		Debugprintf2("No file given!",0)
+		return "-1"
+	else
+		mypath = stringfromlist(0, outputPaths,"\r")
+		if(defined(MACINTOSH))
+			mypath = mypath[0,strsearch(mypath,":",inf,1)]
+			
+		elseif(defined(WINDOWS))
+			mypath = mypath[0,strsearch(mypath,"\\",inf,1)]
+		endif
+	endif
+	return outputPaths
+end
+
+function multiLoader_autoloader()
+
+	string fileFilters = "All Files:.*;"
+	string outputPaths = multiLoader_select_files(fileFilters)
+	if(cmpstr(outputPaths,"-1")==0)
 		return -1
 	endif
 
@@ -51,7 +66,45 @@ function multiLoader_loader(funcname)
 	Variable numFilesSelected = ItemsInList(outputPaths, "\r")
 	for(i=0; i<numFilesSelected; i+=1)
 		String path = StringFromList(i, outputPaths, "\r")
-		Printf " .. loading file %d: %s\r", i, path	
+		Printf " .. loading file (%d/%d): %s\r", (i+1),numFilesSelected, path	
+		open /R file as StringFromList(i, outputPaths, "\r")
+
+		string tmps = multiLoader_guess_filetype(file)
+		if(cmpstr(tmps,"-1")!=0)
+			FUNCREF multiLoader_protoload_data f_load = $(tmps+"_load_data")
+			f_load(optfile=file)
+		else
+			Debugprintf2("no file",1)
+		endif
+	endfor
+	return 0
+end
+
+
+function multiLoader_loader(funcname)
+	string funcname
+	if(strlen(stringfromlist(0,funcname,";"))==0 || strlen(stringfromlist(1,funcname,";"))==0)
+		return -1
+	endif
+
+	struct importloader importloader
+	FUNCREF multiLoader_protoload_data_info f = $(stringfromlist(1,funcname,";"))
+	importloader.category = "misc"
+	f(importloader)
+	
+	String fileFilters = importloader.name+" Files ("+importloader.filestr+"):"+ReplaceString("*",importloader.filestr,"")+";"
+	fileFilters += "All Files:.*;"
+
+	String outputPaths = multiLoader_select_files(fileFilters)
+	if(cmpstr(outputPaths,"-1")==0)
+		return -1
+	endif
+
+	variable file, i=0
+	Variable numFilesSelected = ItemsInList(outputPaths, "\r")
+	for(i=0; i<numFilesSelected; i+=1)
+		String path = StringFromList(i, outputPaths, "\r")
+		Printf " .. loading file (%d/%d): %s\r", (i+1),numFilesSelected, path	
 		open /R file as StringFromList(i, outputPaths, "\r")
 		FUNCREF multiLoader_protoload_data ff = $(stringfromlist(0,funcname,";"))
 		ff(optfile=file)
@@ -99,6 +152,17 @@ function /S multiLoader_getcategories()
 end
 
 
+function multiLoader_autoloadbutton(ba) : ButtonControl
+	STRUCT WMButtonAction &ba
+	switch( ba.eventCode )
+		case 2: // mouse up
+			multiLoader_autoloader()
+			break
+	endswitch
+	return 0
+end
+
+
 function multiLoader_loadbutton(ba) : ButtonControl
 	STRUCT WMButtonAction &ba
 	switch( ba.eventCode )
@@ -141,7 +205,7 @@ Function multiLoader_MakePanel()
 	init_flags()
 
 	NewPanel/K=1/W=(381,55,680,420)/N=Multiloader
-	ModifyPanel fixedSize=1//,noEdit=1
+	ModifyPanel fixedSize=1,noEdit=1
 
 	PopupMenu popup_category,pos={10,10},size={115,20},title="Category  ",fSize=12, proc=multiLoader_changedcategory
 	PopupMenu popup_category,mode=1,value=#"multiLoader_getcategories()"
@@ -149,7 +213,7 @@ Function multiLoader_MakePanel()
 	PopupMenu popup_loader,mode=1,value=#"multiLoader_listfuncofcateg()"
 	
 	Button button_load,pos={100,330},size={80,20},title="Load",fSize=14, proc=multiLoader_loadbutton
-//	Button button_autoload,pos={10,330},size={80,20},title="Auto Load",fSize=14, proc=multiLoader_loadbutton // need a working xx_check_file() function for each file type
+	Button button_autoload,pos={10,330},size={80,20},title="Auto Load",fSize=14, proc=multiLoader_autoloadbutton // need a working xx_check_file() function for each file type
 
 	SetDrawEnv textrgb= (26205,52428,1),fstyle= 21,fsize= 14;DelayUpdate
 	DrawText 110,80,"Settings"
@@ -194,4 +258,84 @@ Function multiLoader_MakePanel()
 	DrawRRect 145,220,275, 315
 
 	return 0
+end
+
+
+function /S multiLoader_guess_filetype(file)
+	variable file
+	
+	fstatus file
+	if(V_logEOF==0)
+		Debugprintf2("Zero byte file!",0)
+		return "-1"
+	endif
+	
+	string funclist = FunctionList("*_load_data",";","KIND:2")
+	string funclistinfo = FunctionList("*_load_data_info",";","KIND:2")
+	string funclistcheck = FunctionList("*_check_file",";","KIND:2")
+	string already_checked= ""
+	struct importloader importloader
+
+	// get extension of file
+	fstatus file
+	string file_extension = S_filename
+	if (strsearch(file_extension,".",inf,1)>1)//remove filename
+		file_extension=file_extension[strsearch(file_extension,".",inf,1)+1, inf]
+	else
+		file_extension = ""
+	endif
+	Debugprintf2(".. file extension: *."+file_extension,0)
+	
+	// get matching file loader for extension, and check against these loaders
+	string tmps = ""
+	variable i=0
+	for(i=0;i<itemsinlist(funclistinfo,";");i+=1)
+		FUNCREF multiLoader_protoload_data_info f_info = $(stringfromlist(i,funclistinfo,";"))
+		f_info(importloader)
+		if(strsearch(importloader.filestr, "*."+file_extension,0,2)!=-1)
+			tmps = ReplaceString("_load_data_info",stringfromlist(i,funclistinfo,";"),"")+"_check_file"
+			already_checked+=tmps+";" // exclude for second check if no hit
+			if(exists(tmps)==6)
+				FUNCREF multiLoader_proto_check_file f_check = $(tmps)
+				Debugprintf2(" ... checking against: "+ReplaceString("_check_file",tmps,""),1)
+				if(f_check(file)==1)
+					Debugprintf2(".. found: "+ReplaceString("_check_file",tmps,""),0)
+					return ReplaceString("_check_file",tmps,"")
+				endif
+			endif
+		endif
+	endfor
+	Debugprintf2(" .. no hit with quick check!",0)
+
+	// if no hit check against rest of loader
+	for(i=0;i<itemsinlist(funclistinfo,";");i+=1)
+			tmps = ReplaceString("_load_data_info",stringfromlist(i,funclistinfo,";"),"")+"_check_file"
+			if(strsearch(already_checked, tmps, 0)!=-1)
+				Debugprintf2(" .. already checked against: "+tmps,1)
+				continue
+			endif
+			if(exists(tmps)==6)
+				FUNCREF multiLoader_proto_check_file f_check = $(tmps)
+				Debugprintf2(" ... checking against: "+ReplaceString("_check_file",tmps,""),1)
+				if(f_check(file)==1)
+					Debugprintf2(" .. found: "+ReplaceString("_check_file",tmps,""),0)
+					return ReplaceString("_check_file",tmps,"")
+				endif
+			endif	
+	endfor
+	
+	Debugprintf2(" .. no suitable loader found !",0)
+	return "-1"	
+end
+
+
+function test_for_missing_checks()
+	string funclist = FunctionList("*_load_data",";","KIND:2")
+	variable i=0
+	for(i=0;i<itemsinlist(funclist,";");i+=1)
+		if(exists( ReplaceString("_load_data",stringfromlist(i,funclist,";"),"_check_file") )==6)
+		else
+			print ReplaceString("_load_data",stringfromlist(i,funclist,";"),"_check_file")
+		endif
+	endfor
 end
