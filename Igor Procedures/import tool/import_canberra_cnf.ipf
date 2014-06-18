@@ -84,6 +84,40 @@ static function  CanberraCnf_convert_time(file)
 end
 
 
+function CanberraCnf_check_file(file)
+	variable file
+	fsetpos file, 112
+	variable offset = 0
+	variable pos = 112
+	string buf
+	struct fourbytes ptr
+	do
+		fsetpos file, pos
+		Fbinread /B=3 file, ptr //read little endian (=3)
+		if(ptr.bytes[0] == 5 && ((ptr.bytes[1] == 0x20 && ptr.bytes[2] == 0x01) || ptr.bytes[1] == 0 || ptr.bytes[2] == 0))
+			FSetPos file,pos+10
+			offset = read_uint32_le(file)
+			break
+		endif
+		pos +=48	
+		fstatus file
+	while(V_logEOF>V_filePOS)
+	if(offset <= pos)
+		fsetpos file, 0
+		return -1
+	endif
+	fsetpos file, offset
+	Fbinread /B=3 file, ptr //read little endian (=3)
+	fstatus file
+	if(V_logEOF>V_filePOS && ptr.bytes[0] == 5 && ptr.bytes[1] == 0x20)
+		fsetpos file, 0
+		return 1
+	endif	
+	fsetpos file, 0
+	return -11
+end
+
+
 function CanberraCnf_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Canberra CNF"
@@ -165,15 +199,15 @@ function CanberraCnf_load_data([optfile])
 	string name, desc
 	if (beg_ + sam_offset+0x30+80 >= end_ || sam_ptr.bytes[0] != 1 || sam_ptr.bytes[1] != 0x20)
 		Debugprintf2("Warning. Sample data not found.",0)
-		close file
+		loaderend(importloader)
 		return -1
 	else
 		FSetPos file,beg_ + sam_offset+0x30
 		name = stripstr(mybinread(file,32)," ","")
-		Debugprintf2("Sample name: "+name, 0)
+		Debugprintf2("Sample name: "+name, 1)
 		FSetPos file,beg_ + sam_offset+0x30+32
 		desc = stripstr(mybinread(file,48)," ","")
-		Debugprintf2("sample description: "+desc,0)
+		Debugprintf2("sample description: "+desc,1)
 	endif
 
 	// go to acquisition data
@@ -182,7 +216,7 @@ function CanberraCnf_load_data([optfile])
 	Fbinread /B=3 file, acq_ptr //read little endian (=3)
 	if (beg_ + acq_offset+48+128+10+4 >= end_ || acq_ptr.bytes[0] != 0 || acq_ptr.bytes[1] != 0x20)
 		Debugprintf2("Acquisition data not found.",0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif
 	FSetPos file, beg_ + acq_offset+34
@@ -192,14 +226,14 @@ function CanberraCnf_load_data([optfile])
 	FSetPos file, beg_ + acq_offset +48+128
 	if (strsearch(mybinread(file,3)"PHA",0)!=0)
 		Debugprintf2("Warning. PHA keyword not found.",0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif
 	FSetPos file, beg_ + acq_offset +48+128+10
 	variable n_channels = read_uint16_le(file)*256
 	if (n_channels < 256 || n_channels > 16384)
 		Debugprintf2("Unexpected number of channels" + num2str(n_channels),0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif
 
@@ -207,18 +241,18 @@ function CanberraCnf_load_data([optfile])
     	FSetPos file, beg_ +acq_offset+48+offset2+1
 	if ( beg_ +acq_offset+48+offset2+1+3*8>=end_)
 		Debugprintf2("Unexpected end of file!",0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif
 	string dates="date and time: "+ cleanupname(mybinread(file,8),1)
 	variable real_time = CanberraCnf_convert_time(file)
-	Debugprintf2("real time (s): "+num2str(real_time),0)
+	Debugprintf2("real time (s): "+num2str(real_time),1)
 	variable live_time =  CanberraCnf_convert_time(file)
-	Debugprintf2("live time (s): "+num2str(live_time),0)
+	Debugprintf2("live time (s): "+num2str(live_time),1)
 
 	if(beg_ + enc_offset+48+32 + offset1 >= end_)
 		Debugprintf2("Unexpected end of file!",0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif
 	
@@ -249,7 +283,7 @@ function CanberraCnf_load_data([optfile])
 
 	FsetPos file, detoff
 	string detector= "Detector name: "+cleanupname(mybinread(file,32),1)+"#"
-	Debugprintf2(detector,0)
+	Debugprintf2(detector,1)
 	note ycols, detector
 
 	// channel data
@@ -258,7 +292,7 @@ function CanberraCnf_load_data([optfile])
 	Fbinread /B=3 file, chan_ptr
 	if (beg_ + chan_offset+512+4*n_channels > end_ || chan_ptr.bytes[0] != 5 || chan_ptr.bytes[1] != 0x20)
 		Debugprintf2("Channel data not found.",0)
-		close file
+		loaderend(importloader)
 		return -1
 	endif 
         
