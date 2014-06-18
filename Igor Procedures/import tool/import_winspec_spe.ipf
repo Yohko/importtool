@@ -266,15 +266,18 @@ function WinspecSpe_check_file(file)
 		fsetpos file, 0
 		return -1
 	endif
-	FSetPos file, 0
+	FSetPos file, 108
 	// datatype field in header ONLY can be 0 .. 3
-	mybinread(file,108)
 	variable data_type = read_uint16_le(file)
-	if (data_type < SPE_DATA_FLOAT || data_type > SPE_DATA_UINT)
-		fsetpos file, 0
+	fsetpos file, 1992
+	variable headerversion = read_flt_le(file)
+	fsetpos file, 0
+	if(headerversion<2 || headerversion>3)
 		return -1
 	endif
-	fsetpos file, 0
+	if (data_type < 0 || data_type > 3)
+		return -1
+	endif
 	return 1
 end
 
@@ -283,6 +286,7 @@ function WinspecSpe_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Princeton Instruments WinSpec"
 	importloader.filestr = "*.spe"
+	importloader.category = "XRD"
 end
 
 

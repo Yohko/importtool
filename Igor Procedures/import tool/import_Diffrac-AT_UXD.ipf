@@ -188,8 +188,9 @@ function Uxd_load_data([optfile])
 			endif
 			ncols = 1
 			groupcount +=1
-			tmps = "Group"+num2str(groupcount)
-			
+			tmps = "dummyX"
+			Make /O/R/N=(0,1)  $tmps /wave=xcols
+			tmps = "Group"+num2str(groupcount)		
 			Make /O/R/N=(0,1)  $tmps /wave=ycols
 			SetScale/P  x,start,step,"", ycols
 			note ycols, comments
@@ -241,7 +242,7 @@ function Uxd_load_data([optfile])
 		endif
 		fstatus file
 	while(V_logEOF>V_filePOS)
-
+	killwaves /Z $("dummyX")
 	importloader.success = 1
 	loaderend(importloader)
 end

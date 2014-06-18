@@ -86,12 +86,20 @@ end
 
 function CanberraCnf_check_file(file)
 	variable file
+	fstatus file
+	if(V_logEOF<=112)
+		return -1
+	endif
 	fsetpos file, 112
 	variable offset = 0
 	variable pos = 112
 	string buf
 	struct fourbytes ptr
 	do
+		fstatus file
+		if(V_logEOF<=(pos+4))
+			return -1
+		endif
 		fsetpos file, pos
 		Fbinread /B=3 file, ptr //read little endian (=3)
 		if(ptr.bytes[0] == 5 && ((ptr.bytes[1] == 0x20 && ptr.bytes[2] == 0x01) || ptr.bytes[1] == 0 || ptr.bytes[2] == 0))
@@ -106,6 +114,10 @@ function CanberraCnf_check_file(file)
 		fsetpos file, 0
 		return -1
 	endif
+	fstatus file
+	if(V_logEOF<=offset)
+		return -1
+	endif
 	fsetpos file, offset
 	Fbinread /B=3 file, ptr //read little endian (=3)
 	fstatus file
@@ -114,7 +126,7 @@ function CanberraCnf_check_file(file)
 		return 1
 	endif	
 	fsetpos file, 0
-	return -11
+	return -1
 end
 
 

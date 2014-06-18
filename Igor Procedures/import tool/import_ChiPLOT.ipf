@@ -110,10 +110,10 @@ function ChiPlot_check_file(file)
 	if(itemsinlist(line,"_")>1)
 		n_ycols = str2num(StringFromList(1,line,","))
 	endif
-	if(n_points <= 0 || n_ycols <= 0) // expect positive number
+	if(n_points <= 0 || n_ycols <= 0 || n_points > 2E6) // expect positive number
 		fsetpos file, 0
 		return -1
-	endif 
+	endif
 	// check 5. line
 	FReadLine file, line
 	fsetpos file, 0
@@ -122,6 +122,9 @@ function ChiPlot_check_file(file)
 	endif
 	line = mycleanupstr(line)
 	if(ChiPlot_get_dataline(line)==-1)
+		return -1
+	endif
+	if(itemsinlist(line,"_") != (n_ycols+1))
 		return -1
 	endif
 	return 1

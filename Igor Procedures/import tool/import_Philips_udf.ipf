@@ -38,11 +38,35 @@ function Udf_check_file(file)
 	fsetpos file, 0
 	string head=""
 	FReadLine /N=11 file, head
-	fsetpos file, 0
 	if(strlen(head) == 0)
+		fsetpos file, 0
 		return -1
 	endif
 	if(cmpstr(head, "SampleIdent")!=0)
+		fsetpos file, 0
+		return -1
+	endif
+	// avoid false positive with GSAS files
+	variable i=0, found = 0
+	for(i = 0; i < 10; i+=1)
+		FReadLine file, head
+		if(strlen(head) == 0)
+			fsetpos file, 0
+			return -1
+		endif
+		head = mycleanupstr(head)
+		if(strsearch(head,"Title1",0)!=-1)
+			found +=1
+		elseif(strsearch(head,"DiffrType",0)!=-1)
+			found +=1
+		elseif(strsearch(head,"DiffrNumber",0)!=-1)
+			found +=1
+		elseif(strsearch(head,"Anode",0)!=-1)
+			found +=1
+		endif		
+	endfor	
+	fsetpos file, 0
+	if(found !=4)
 		return -1
 	endif
 	return 1
