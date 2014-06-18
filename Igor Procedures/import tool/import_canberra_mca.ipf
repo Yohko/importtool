@@ -29,6 +29,30 @@ end
 // Canberra Accuspec (*.dat). In ver. 0.9 .dat extension was added.
 
 
+static constant file_size = 9216//2*512+2048*4
+
+
+function CanberraMca_check_file(file)
+	variable file
+	fsetpos file, 0
+	FStatus file
+	if (V_logEOF != file_size)
+		return -1
+	endif
+
+	variable word_at_0 = read_uint16_le(file)
+	mybinread(file, 32)
+	variable word_at_34 = read_uint16_le(file)
+	variable word_at_36 = read_uint16_le(file)
+	variable word_at_38 = read_uint16_le(file)
+	fsetpos file, 0
+	if(word_at_0 !=0 && word_at_34 != 4 && word_at_36 !=2048 && word_at_38 !=1)
+		return -1
+	endif
+	return 1
+end
+
+
 function CanberraMca_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Canberra AccuSpec MCA"
@@ -49,25 +73,24 @@ function CanberraMca_load_data([optfile])
 	variable file = importloader.file
 
 
-	variable file_size = 2*512+2048*4
 	FStatus file
-	if (V_logEOF <= 4100)
+	if (V_logEOF != file_size)
 		Debugprintf2("Unexpected end of file.",0)
-		close file
+		loaderend(importloader)
 		return -1		
 	endif
 	FSetPos file, 0
 
 	mybinread(file,24)
 	variable data_offset = read_uint16_le(file)
-	Debugprintf2("Data offset: "+num2str(data_offset),0)
+	Debugprintf2("Data offset: "+num2str(data_offset),1)
 	mybinread(file,82)//108-24-2=82
 	variable energy_offset = from_pdp11(mybinread(file,4))//(all_data + 108)
-	Debugprintf2("energy offset: "+num2str(energy_offset),0)
+	Debugprintf2("energy offset: "+num2str(energy_offset),1)
 	variable energy_slope = from_pdp11(mybinread(file,4))//(all_data + 112)
-	Debugprintf2("energy slope: "+num2str(energy_slope),0)
+	Debugprintf2("energy slope: "+num2str(energy_slope),1)
 	variable energy_quadr = from_pdp11(mybinread(file,4))//(all_data + 116)
-	Debugprintf2("energy quadr: "+num2str(energy_quadr),0)
+	Debugprintf2("energy quadr: "+num2str(energy_quadr),1)
 
 	variable xval=0,yval=0
 	string tmps = getnameforwave(file)+"_Y"//"raw_data_Y"
