@@ -56,6 +56,62 @@ static structure Header
 endstructure
 
 
+function VeecoHDF_check_file(file)
+	variable file
+	fsetpos file, 0
+	variable offset = MAGIC_SIZE, pos = MAGIC_SIZE
+	variable size = 0, found = 0
+
+	pos+=2+4+(2+2+4+4)
+	fstatus file
+	if(V_logEOF<=10) //check for file size
+		return -1
+	endif
+	
+	FsetPos file, offset
+	Fbinread/B=2/F=2/U file, size
+	if(numtype(size)!=0 && size <=0)
+		return -1
+	endif
+	Fbinread/B=2/F=3/U file, offset
+	if(numtype(offset)!=0 && offset <0)
+		return -1
+	endif
+	variable t_tag,t_ref,t_offset,t_length, i, t_data
+	for(i=0;i<size;i+=1)
+		Fbinread/B=2/U/F=2 file,t_tag
+		Fbinread/B=2/U/F=2 file,t_ref
+		Fbinread/B=2/U/F=3 file,t_offset
+		Fbinread/B=2/U/F=3 file,t_length
+		Fstatus file
+		t_data=V_filePOS+t_offset
+		switch(t_tag)
+			case HDF4_PSIHD:
+				found +=1
+				break
+			case HDF4_SD:
+				found+=1
+				break
+		endswitch
+		if(found == 2)
+			fsetpos file, 0
+			return 1
+		endif
+		pos+=(2+2+4+4)
+		fstatus file
+		if(V_filepos>=V_logEOF || pos >= V_logEOF) //check for file size
+			fsetpos file, 0
+			return -1
+		endif		
+	endfor
+	fsetpos file, 0
+	if(found !=2)
+		return -1
+	endif
+	return 1
+end
+
+
 function VeecoHDF_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Hierarchical Data Format"
@@ -105,23 +161,24 @@ static function VeecoHDF_read(file,header)
 			t_data=V_filePOS+t_offset
 			Debugprintf2("Datastart at: "+num2str(t_data),1)
 			// Ignore NULL and invalid tags
-
-			if(t_tag == HDF4_PSIHD)
-				// found header
-				headerpos.tagg=t_tag
-				headerpos.ref=t_ref
-				headerpos.length=t_length
-				headerpos.offset=t_offset
-				headerpos.data=t_data
-			endif
-			if(t_tag==HDF4_SD)
-				//found image in int16
-				imagepos.tagg=t_tag
-				imagepos.ref=t_ref
-				imagepos.offset=t_offset
-				imagepos.length=t_length
-				imagepos.data=t_data
-			endif
+			switch(t_tag)
+				case HDF4_PSIHD:
+					// found header
+					headerpos.tagg=t_tag
+					headerpos.ref=t_ref
+					headerpos.length=t_length
+					headerpos.offset=t_offset
+					headerpos.data=t_data
+					break
+				case HDF4_SD:
+					//found image in int16
+					imagepos.tagg=t_tag
+					imagepos.ref=t_ref
+					imagepos.offset=t_offset
+					imagepos.length=t_length
+					imagepos.data=t_data
+					break			
+			endswitch
 		endfor	
 
 		Fstatus file
@@ -135,30 +192,31 @@ static function VeecoHDF_read(file,header)
 	struct header fileheader
 	FBinread/B=3 file, fileheader
 
-	Debugprintf2("Title: "+fileheader.title,0)
-	Debugprintf2("Instrument: "+fileheader.instrument,0)
-	Debugprintf2("xdir: "+num2str(fileheader.x_dir),0)
-	Debugprintf2("ydir: "+num2str(fileheader.y_dir),0)
-	Debugprintf2("Show offset?: "+num2str(fileheader.show_offset),0)
-	Debugprintf2("No units?: "+num2str(fileheader.no_units),0)
-	Debugprintf2("xres: "+num2str(fileheader.xres),0)
-	Debugprintf2("yres: "+num2str(fileheader.yres),0)
-	Debugprintf2("xscale: "+num2str(fileheader.xscale),0)
-	Debugprintf2("yscale: "+num2str(fileheader.xscale),0)
-	Debugprintf2("xoff: "+num2str(fileheader.xoff),0)
-	Debugprintf2("yoff: "+num2str(fileheader.yoff),0)
-	Debugprintf2("rotation: "+num2str(fileheader.rotation),0)
-	Debugprintf2("lines/s: "+num2str(fileheader.lines_per_sec),0)
-	Debugprintf2("Set point: "+num2str(fileheader.set_point)+" "+fileheader.set_point_unit,0)
-	Debugprintf2("Sample bias: "+num2str(fileheader.sample_bias),0)
-	Debugprintf2("Tip bias: "+num2str(fileheader.tip_bias),0)
-	Debugprintf2("Zgain: "+num2str(fileheader.zgain)+fileheader.zgain_unit,0)
-	Debugprintf2("Min: "+num2str(fileheader.mymin),0)
-	Debugprintf2("Max: "+num2str(fileheader.mymax),0)
+	Debugprintf2("Title: "+fileheader.title,1)
+	Debugprintf2("Instrument: "+fileheader.instrument,1)
+	Debugprintf2("xdir: "+num2str(fileheader.x_dir),1)
+	Debugprintf2("ydir: "+num2str(fileheader.y_dir),1)
+	Debugprintf2("Show offset?: "+num2str(fileheader.show_offset),1)
+	Debugprintf2("No units?: "+num2str(fileheader.no_units),1)
+	Debugprintf2("xres: "+num2str(fileheader.xres),1)
+	Debugprintf2("yres: "+num2str(fileheader.yres),1)
+	Debugprintf2("xscale: "+num2str(fileheader.xscale),1)
+	Debugprintf2("yscale: "+num2str(fileheader.xscale),1)
+	Debugprintf2("xoff: "+num2str(fileheader.xoff),1)
+	Debugprintf2("yoff: "+num2str(fileheader.yoff),1)
+	Debugprintf2("rotation: "+num2str(fileheader.rotation),1)
+	Debugprintf2("lines/s: "+num2str(fileheader.lines_per_sec),1)
+	Debugprintf2("Set point: "+num2str(fileheader.set_point)+" "+fileheader.set_point_unit,1)
+	Debugprintf2("Sample bias: "+num2str(fileheader.sample_bias),1)
+	Debugprintf2("Tip bias: "+num2str(fileheader.tip_bias),1)
+	Debugprintf2("Zgain: "+num2str(fileheader.zgain)+fileheader.zgain_unit,1)
+	Debugprintf2("Min: "+num2str(fileheader.mymin),1)
+	Debugprintf2("Max: "+num2str(fileheader.mymax),1)
 
 
 	//reading image
 	tmps=getnameforwave(file)//"rawimage"
+	Debugprintf2("... exporting: "+tmps,0)
 	Make /O/R/N=(fileheader.xres,fileheader.xres)  $tmps /wave=image
 	SetScale/I  x,0,fileheader.xscale, "µm", image
 	SetScale/I  y,0,fileheader.xscale, "µm", image
@@ -188,5 +246,6 @@ static function VeecoHDF_read(file,header)
 	Fbinread/B=3/F=2 file, image
 	Duplicate/FREE image, imagetemp
 	image[][]=imagetemp[p][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original image
+	return 0
 end
 
