@@ -585,6 +585,44 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 end
 
 
+function Vamasrpt_check_file(file)
+	variable file
+	fsetpos file, 0
+	string line = ""
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)
+	if(strsearch(line, ".vms",0) ==-1)
+		fsetpos file, 0
+		return -1
+	endif
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+
+	FReadLine file, line
+	if(strlen(line) == 0)
+		fsetpos file, 0
+		return -1
+	endif
+	line = mycleanupstr(line)
+	if(strsearch(line, "Characteristic Energy eV",0) ==-1 && strsearch(line, "Acquisition Time s",0) ==-1)
+		fsetpos file, 0
+		return -1
+	endif
+
+	fsetpos file, 0
+	return 1
+end
+
+
 function Vamasrpt_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Vamas report (CasaXPS)"
