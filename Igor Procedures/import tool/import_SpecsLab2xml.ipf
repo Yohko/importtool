@@ -10,6 +10,9 @@ Menu "Macros"
 end
 
 
+// some xy exported by SpecsLab2 are interpolated, some are not?
+// only FAT is sometimes interpolated, not XAS, FE...
+
 // some waves for saving values
 static strconstant countlist				= "countlist"
 static strconstant scalinglist				= "scalinglist"
@@ -177,15 +180,30 @@ end
 static function SpecsXML_savedetector(myRegionInfo)
 	struct RegionInfo &myRegionInfo
 	
-	
-	wave /Z countlistg = $countlist
-	wave /Z scalinglistg = $scalinglist
-	if(WaveExists( countlistg) == 0 && WaveExists(scalinglistg) == 0)
+	// getting counts and scaling list
+	wave /Z countlist = $countlist
+	wave /Z scalinglist = $scalinglist
+	if(WaveExists( countlist) == 0 && WaveExists(scalinglist) == 0)
 		Debugprintf2("	... empty region",0)
-		killwaves countlistg
-		killwaves scalinglistg
+		killwaves countlist
+		killwaves scalinglist
 		return 0
 	endif
+	
+	// adding up the single scans in a new counlist
+	Make /FREE/O/D/N=(dimsize(countlist,0)) Countliste_avg = 0
+	variable i=0
+	for(i=0;i<myRegionInfo.num_scans;i+=1)
+		Countliste_avg[]+= countlist[p][i]
+	endfor
+
+	
+	// saving gain etc. in single waves
+	// todo: save them already in waves when read (will also avoid the limit of 255 detectors in structs
+	Make /FREE/O/D/N=(myRegionInfo.detector.numdetectors) DetGainList = 0
+	Make /FREE/O/D/N=(myRegionInfo.detector.numdetectors) DetShiftList = 0
+	DetGainList[] = myRegionInfo.detector.gain[p]
+	DetShiftList[] = myRegionInfo.detector.shift[p]
 	
 	// save flags in single variables (for speed reasons)	
 	variable f_interpolate = str2num(get_flags("interpolieren"))
@@ -195,59 +213,54 @@ static function SpecsXML_savedetector(myRegionInfo)
 	variable f_DivLifeTime = str2num(get_flags("CB_DivLifeTime"))
 	variable f_singlescans = str2num(get_flags("singlescans"))
 
-	variable GetMaxPositiveDetektorShift = -1E100
-	variable i = 0
-	for (i=0;i<myRegionInfo.detector.numdetectors;i+=1)
-		if (myRegionInfo.detector.shift[i]>GetMaxPositiveDetektorShift)
-			GetMaxPositiveDetektorShift=myRegionInfo.detector.shift[i]
-		endif
-	endfor
-	variable StartOfsett = myRegionInfo.detector.numdetectors*ROUND(GetMaxPositiveDetektorShift*myRegionInfo.pass_energy/myRegionInfo.scan_delta)// Zeigt jetzt innerhalb des Counts-Array auf ein Element unmittelbar VOR der ersten Detektorgruppe
+	// getting max positive detektorshift
+	wavestats /M=1 /Q /C=1 DetShiftList
+	variable GetMaxPositiveDetektorShift = V_max
 
-// 	string tmps = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),16),"_Detector")
+	// check for flags and set temporary lists and variables accordingly so we dont need to check for flags every time
+	variable tmp_dwell_time = myRegionInfo.dwell_time
+	if(f_DivLifeTime == 0)
+		tmp_dwell_time = 1
+	endif
+	variable tmp_num_scans = myRegionInfo.num_scans 
+	if(f_DivScans == 0)
+		tmp_num_scans = 1
+	endif   
+	if(f_DivDetGain == 0 && cmpstr(myRegionInfo.scanmode,f_SFAT) != 0) 
+		// we need the DetGain for the SFAT mode
+		DetGainList = 1
+	endif
+
+	// making waves for spectra
  	string tmps = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),14),"_Detector")
 	variable t_valx = myRegionInfo.values_per_curve
 	if(cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
 		t_valx *= myRegionInfo.detector.numdetectors
 	 	Make /O/R/N=(t_valx) $tmps+"_X" /wave=DetectorX
 	endif
-
- 	Make /O/R/N=(t_valx) $tmps /wave=Detector
- 	Detector = 0
+ 	Make /O/R/N=(t_valx) $tmps /wave=Detector = 0
        if(f_CHE  == 1 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-	 	Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors) $tmps+"CHE" /wave=DetectorCHE
-	 	Make /O/R/N=(myRegionInfo.detector.numdetectors+1) $tmps+"CHEY" /wave=DetectorCHEY
+	 	Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors) $tmps+"CHE" /wave=DetectorCHE = 0
+	 	Make /O/R/N=(myRegionInfo.detector.numdetectors) $tmps+"CHEY" /wave=DetectorCHEY = 0
 	endif
 	if(f_singlescans==1  && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-		Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $tmps+"CHES" /wave=DetectorCHES
-		Make /O/R/N=(myRegionInfo.detector.numdetectors*myRegionInfo.num_scans+1) $tmps+"CHESY" /wave=DetectorCHESY
+		Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $tmps+"CHES" /wave=DetectorCHES = 0
+		Make /O/R/N=(myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $tmps+"CHESY" /wave=DetectorCHESY = 0
 	elseif(f_singlescans==1  && cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
-		Make /O/R/N=(t_valx,myRegionInfo.num_scans) $tmps+"CHES" /wave=DetectorCHES
+		Make /O/R/N=(t_valx,myRegionInfo.num_scans) $tmps+"CHES" /wave=DetectorCHES = 0
+		Make /O/R/N=(myRegionInfo.num_scans) $tmps+"CHESY" /wave=DetectorCHESY = 0
+		DetectorCHESY[] = p*myRegionInfo.dwell_time
 	endif
 
 	variable j=0, k=0, index = 0, tmpr=0, InterpolationsDetektor=0, HauptAnteil=0
-
-	tmps = GetDataFolder(1)+"Countliste" ; Make /O/D/N=(0,0) $tmpS ; wave Countliste = $tmps
-	duplicate /O countlistg, Countliste
-	tmps = GetDataFolder(1)+"CountlisteS"; Make /O/D/N=(0,0) $tmpS ; wave /Z CountlisteS = $tmps
-	duplicate/O countlistg, CountlisteS
-
-	redimension /N=(dimsize(Countliste,0)) Countliste
-	Countliste = 0
-	Countliste[]+= CountlisteS[p][q] // adding up the single scans
-
+	
 	for (i=0;i<(myRegionInfo.values_per_curve);i+=1)
 		tmpR=0
 		for(j=0;j<(myRegionInfo.detector.numdetectors);j+=1)
 
 			strswitch(myRegionInfo.scanmode)
 				case f_FAT:
-					if(StartOfsett==(myregionInfo.mcd_head * myregionInfo.detector.numdetectors))
-						//todo: drop "StartOfsett" next time
-						Index = StartOfsett + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(myRegionInfo.detector.shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
-					else
-						Index =myregionInfo.mcd_head * myregionInfo.detector.numdetectors + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(myRegionInfo.detector.shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
-					endif
+					Index =myregionInfo.mcd_head * myregionInfo.detector.numdetectors + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
 				break
 				case f_FE:
 					Index = myRegionInfo.detector.numdetectors*(i) + (j)  // Hier einfach die Detektoren aufsummieren, da sie hintereinander in der Counts-Liste stehen und auch so zusammen gehoeren !
@@ -264,89 +277,65 @@ static function SpecsXML_savedetector(myRegionInfo)
 				case f_SFAT:
 					// we NEED to multiply by gain!!!
 		       		for(k=0;k<myRegionInfo.num_scans;k+=1)
-						Detector[j+(i*myRegionInfo.detector.numdetectors)] += CountlisteS[j+(i*myRegionInfo.detector.numdetectors)][k] * myRegionInfo.detector.gain[j]
+						Detector[j+(i*myRegionInfo.detector.numdetectors)] += countlist[j+(i*myRegionInfo.detector.numdetectors)][k] * DetGainList[j]
 				       	if(f_singlescans ==1)
-							DetectorCHES[j+(i*myRegionInfo.detector.numdetectors)][k] =  CountlisteS[j+(i*myRegionInfo.detector.numdetectors)][k] * myRegionInfo.detector.gain[j]
+							DetectorCHES[j+(i*myRegionInfo.detector.numdetectors)][k] =  countlist[j+(i*myRegionInfo.detector.numdetectors)][k] * DetGainList[j]
 						endif
 					endfor
-					DetectorX[j+(i*myRegionInfo.detector.numdetectors)] = myRegionInfo.kinetic_energy+myRegionInfo.scan_delta*i+myregionInfo.Detector.shift[j]*myRegionInfo.pass_energy
+					DetectorX[j+(i*myRegionInfo.detector.numdetectors)] = myRegionInfo.kinetic_energy+myRegionInfo.scan_delta*i+DetShiftList[j]*myRegionInfo.pass_energy
 				break 
 			endswitch
-			
 			
 			if(cmpstr(myRegionInfo.scanmode,f_SFAT) != 0)
 			
 				if(f_interpolate == 1)
 					// OMICRON-Methode: Zaehlrate am aktuellen Messpunkt aus den rechts und links davon liegenden Channeltron-Zaehlraten interpolieren
 					// Zunaechst mal muss ich ermittel, ob er ab- oder aufgerundet hat, beim bestimmen des Index
-					if (abs(mod(myRegionInfo.detector.shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))<0.5)
+					if (abs(mod(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))<0.5)
 						// Es wurde abgerundet => ich muss mit einem um eine Schrittweite IM INDEX HOEHER liegenden Datenpunkt interpolieren
 						InterpolationsDetektor = -1
-						HauptAnteil = 1 - abs(mod(myRegionInfo.detector.shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
+						HauptAnteil = 1 - abs(mod(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
 					else
 						// Es wurde aufgerundet => ich muss mit einem um eine Schrittweite IM INDEX NIEDRIGER liegenden Datenpunkt interpolieren
 						InterpolationsDetektor = 1
-						HauptAnteil = abs(mod(myRegionInfo.detector.shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
+						HauptAnteil = abs(mod(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
 					endif
-					InterpolationsDetektor = InterpolationsDetektor * SIGN(mod(myRegionInfo.detector.shift[j],1))// Der Detektor-Versatz kann ja positiv oder negativ sein. Bei negativem Versatz muss ich die Richtung umkehren !
+					InterpolationsDetektor = InterpolationsDetektor * SIGN(mod(DetShiftList[j],1))// Der Detektor-Versatz kann ja positiv oder negativ sein. Bei negativem Versatz muss ich die Richtung umkehren !
 					if (InterpolationsDetektor == 0)
-						if(f_DivDetGain == 0)
-							TmpR = TmpR + Countliste[Index]// Zaehlraten der Einzelchanneltrons addieren
-						else
-							TmpR = TmpR + CountListe[Index]*myRegionInfo.detector.gain[j] // Zaehlraten der Einzelchanneltrons addieren
-						endif
+						TmpR = TmpR + Countliste_avg[Index]*DetGainList[j] // Zaehlraten der Einzelchanneltrons addieren
 	 				else
-						if(f_DivDetGain == 0)
-							TmpR = TmpR + HauptAnteil * CountListe[Index]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
-						else
-							TmpR = TmpR + HauptAnteil * CountListe[Index]*myRegionInfo.detector.gain[j] // Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
-						endif
+						TmpR = TmpR + HauptAnteil * Countliste_avg[Index]*DetGainList[j] // Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
 						If((Index + InterpolationsDetektor*myRegionInfo.detector.numdetectors) < 0 || (Index + InterpolationsDetektor*myRegionInfo.detector.numdetectors) > (myRegionInfo.numcounts-1)) //todo ||
 							InterpolationsDetektor = 0// Sollte der Datenpunkt ausserhalb der Liste liegen, also nicht mitgemessen worden sein, dass nehme ich einfach den mit Index spezifizierten Punkt zu 100%
 						endif
-						if(f_DivDetGain == 0)
-							TmpR = TmpR + (1-HauptAnteil) * CountListe[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
-						else
-				             	TmpR = TmpR + (1-HauptAnteil) * CountListe[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]*myRegionInfo.detector.gain[j]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
-						endif
+				             	TmpR = TmpR + (1-HauptAnteil) * Countliste_avg[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]*DetGainList[j]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
  					endif
 	  			else
  					// Specs-Methode: nicht interpolieren, sondern die Channeltron-Zaehlrate, die dem aktuellen Messpunkt am naehesten liegt voll dem Messpunkt zuordnen
-					if(f_DivDetGain == 0)
-						TmpR = TmpR + CountListe[Index]//Zaehlraten der Einzelchanneltrons addieren
-					else
-						TmpR = TmpR + CountListe[Index]*myRegionInfo.detector.gain[j] //Zaehlraten der Einzelchanneltrons addieren
-					endif
+					TmpR = TmpR + Countliste_avg[Index]*DetGainList[j] //Zaehlraten der Einzelchanneltrons addieren
 				endif
-
 
 			       if(f_CHE == 1)
 				       // detector shift berücksichtigen ....
-					DetectorCHE[i][j]=CountListe[Index]//Falls Zaehlraten der Einzelchanneltrons auch gewuenscht, dann diese aufheben
+					DetectorCHE[i][j]=Countliste_avg[Index] * DetGainList[j]
 					if(cmpstr(myRegionInfo.scanmode,f_FAT)==0) //time scale
 						DetectorCHEY[j]=myRegionInfo.dwell_time*(myRegionInfo.mcd_head+j)
 					else // kinetic energy scale
-						DetectorCHEY[j]=myRegionInfo.kinetic_energy+myregionInfo.Detector.shift[j]*myRegionInfo.pass_energy
-					endif
-					if(f_DivDetGain == 1)
-						DetectorCHE[i][j] *= myRegionInfo.detector.gain[j]//Falls Zaehlraten der Einzelchanneltrons auch gewuenscht, dann diese aufheben
+						DetectorCHEY[j]=myRegionInfo.kinetic_energy+DetShiftList[j]*myRegionInfo.pass_energy
 					endif
 			       endif
 			       
 		       	if(f_singlescans ==1)
 		       		for(k=0;k<myRegionInfo.num_scans;k+=1)
-						DetectorCHES[i][j+(k*myRegionInfo.detector.numdetectors)]=CountlisteS[Index][k]
+						DetectorCHES[i][j+(k*myRegionInfo.detector.numdetectors)]=countlist[Index][k]*DetGainList[j]
 						if(cmpstr(myRegionInfo.scanmode,f_FAT)==0) // time scale
-							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.dwell_time*(myRegionInfo.mcd_head+j+k*(dimsize(Countliste,0)/myRegionInfo.detector.numdetectors))
+							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.dwell_time*(myRegionInfo.mcd_head+j+k*(dimsize(Countliste_avg,0)/myRegionInfo.detector.numdetectors))
 						else // kinetic energy scale
-							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.kinetic_energy+myregionInfo.Detector.shift[j]*myRegionInfo.pass_energy
-						endif
-						if(f_DivDetGain == 1)
-							DetectorCHES[i][j+(k*myRegionInfo.detector.numdetectors)]*=myRegionInfo.detector.gain[j]
+							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.kinetic_energy+DetShiftList[j]*myRegionInfo.pass_energy
 						endif
 					endfor
 				endif
-				
+		
 		       endif
 
 		endfor
@@ -357,19 +346,21 @@ static function SpecsXML_savedetector(myRegionInfo)
 
 	endfor
 
-	// quote: "The 1D wave has to be 1 point longer than the corresponding dimension of the 2D wave, because the boundaries of the pixels are taken into account."
-	// Y-wave scaling
-	if(waveexists(DetectorCHESY))
-		DetectorCHESY[dimsize(DetectorCHESY,0)-1] =  2*DetectorCHESY[dimsize(DetectorCHESY,0)-2]-DetectorCHESY[dimsize(DetectorCHESY,0)-3]
-		if(str2num(get_flags("vskineticenergy"))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 && cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
-			if(str2num(get_flags("posbinde")) == 0)
-				DetectorCHESY -= myRegionInfo.excitation_energy
-			else
-				DetectorCHESY = myRegionInfo.excitation_energy
-			endif
-		endif
+	// cps conversion if desired && save spectra and add notes
+     	Detector /= tmp_num_scans
+     	Detector /= tmp_dwell_time
+	SpecsXML_savewave(Detector, myRegionInfo, 1)
+	if(cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
+		SpecsXML_savewave(DetectorX, myRegionInfo, 1)
 	endif
-	if(waveexists(DetectorCHEY))
+	// single channeltrons
+       if(f_CHE  == 1&& cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
+		DetectorCHE /= tmp_num_scans
+		DetectorCHE /= tmp_dwell_time
+		SpecsXML_savewave(DetectorCHE, myRegionInfo, 1)
+		// quote: "The 1D wave has to be 1 point longer than the corresponding dimension of the 2D wave, because the boundaries of the pixels are taken into account."
+		// Y-wave scaling
+		redimension /N=(dimsize(DetectorCHEY,0)+1) DetectorCHEY
 		DetectorCHEY[dimsize(DetectorCHEY,0)-1] =  2*DetectorCHEY[dimsize(DetectorCHEY,0)-2]-DetectorCHEY[dimsize(DetectorCHEY,0)-3]
 		if(str2num(get_flags("vskineticenergy"))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 &&cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
 			if(str2num(get_flags("posbinde")) == 0)
@@ -378,47 +369,30 @@ static function SpecsXML_savedetector(myRegionInfo)
 				DetectorCHEY = myRegionInfo.excitation_energy - DetectorCHEY
 			endif
 		endif
-	endif
-
-	// cps conversion if desired
-	if(f_DivScans == 1)
-	     	Detector /=myRegionInfo.num_scans
-		if(f_CHE == 1  && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-			DetectorCHE /= myRegionInfo.num_scans
-		endif
-		if(f_singlescans ==1)
-			DetectorCHES /= myRegionInfo.num_scans
-		endif
-	endif
-	if(f_DivLifeTime == 1)
-	     	Detector /= myRegionInfo.dwell_time
-		if(f_CHE == 1  && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-			DetectorCHE /= myRegionInfo.dwell_time
-		endif
-		if(f_singlescans ==1)
-			DetectorCHES /= myRegionInfo.dwell_time
-		endif
-	endif
-
-	// save spectra and add notes
-	SpecsXML_savewave(Detector, myRegionInfo, 1)
-	if(cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
-		SpecsXML_savewave(DetectorX, myRegionInfo, 1)
-	endif
-       if(f_CHE  == 1&& cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-		SpecsXML_savewave(DetectorCHE, myRegionInfo, 1)
 		SpecsXML_savewave(DetectorCHEY, myRegionInfo, 1)
 	endif
+	// single scans
       	if(f_singlescans==1)
+		DetectorCHES /= tmp_num_scans
+		DetectorCHES /= tmp_dwell_time
 		SpecsXML_savewave(DetectorCHES, myRegionInfo, 1)
+		// quote: "The 1D wave has to be 1 point longer than the corresponding dimension of the 2D wave, because the boundaries of the pixels are taken into account."
+		// Y-wave scaling
+		redimension /N=(dimsize(DetectorCHESY,0)+1) DetectorCHESY
+		DetectorCHESY[dimsize(DetectorCHESY,0)-1] =  2*DetectorCHESY[dimsize(DetectorCHESY,0)-2]-DetectorCHESY[dimsize(DetectorCHESY,0)-3]
+		if(str2num(get_flags("vskineticenergy"))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 && cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
+			if(str2num(get_flags("posbinde")) == 0)
+				DetectorCHESY -= myRegionInfo.excitation_energy
+			else
+				DetectorCHESY = myRegionInfo.excitation_energy - DetectorCHESY
+			endif
+		endif
 		SpecsXML_savewave(DetectorCHESY, myRegionInfo, 1)
 	endif
 	
 	// delete tmp waves
-	killwaves Countliste
-	killwaves CountlisteS
-	killwaves countlistg
-	killwaves scalinglistg
+	killwaves countlist
+	killwaves scalinglist
 end
 
 
