@@ -16,6 +16,7 @@ end
 // some waves for saving values
 static strconstant countlist				= "countlist"
 static strconstant scalinglist				= "scalinglist"
+static constant charlimit 				= 14
 
 // meas. modes
 static strconstant f_FAT					= "FixedAnalyzerTransmission"
@@ -212,6 +213,8 @@ static function SpecsXML_savedetector(myRegionInfo)
 	variable f_DivScans = str2num(get_flags("CB_DivScans"))
 	variable f_DivLifeTime = str2num(get_flags("CB_DivLifeTime"))
 	variable f_singlescans = str2num(get_flags("singlescans"))
+	variable f_DivTF = str2num(get_flags("f_DivTF"))
+	variable f_includeTF = str2num(get_flags("includetransmission"))
 
 	// getting max positive detektorshift
 	wavestats /M=1 /Q /C=1 DetShiftList
@@ -230,25 +233,24 @@ static function SpecsXML_savedetector(myRegionInfo)
 		// we need the DetGain for the SFAT mode
 		DetGainList = 1
 	endif
-
 	// making waves for spectra
- 	string tmps = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),14),"_Detector")
+ 	string detectorname = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit),"_Detector")
 	variable t_valx = myRegionInfo.values_per_curve
 	if(cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
 		t_valx *= myRegionInfo.detector.numdetectors
-	 	Make /O/R/N=(t_valx) $tmps+"_X" /wave=DetectorX
+	 	Make /O/R/N=(t_valx) $detectorname+"_X" /wave=DetectorX
 	endif
- 	Make /O/R/N=(t_valx) $tmps /wave=Detector = 0
+ 	Make /O/R/N=(t_valx) $detectorname /wave=Detector = 0
        if(f_CHE  == 1 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-	 	Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors) $tmps+"CHE" /wave=DetectorCHE = 0
-	 	Make /O/R/N=(myRegionInfo.detector.numdetectors) $tmps+"CHEY" /wave=DetectorCHEY = 0
+	 	Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors) $detectorname+"CHE" /wave=DetectorCHE = 0
+	 	Make /O/R/N=(myRegionInfo.detector.numdetectors) $detectorname+"CHEY" /wave=DetectorCHEY = 0
 	endif
 	if(f_singlescans==1  && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0)
-		Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $tmps+"CHES" /wave=DetectorCHES = 0
-		Make /O/R/N=(myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $tmps+"CHESY" /wave=DetectorCHESY = 0
+		Make /O/R/N=(t_valx,myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $detectorname+"CHES" /wave=DetectorCHES = 0
+		Make /O/R/N=(myRegionInfo.detector.numdetectors*myRegionInfo.num_scans) $detectorname+"CHESY" /wave=DetectorCHESY = 0
 	elseif(f_singlescans==1  && cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
-		Make /O/R/N=(t_valx,myRegionInfo.num_scans) $tmps+"CHES" /wave=DetectorCHES = 0
-		Make /O/R/N=(myRegionInfo.num_scans) $tmps+"CHESY" /wave=DetectorCHESY = 0
+		Make /O/R/N=(t_valx,myRegionInfo.num_scans) $detectorname+"CHES" /wave=DetectorCHES = 0
+		Make /O/R/N=(myRegionInfo.num_scans) $detectorname+"CHESY" /wave=DetectorCHESY = 0
 		DetectorCHESY[] = p*myRegionInfo.dwell_time
 	endif
 
@@ -390,6 +392,14 @@ static function SpecsXML_savedetector(myRegionInfo)
 		SpecsXML_savewave(DetectorCHESY, myRegionInfo, 1)
 	endif
 	
+	// divide Detector by Transmission Function	
+ 	if( f_DivTF && f_includeTF)
+		Make /O/R/N=(0) $detectorname+"divTF" /wave=DetectordivTF = 0
+		wave DetectorTF = $(detectorname[0,strlen(detectorname)-10]+"_transm")
+		duplicate /O Detector, DetectordivTF
+		DetectordivTF[] /= DetectorTF[p]
+ 	endif
+	
 	// delete tmp waves
 	killwaves countlist
 	killwaves scalinglist
@@ -403,6 +413,7 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 
 
 	Note savewave, ""+myRegionInfo.header
+	Note savewave, "Region Name: "+myRegionInfo.RegionName
 	Note savewave, "Scans: " + num2str(myRegionInfo.num_scans)
 	//	Note  savewave, "Curve: " + num2str(curve)
 	//	Note  savewave, "Channel: " + num2str(channel)
@@ -969,7 +980,7 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 					SpecsXML_counts(file, doubleseqwave, savepos, seq.length)
 					FReadLine file, tmps // </double>
 					FReadLine file, tmps //</sequence>
-					tmps2 = SpecsXML_checkdblwavename(cleanname(myRegionInfo.RegionName), "_"+cleanname(myRegionInfo.YCurve_name))
+					tmps2 = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit), "_"+cleanname(myRegionInfo.YCurve_name))
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
 					if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
@@ -992,7 +1003,7 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 					SpecsXML_counts(file, doubleseqwave, savepos, seq.length)
 					FReadLine file, tmps // </double>
 					FReadLine file, tmps //</sequence>
-					tmps2 = SpecsXML_checkdblwavename(cleanname(myRegionInfo.RegionName), "_transm")
+					tmps2 = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit), "_transm")
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
 					if(str2num(get_flags("includetransmission"))==1 && str2num(get_flags("justdetector"))==0)

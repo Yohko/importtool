@@ -64,6 +64,9 @@ function init_flags()
 	if(exists(mypath+":justdetector")!=2)
 		variable /G  $(mypath+":justdetector") 			= 0			// export just the detector (only for Dsets)
 	endif
+	if(exists(mypath+":f_DivTF")!=2)
+		variable /G  $(mypath+":f_DivTF") 				= 0			// create a new wave and devide Detector by Transmission function
+	endif
 end
 //ende importflags ##############################################
 
@@ -569,7 +572,7 @@ Structure fourbytes
  	char bytes[4]
 endstructure
 
-static Structure myflt
+Structure myflt
 	float val
 endstructure
 
@@ -654,6 +657,7 @@ function /S get_flags(type)
 	NVAR myvskineticenergy = root:Packages:Import_Tool:flags:vskineticenergy
 	NVAR myaskforappenddet = root:Packages:Import_Tool:flags:askforappenddet
 	NVAR myjustdetector = root:Packages:Import_Tool:flags:justdetector
+	NVAR f_DivTF = root:Packages:Import_Tool:flags:f_DivTF
 	
 	strswitch(type)
 		case "includeADC":
@@ -700,6 +704,9 @@ function /S get_flags(type)
 			break
 		case "justdetector":
 			return num2str(myjustdetector)
+			break
+		case "f_DivTF":
+			return num2str(f_DivTF)
 			break
 		default:
 			debugprintf2("Unknown Flag: "+type,1)

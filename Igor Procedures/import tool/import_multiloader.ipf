@@ -233,6 +233,7 @@ Function multiLoader_MakePanel()
 	CheckBox check6 title="div by lifetime",pos={150,100+y},variable=$("root:Packages:Import_Tool:flags:CB_DivLifeTime")
 	CheckBox check7 title="div by DetectorGain",pos={150,120+y},variable=$("root:Packages:Import_Tool:flags:DivDetectorGain")
 	CheckBox check8 title="interpolate counts",pos={150,140+y},variable=$("root:Packages:Import_Tool:flags:Interpolieren")
+	CheckBox check14 title="div by TF",pos={150,160+y},variable=$("root:Packages:Import_Tool:flags:f_DivTF")
 	y=80
 	// x-axis
 	SetDrawEnv textrgb= (65535,0,0),fstyle= 1;DelayUpdate
