@@ -102,6 +102,7 @@ static structure RegionInfo
 	variable Ycurve_curves
 	variable Ycurve_length
 	string comment
+	string appendtodetector
 endstructure
 
 
@@ -234,7 +235,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 		DetGainList = 1
 	endif
 	// making waves for spectra
- 	string detectorname = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit),"_Detector")
+ 	string detectorname = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit),myRegionInfo.appendtodetector)
 	variable t_valx = myRegionInfo.values_per_curve
 	if(cmpstr(myRegionInfo.scanmode,f_SFAT)==0)
 		t_valx *= myRegionInfo.detector.numdetectors
@@ -395,7 +396,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 	// divide Detector by Transmission Function	
  	if( f_DivTF && f_includeTF)
 		Make /O/R/N=(0) $detectorname+"divTF" /wave=DetectordivTF = 0
-		wave DetectorTF = $(detectorname[0,strlen(detectorname)-10]+"_transm")
+		wave DetectorTF = $(detectorname[0,strlen(detectorname)-strlen(myRegionInfo.appendtodetector)-1]+"_transm")
 		duplicate /O Detector, DetectordivTF
 		DetectordivTF[] /= DetectorTF[p]
  	endif
@@ -1574,6 +1575,18 @@ function SpecsXML_load_data([optfile])
 	variable file = importloader.file
 
 	string tmps= ""
+	string appendtodetector = "_detector"
+	if(str2num(get_flags("askforappenddet")))
+		tmps = appendtodetector
+		prompt tmps, "What string to append to detector spectra?"
+		doprompt "Import flags!", tmps
+		if(V_flag==1)
+			Debugprintf2("Cancel import!",0)
+			loaderend(importloader)
+			return -1
+		endif
+		appendtodetector = tmps
+	endif
 
 	do
 		FReadLine file, tmps
@@ -1592,6 +1605,7 @@ function SpecsXML_load_data([optfile])
 	variable tmpd = -1//, i=0
 	myRegionInfo.folder=GetDataFolder(1)
 	myRegionInfo.header= header
+	myRegionInfo.appendtodetector = appendtodetector
 	do
 		FReadLine file, tmps
 		tmps = mycleanupstr(tmps)
