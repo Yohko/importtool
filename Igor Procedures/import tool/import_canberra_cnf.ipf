@@ -215,10 +215,10 @@ function CanberraCnf_load_data([optfile])
 		return -1
 	else
 		FSetPos file,beg_ + sam_offset+0x30
-		name = stripstr(mybinread(file,32)," ","")
+		name = ReplaceString(" ",mybinread(file,32),"")
 		Debugprintf2("Sample name: "+name, 1)
 		FSetPos file,beg_ + sam_offset+0x30+32
-		desc = stripstr(mybinread(file,48)," ","")
+		desc = ReplaceString(" ",mybinread(file,48),"")
 		Debugprintf2("sample description: "+desc,1)
 	endif
 

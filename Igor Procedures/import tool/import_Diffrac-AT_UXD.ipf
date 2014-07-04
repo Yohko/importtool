@@ -82,7 +82,7 @@ static function Uxd_add_values_from_str(str, sep, ycol,xcol, ncols)
 	wave xcol
 	variable ncols
 	if(strsearch(str,sep,0)!=-1)
-		str = stripstr(str, " ","")
+		str = ReplaceString(" ",str,"")
 	else
 		if(strsearch(str,"\t",0)==-1)
 			str=splitintolist(str, " ")//only whitespaces as sep

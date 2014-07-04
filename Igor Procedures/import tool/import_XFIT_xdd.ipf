@@ -58,8 +58,8 @@ function XfitXdd_check_file(file)
 		fsetpos file, 0
 		return -1
 	endif
-	string templine = stripstr(line," ","")
-	templine = stripstr(line,"\t","")
+	string templine = ReplaceString(" ",line,"")
+	templine = ReplaceString("\t",line,"")
 	if (strlen(templine) ==0)
 		FReadLine file, line
 	endif
@@ -72,7 +72,7 @@ function XfitXdd_check_file(file)
 	endif
 	line=mycleanupstr(line)
 	if(strsearch(line,sep,0)!=-1)
-		line= stripstr(line," ","")
+		line= ReplaceString(" ",line,"")
 	else
 		if(strsearch(line,"\t",0)==-1)
 			line=splitintolist(line, " ")
@@ -127,8 +127,8 @@ function XfitXdd_load_data([optfile])
 		close file
 		return -1
 	endif
-	string templine = stripstr(line," ","")
-	templine = stripstr(line,"\t","")
+	string templine = ReplaceString(" ",line,"")
+	templine = ReplaceString("\t",line,"")
 	if (strlen(templine) ==0)
 		FReadLine file, line
 	endif
@@ -143,7 +143,7 @@ function XfitXdd_load_data([optfile])
 	endif
 	line=mycleanupstr(line)
 	if(strsearch(line,sep,0)!=-1)
-		line= stripstr(line," ","")
+		line= ReplaceString(" ",line,"")
 	else
 		if(strsearch(line,"\t",0)==-1)
 			line=splitintolist(line, " ")
@@ -184,7 +184,7 @@ function XfitXdd_load_data([optfile])
 		endif
 		line=mycleanupstr(line)
 		if(strsearch(line,sep,0)!=-1)
-			line= stripstr(line," ","")
+			line= ReplaceString(" ",line,"")
 		else
 			if(strsearch(line,"\t",0)==-1)
 				line=splitintolist(line, " ")

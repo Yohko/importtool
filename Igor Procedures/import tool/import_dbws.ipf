@@ -106,7 +106,7 @@ function Dbws_load_data([optfile])
 		s=mycleanupstr(s)
 		// numbers delimited by commas or spaces.
 		if(strsearch(s,sep,0)!=-1)
-			s= stripstr(s," ","")
+			s= ReplaceString(" ",s,"")
 		else
 			if(strsearch(s,"\t",0)==-1)
 				s=splitintolist(s, " ")

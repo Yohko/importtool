@@ -99,10 +99,10 @@ function Udf_load_data([optfile])
 	// read header
 	do
 		line = read_line_trim(file)
-		line = stripstr(line," ","")
-		line = stripstr(line,"\r","")
-		line = stripstr(line,"\t","")
-		line = stripstr(line,"\n","")
+		line = ReplaceString(" ",line,"")
+		line = ReplaceString("\r",line,"")
+		line = ReplaceString("\t",line,"")
+		line = ReplaceString("\n",line,"")
 		if (cmpstr(line,"RawScan")==0) // indicates XY data start
 			break
 		endif
@@ -155,10 +155,10 @@ function Udf_load_data([optfile])
 			break
 		endif
 		line = mycleanupstr(line)
-		line = stripstr(line," ","") // last line with last value 
-		line = stripstr(line,"\r","")
-		line = stripstr(line,"\t","")
-		line = stripstr(line,"\n","")
+		line = ReplaceString(" ",line,"") // last line with last value 
+		line = ReplaceString("\r",line,"")
+		line = ReplaceString("\t",line,"")
+		line = ReplaceString("\n",line,"")
 
 		//line = stripstr(line,",/","") // last line with last value 
 		if (strsearch(line,",/",0)!=-1)

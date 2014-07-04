@@ -106,7 +106,7 @@ function Rigaku_load_data([optfile])
 				break
 			endif
 			line=mycleanupstr(line)
-			linecheck = stripstr(line," ","")
+			linecheck = ReplaceString(" ",line,"")
 			if ((strsearch(linecheck,"#",0)!=0) && (strlen(linecheck) !=0))
 				break
 			endif
@@ -149,7 +149,7 @@ function Rigaku_load_data([optfile])
 			
 				string key, val
 				line = line[1,inf]
-				key=stripstr(line[0,strsearch(line,"=",0)-1]," ","")
+				key=ReplaceString(" ",line[0,strsearch(line,"=",0)-1],"")
 				val=line[strsearch(line,"=",0)+1,inf]
 
 				Debugprintf2(key+": "+val,1)

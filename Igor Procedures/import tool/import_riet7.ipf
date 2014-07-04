@@ -172,7 +172,7 @@ function Riet7_load_data([optfile])
 		endif
 		line=mycleanupstr(line)
 		if(strsearch(line,sep,0)!=-1)
-			line= stripstr(line," ","")
+			line= ReplaceString(" ",line,"")
 		else
 			if(strsearch(line,"\t",0)==-1)
 				line=splitintolist(line, " ")
