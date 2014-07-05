@@ -105,7 +105,6 @@ function loaderstart(importloader,[optfile])
 	if(str2num(get_flags("importtoroot"))==1)
 		SetDataFolder root:
 	endif
-	variable  i=0
 	fstatus optfile
 	if(V_flag)
 		importloader.file = optfile
@@ -125,34 +124,19 @@ function loaderstart(importloader,[optfile])
 	ExperimentName = ReplaceString(")",ExperimentName,"")
 	ExperimentName = ReplaceString(".",ExperimentName,"")	
 	ExperimentName = cleanname(ExperimentName)
-	string newexpname =""
+	string newexpname = ExperimentName
 	if(str2num(get_flags("importtoroot"))==1)
-		newexpname = "root:"+ExperimentName
-	else
-		newexpname = importloader.dfSave+ExperimentName
+		SetDataFolder root:
 	endif
-	Debugprintf2(".. exporting to: "+newexpname,0)
 	if(DataFolderExists(newexpname))
 		Debugprintf2("Folder exists, adding suffix!",0)
-		ExperimentName += get_flags("suffix")
-		i=0
-		do
-			i+=1
-			if(str2num(get_flags("importtoroot"))==1)
-				newexpname = "root:"+Experimentname + num2str(i)
-			else
-				newexpname = importloader.dfSave+Experimentname + num2str(i)
-			endif
-		while(DataFolderExists(newexpname))
-		Experimentname +=num2str(i)
+		newexpname += get_flags("suffix")
+		print newexpname
+		newexpname = UniqueName(newexpname, 11, 0)
 	endif
-	if(str2num(get_flags("importtoroot"))==1)
-		NewDataFolder/s root:$(ExperimentName)
-		SetDataFolder root:$(ExperimentName)
-	else
-		NewDataFolder/s $(importloader.dfSave+ExperimentName)
-		SetDataFolder $(importloader.dfSave+ExperimentName)
-	endif
+	NewDataFolder/S $newexpname
+	Debugprintf2(".. exporting to: "+GetDataFolder(1),0)
+
 	fstatus importloader.file
 	importloader.header = "Fileinfo: " + S_path + S_filename
 	mypath=S_path // save the last filepath (workaround for a bug)
@@ -172,9 +156,7 @@ function loaderend(importloader)
 			close importloader.file
 			break
 	endswitch
-	if(str2num(get_flags("importtoroot"))==1)
-	 	setdatafolder $(importloader.dfSave)
-	endif
+	setdatafolder $(importloader.dfSave)
 	Debugprintf2("Finished "+importloader.name+" File Import",0)
 	Debugprintf2("##########################",0)
 end
@@ -266,8 +248,8 @@ end
 Function /S cleanname(str)
 	string str
 	str = cleanupname(str,0)
-	str= stripstr(str,"_","")
-	str= stripstr(str," ","")
+	str= ReplaceString("_",str,"")
+	str= ReplaceString(" ",str,"")
 	variable maxlen = 20
 	
 #if 0	
@@ -374,22 +356,6 @@ function /S shortname(name, len)
 		print "After: "+name
 	endif
 	return name
-end
-
-
-Function/S stripstr(str, zeicheni,zeicheno)
-		string str, zeicheni,zeicheno
-		string stro=""
-		variable i=0,j=0, length=strlen(str)
-		For (i=0;i<ItemsInList(str,zeicheni);i+=1)
-			if (strlen(StringFromList(i,str,zeicheni)) !=0)
-				stro = stro+zeicheno+StringFromList(i,str,zeicheni)
-			endif
-		endfor
-		if (strlen(zeicheno) != 0)
-			stro=stro[1,strlen(stro)]
-		endif
-		return stro
 end
 
 
@@ -548,7 +514,7 @@ function /S get_valid_line(file, comment_char)
 		endif
 		line = mycleanupstr(line)
 		tmps=line
-		tmps=stripstr(tmps," ","")
+		tmps=ReplaceString(" ",tmps,"")
 		if((strlen(tmps)!=0) && (strsearch(tmps,comment_char,0)!=0))
 			break
 		endif
