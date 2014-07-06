@@ -266,15 +266,9 @@ Function /S cleanname(str)
 		while (strlen(str) >= max)
 	endif
 #endif
-	
-	if(strlen(str) >= maxlen)
-		print "Name too long. Shortened."
-		print "Before: "+str
-		str = str[0,maxlen-2]
-		print "After: "+str
-	endif
-	return str
+	return shortname(str, maxlen)
 end
+
 
 
 Function/S stripstrfirstlastspaces(str)
@@ -349,10 +343,10 @@ function /S shortname(name, len)
 	string name
 	variable len
 	if(strlen(name) > len)
-		print "Name too long. Shortened."
-		print "Before: "+name
+		Debugprintf2("Name too long. Shortened.",1)
+		Debugprintf2("Before: "+name,1)
 		name = name[0,len-2]
-		print "After: "+name
+		Debugprintf2("After: "+name,1)
 	endif
 	return name
 end

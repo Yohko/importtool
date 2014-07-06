@@ -258,7 +258,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 		DetectorCHESY[] = p*myRegionInfo.dwell_time
 	endif
 
-	variable j=0, k=0, index = 0, tmpr=0, InterpolationsDetektor=0, HauptAnteil=0
+	variable j=0, k=0, index = 0, tmpr=0, InterpolationsDetektor=0, HauptAnteil=0, tmpstart=0, tmpend=0
 	
 	for (i=0;i<(myRegionInfo.values_per_curve);i+=1)
 		tmpR=0
@@ -267,9 +267,16 @@ static function SpecsXML_savedetector(myRegionInfo)
 			strswitch(myRegionInfo.scanmode)
 				case f_FAT:
 					Index =myregionInfo.mcd_head * myregionInfo.detector.numdetectors + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
-					if(index<0 || index>=dimsize(countlist,0))//myRegionInfo.values_per_curve)
-						Debugprintf2("Error - Index out of range (0<  x <"+num2str(dimsize(countlist,0))+")"+num2str(index),0)
-						return -1
+					// in case a new MCD calibration was applied to the spectra it can happen that some detectors are now outside the measurement window (index is out of range)
+					// Debugprintf2("Error - Index out of range (0<  x <"+num2str(dimsize(countlist,0))+")"+num2str(index),0)
+					// SpecsLab just skips the detectors which are out of range for the corresponding measurement point, but we will rescale the wave later
+					if(index<0)
+						tmpstart = i+1
+						continue
+					endif
+					if(index>=dimsize(countlist,0))
+						tmpend =  i-1
+						continue
 					endif
 				break
 				case f_FE:
@@ -407,6 +414,17 @@ static function SpecsXML_savedetector(myRegionInfo)
 		duplicate /O Detector, DetectordivTF
 		DetectordivTF[] /= DetectorTF[p]
  	endif
+	
+	
+	// check if a new calibration was applied and we need to rescale the wave (only the detector for now!!!)
+	if(tmpend !=0 || tmpstart !=0)
+		// this should only affect FAT
+		Debugprintf2("Some detectors were out of range, rescaling wave!",0)
+		Duplicate/FREE Detector, Detectortmp
+		redimension /N=(tmpend-tmpstart+1) Detector
+		SetScale/P  x,DimOffset(Detector, 0)+tmpstart*DimDelta(Detector, 0),DimDelta(Detector, 0),"eV",  Detector
+		Detector[] = Detectortmp[tmpstart+p]
+	endif
 	
 	// delete tmp waves
 	killwaves countlist
