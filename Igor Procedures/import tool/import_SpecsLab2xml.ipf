@@ -17,6 +17,7 @@ end
 static strconstant countlist				= "countlist"
 static strconstant scalinglist				= "scalinglist"
 static constant charlimit 				= 14
+static strconstant directory = "root:Packages:SpecsLabXML"
 
 // meas. modes
 static strconstant f_FAT					= "FixedAnalyzerTransmission"
@@ -55,11 +56,11 @@ endstructure
 
 
 static Structure Detectors
-	variable position[255]		// eV
-	variable shift[255]			// eV
-	variable gain[255]			// -
-	variable deadtime[255]		// ns
-	variable threshold[255] 	// mV
+	wave w_position		// eV
+	wave w_shift			// eV
+	wave w_gain			// -
+	wave w_deadtime		// ns
+	wave w_threshold 	// mV
 	variable numdetectors
 endstructure
 
@@ -111,15 +112,13 @@ endstructure
 
 static function SpecsXML_resetRegionInfo(myRegionInfo)
 	struct RegionInfo &myRegionInfo
-	variable i=0
-	// DLD can have up to 1000 channels but IgorPro has a limit to arrays of structs
-	for(i=0;i<255;i+=1)
-		myRegionInfo.Detector.position[i]=0
-		myRegionInfo.Detector.gain[i]=0
-		myRegionInfo.Detector.shift[i]=0
-		myRegionInfo.Detector.deadtime[i]=0
-		myRegionInfo.Detector.threshold[i]=0
-	endfor
+	NewDatafolder /O root:Packages ; NewDatafolder /O $directory
+	string tmps = ""
+	tmps = directory+":w_position"; Make /O/D/N=(0) $tmpS; wave myRegionInfo.Detector.w_position = $tmps
+	tmps = directory+":w_shift"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_shift = $tmps
+	tmps = directory+":w_gain"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_gain = $tmps
+	tmps = directory+":w_deadtime"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_deadtime = $tmps
+	tmps = directory+":w_thresold"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_threshold = $tmps
 	myRegionInfo.Detector.numdetectors=0
 	
 	myRegionInfo.nameforwave = ""
@@ -201,14 +200,6 @@ static function SpecsXML_savedetector(myRegionInfo)
 	for(i=0;i<myRegionInfo.num_scans;i+=1)
 		Countliste_avg[]+= countlist[p][i]
 	endfor
-
-	
-	// saving gain etc. in single waves
-	// todo: save them already in waves when read (will also avoid the limit of 255 detectors in structs
-	Make /FREE/O/D/N=(myRegionInfo.detector.numdetectors) DetGainList = 0
-	Make /FREE/O/D/N=(myRegionInfo.detector.numdetectors) DetShiftList = 0
-	DetGainList[] = myRegionInfo.detector.gain[p]
-	DetShiftList[] = myRegionInfo.detector.shift[p]
 	
 	// save flags in single variables (for speed reasons)	
 	variable f_interpolate = str2num(get_flags("interpolieren"))
@@ -221,7 +212,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 	variable f_includeTF = str2num(get_flags("includetransmission"))
 
 	// getting max positive detektorshift
-	wavestats /M=1 /Q /C=1 DetShiftList
+	wavestats /M=1 /Q /C=1 myRegionInfo.Detector.w_shift
 	variable GetMaxPositiveDetektorShift = V_max
 
 	// check for flags and set temporary lists and variables accordingly so we dont need to check for flags every time
@@ -235,7 +226,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 	endif   
 	if(f_DivDetGain == 0 && cmpstr(myRegionInfo.scanmode,f_SFAT) != 0) 
 		// we need the DetGain for the SFAT mode
-		DetGainList = 1
+		myRegionInfo.Detector.w_gain = 1
 	endif
 	// making waves for spectra
  	string detectorname = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit),myRegionInfo.appendtodetector)
@@ -266,7 +257,7 @@ static function SpecsXML_savedetector(myRegionInfo)
 
 			strswitch(myRegionInfo.scanmode)
 				case f_FAT:
-					Index =myregionInfo.mcd_head * myregionInfo.detector.numdetectors + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
+					Index =myregionInfo.mcd_head * myregionInfo.detector.numdetectors + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
 					// in case a new MCD calibration was applied to the spectra it can happen that some detectors are now outside the measurement window (index is out of range)
 					// Debugprintf2("Error - Index out of range (0<  x <"+num2str(dimsize(countlist,0))+")"+num2str(index),0)
 					// SpecsLab just skips the detectors which are out of range for the corresponding measurement point, but we will rescale the wave later
@@ -294,12 +285,12 @@ static function SpecsXML_savedetector(myRegionInfo)
 				case f_SFAT:
 					// we NEED to multiply by gain!!!
 		       		for(k=0;k<myRegionInfo.num_scans;k+=1)
-						Detector[j+(i*myRegionInfo.detector.numdetectors)] += countlist[j+(i*myRegionInfo.detector.numdetectors)][k] * DetGainList[j]
+						Detector[j+(i*myRegionInfo.detector.numdetectors)] += countlist[j+(i*myRegionInfo.detector.numdetectors)][k] * myRegionInfo.Detector.w_gain[j]
 				       	if(f_singlescans ==1)
-							DetectorCHES[j+(i*myRegionInfo.detector.numdetectors)][k] =  countlist[j+(i*myRegionInfo.detector.numdetectors)][k] * DetGainList[j]
+							DetectorCHES[j+(i*myRegionInfo.detector.numdetectors)][k] =  countlist[j+(i*myRegionInfo.detector.numdetectors)][k] * myRegionInfo.Detector.w_gain[j]
 						endif
 					endfor
-					DetectorX[j+(i*myRegionInfo.detector.numdetectors)] = myRegionInfo.kinetic_energy+myRegionInfo.scan_delta*i+DetShiftList[j]*myRegionInfo.pass_energy
+					DetectorX[j+(i*myRegionInfo.detector.numdetectors)] = myRegionInfo.kinetic_energy+myRegionInfo.scan_delta*i+myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy
 				break 
 			endswitch
 			
@@ -308,47 +299,47 @@ static function SpecsXML_savedetector(myRegionInfo)
 				if(f_interpolate == 1)
 					// OMICRON-Methode: Zaehlrate am aktuellen Messpunkt aus den rechts und links davon liegenden Channeltron-Zaehlraten interpolieren
 					// Zunaechst mal muss ich ermittel, ob er ab- oder aufgerundet hat, beim bestimmen des Index
-					if (abs(mod(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))<0.5)
+					if (abs(mod(myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))<0.5)
 						// Es wurde abgerundet => ich muss mit einem um eine Schrittweite IM INDEX HOEHER liegenden Datenpunkt interpolieren
 						InterpolationsDetektor = -1
-						HauptAnteil = 1 - abs(mod(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
+						HauptAnteil = 1 - abs(mod(myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
 					else
 						// Es wurde aufgerundet => ich muss mit einem um eine Schrittweite IM INDEX NIEDRIGER liegenden Datenpunkt interpolieren
 						InterpolationsDetektor = 1
-						HauptAnteil = abs(mod(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
+						HauptAnteil = abs(mod(myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta,1))
 					endif
-					InterpolationsDetektor = InterpolationsDetektor * SIGN(mod(DetShiftList[j],1))// Der Detektor-Versatz kann ja positiv oder negativ sein. Bei negativem Versatz muss ich die Richtung umkehren !
+					InterpolationsDetektor = InterpolationsDetektor * SIGN(mod(myRegionInfo.Detector.w_shift[j],1))// Der Detektor-Versatz kann ja positiv oder negativ sein. Bei negativem Versatz muss ich die Richtung umkehren !
 					if (InterpolationsDetektor == 0)
-						TmpR = TmpR + Countliste_avg[Index]*DetGainList[j] // Zaehlraten der Einzelchanneltrons addieren
+						TmpR = TmpR + Countliste_avg[Index]*myRegionInfo.Detector.w_gain[j] // Zaehlraten der Einzelchanneltrons addieren
 	 				else
-						TmpR = TmpR + HauptAnteil * Countliste_avg[Index]*DetGainList[j] // Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
+						TmpR = TmpR + HauptAnteil * Countliste_avg[Index]*myRegionInfo.Detector.w_gain[j] // Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
 						If((Index + InterpolationsDetektor*myRegionInfo.detector.numdetectors) < 0 || (Index + InterpolationsDetektor*myRegionInfo.detector.numdetectors) > (myRegionInfo.numcounts-1)) //todo ||
 							InterpolationsDetektor = 0// Sollte der Datenpunkt ausserhalb der Liste liegen, also nicht mitgemessen worden sein, dass nehme ich einfach den mit Index spezifizierten Punkt zu 100%
 						endif
-				             	TmpR = TmpR + (1-HauptAnteil) * Countliste_avg[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]*DetGainList[j]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
+				             	TmpR = TmpR + (1-HauptAnteil) * Countliste_avg[Index+ InterpolationsDetektor*myRegionInfo.detector.numdetectors]*myRegionInfo.Detector.w_gain[j]// Index zeigt ja immer auf den am naehesten an der Energie liegenden Messpunkt. Von da muss also der Hauptteil (>0,5) kommen
  					endif
 	  			else
  					// Specs-Methode: nicht interpolieren, sondern die Channeltron-Zaehlrate, die dem aktuellen Messpunkt am naehesten liegt voll dem Messpunkt zuordnen
-					TmpR = TmpR + Countliste_avg[Index]*DetGainList[j] //Zaehlraten der Einzelchanneltrons addieren
+					TmpR = TmpR + Countliste_avg[Index]*myRegionInfo.Detector.w_gain[j] //Zaehlraten der Einzelchanneltrons addieren
 				endif
 
 			       if(f_CHE == 1)
 				       // detector shift berücksichtigen ....
-					DetectorCHE[i][j]=Countliste_avg[Index] * DetGainList[j]
+					DetectorCHE[i][j]=Countliste_avg[Index] * myRegionInfo.Detector.w_gain[j]
 					if(cmpstr(myRegionInfo.scanmode,f_FAT)==0) //time scale
 						DetectorCHEY[j]=myRegionInfo.dwell_time*(myRegionInfo.mcd_head+j)
 					else // kinetic energy scale
-						DetectorCHEY[j]=myRegionInfo.kinetic_energy+DetShiftList[j]*myRegionInfo.pass_energy
+						DetectorCHEY[j]=myRegionInfo.kinetic_energy+myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy
 					endif
 			       endif
 			       
 		       	if(f_singlescans ==1)
 		       		for(k=0;k<myRegionInfo.num_scans;k+=1)
-						DetectorCHES[i][j+(k*myRegionInfo.detector.numdetectors)]=countlist[Index][k]*DetGainList[j]
+						DetectorCHES[i][j+(k*myRegionInfo.detector.numdetectors)]=countlist[Index][k]*myRegionInfo.Detector.w_gain[j]
 						if(cmpstr(myRegionInfo.scanmode,f_FAT)==0) // time scale
 							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.dwell_time*(myRegionInfo.mcd_head+j+k*(dimsize(Countliste_avg,0)/myRegionInfo.detector.numdetectors))
 						else // kinetic energy scale
-							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.kinetic_energy+DetShiftList[j]*myRegionInfo.pass_energy
+							DetectorCHESY[j+(k*myRegionInfo.detector.numdetectors)]=myRegionInfo.kinetic_energy+myRegionInfo.Detector.w_shift[j]*myRegionInfo.pass_energy
 						endif
 					endfor
 				endif
@@ -994,6 +985,11 @@ static function SpecsXML_readsq(seq, savewave, savepos, myRegionInfo)
 	
 		case "DetectorSeq":
 			myRegionInfo.Detector.numdetectors = seq.length
+			redimension /N=(myRegionInfo.Detector.numdetectors) myRegionInfo.Detector.w_position; myRegionInfo.Detector.w_position = 0
+			redimension /N=(myRegionInfo.Detector.numdetectors) myRegionInfo.Detector.w_shift; myRegionInfo.Detector.w_shift = 0
+			redimension /N=(myRegionInfo.Detector.numdetectors) myRegionInfo.Detector.w_gain; myRegionInfo.Detector.w_gain = 0
+			redimension /N=(myRegionInfo.Detector.numdetectors) myRegionInfo.Detector.w_deadtime; myRegionInfo.Detector.w_deadtime = 0
+			redimension /N=(myRegionInfo.Detector.numdetectors) myRegionInfo.Detector.w_threshold; myRegionInfo.Detector.w_threshold = 0
 			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
 				return -1
 			endif
@@ -1206,13 +1202,13 @@ static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo
 			case "Detector":
 				strswitch(stringfromlist(0,tmps))
 					case "position":
-						myregionInfo.Detector.position[savepos] = str2num(stringfromlist(1,tmps))
+						myRegionInfo.Detector.w_position[savepos] = str2num(stringfromlist(1,tmps))
 						break
 					case "shift":
-						myregionInfo.Detector.shift[savepos] = str2num(stringfromlist(1,tmps))
+						myRegionInfo.Detector.w_shift[savepos] = str2num(stringfromlist(1,tmps))
 						break
 					case "gain":
-						myregionInfo.Detector.gain[savepos] = str2num(stringfromlist(1,tmps))
+						myRegionInfo.Detector.w_gain[savepos] = str2num(stringfromlist(1,tmps))
 						break
 					default:
 						Debugprintf2("Unknown Detectorstruct element: "+tmps,0)
