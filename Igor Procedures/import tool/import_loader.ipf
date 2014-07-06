@@ -131,7 +131,6 @@ function loaderstart(importloader,[optfile])
 	if(DataFolderExists(newexpname))
 		Debugprintf2("Folder exists, adding suffix!",0)
 		newexpname += get_flags("suffix")
-		print newexpname
 		newexpname = UniqueName(newexpname, 11, 0)
 	endif
 	NewDataFolder/S $newexpname

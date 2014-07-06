@@ -266,7 +266,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 
 //	variable cor_var = 0 // # of corresponding variables
 
-	string blockid =read_line_trim(file)+"_count_"+num2str(count)
+	string blockid ="SPK"+num2str(count)+read_line_trim(file)
 	blockid = cleanname(blockid)
 	Make /O/R/N=(10)  $blockid /wave=ycols
 	Note ycols, headercomment
@@ -578,7 +578,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	if(str2num(get_flags("CB_DivLifeTime")) == 1)
 		ycols/=dwelltime
 	endif
-	
+
 	splitmatrix(ycols, blockid)
 	Debugprintf2("exported: "+blockid,0)
 	return 0
