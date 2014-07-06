@@ -103,6 +103,9 @@ static structure RegionInfo
 	variable Ycurve_length
 	string comment
 	string appendtodetector
+
+	variable linecount
+	wave /T filewave
 endstructure
 
 
@@ -264,6 +267,10 @@ static function SpecsXML_savedetector(myRegionInfo)
 			strswitch(myRegionInfo.scanmode)
 				case f_FAT:
 					Index =myregionInfo.mcd_head * myregionInfo.detector.numdetectors + myRegionInfo.detector.numdetectors*(i) + (j) - myRegionInfo.detector.numdetectors*ROUND(DetShiftList[j]*myRegionInfo.pass_energy/myRegionInfo.scan_delta)
+					if(index<0 || index>=dimsize(countlist,0))//myRegionInfo.values_per_curve)
+						Debugprintf2("Error - Index out of range (0<  x <"+num2str(dimsize(countlist,0))+")"+num2str(index),0)
+						return -1
+					endif
 				break
 				case f_FE:
 					Index = myRegionInfo.detector.numdetectors*(i) + (j)  // Hier einfach die Detektoren aufsummieren, da sie hintereinander in der Counts-Liste stehen und auch so zusammen gehoeren !
@@ -608,8 +615,7 @@ static function /S SpecsXML_checkdblwavename(strs, stre)
 end
 
 
-static function SpecsXML_readstructsafterseq(file, givenstruct, savewave, savepos, myRegionInfo, length, name)
-	variable file
+static function SpecsXML_readstructsafterseq(givenstruct, savewave, savepos, myRegionInfo, length, name)
 	struct xmlstruct &givenstruct
 	wave /Z &savewave
 	variable &savepos
@@ -624,17 +630,18 @@ static function SpecsXML_readstructsafterseq(file, givenstruct, savewave, savepo
 	string tmps
 	for(i=0;i<length;i+=1)
 		j=i
-		FReadLine file, tmps
+		tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 		SpecsXML_getstruct(tmps, givenstruct, name)
-		SpecsXML_readstruct(file, givenstruct, savewave, j, myRegionInfo)
+		if(SpecsXML_readstruct(givenstruct, savewave, j, myRegionInfo) == -1)
+			return -1
+		endif
 	endfor
-	FReadLine file, tmps //</sequence>
+	myRegionInfo.linecount +=1 //</sequence>
 	return 0
 end
 
 
-static function /S SpecsXML_checktype(file, givenstruct, givenseq, givenenum, savewave, savepos, myRegionInfo, str)
-	variable file
+static function /S SpecsXML_checktype(givenstruct, givenseq, givenenum, savewave, savepos, myRegionInfo, str)
 	struct xmlstruct &givenstruct
 	struct xmlsequence &givenseq
 	struct xmlenum &givenenum
@@ -651,11 +658,15 @@ static function /S SpecsXML_checktype(file, givenstruct, givenseq, givenenum, sa
 			return "12"
 		elseIf (strsearch(str,"<sequence",0) == 0)
 			SpecsXML_getsq(str, givenseq)
-			SpecsXML_readsq(file, givenseq, savewave, savepos, myRegionInfo)
+			if(SpecsXML_readsq(givenseq, savewave, savepos, myRegionInfo) == -1)
+				return "-1"
+			endif
 			return ""
 		elseIf (strsearch(str,"<struct",0) == 0)
 			SpecsXML_getstruct(str, givenstruct, "structstruct")
-			SpecsXML_readstruct(file, givenstruct, savewave, savepos, myRegionInfo)
+			if(SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo) == -1)
+				return "-1"
+			endif
 			return ""
 		elseIf (strsearch(str,"<enum",0) == 0)
 			SpecsXML_getenum(str, givenenum)	
@@ -669,8 +680,7 @@ end
 
 
 
-static function SpecsXML_readparamstruct(file, givenstruct, savewave, savepos, myRegionInfo, str)
-	variable file
+static function SpecsXML_readparamstruct(givenstruct, savewave, savepos, myRegionInfo, str)
 	struct xmlstruct &givenstruct
 	wave /Z &savewave
 	variable &savepos
@@ -684,13 +694,13 @@ static function SpecsXML_readparamstruct(file, givenstruct, savewave, savepos, m
 
 	
 	
-	FReadLine file, tmps // <any name="value">
+	tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1 // <any name="value">
 	if(strsearch(tmps,"/>",0) !=  -1)
 		return 0	
 	endif
 
 	do 
-		FReadLine file, tmps
+		tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 		tmps = mycleanupstr(tmps)
 		If (strlen(tmps)==0)
 			return 0
@@ -698,8 +708,11 @@ static function SpecsXML_readparamstruct(file, givenstruct, savewave, savepos, m
 			//just skipping anatyhing between right now
 			return 0
 		endif
-		tmps = SpecsXML_checktype(file, givenstruct, myseq, myenum, savewave, savepos, myRegionInfo, tmps)
+		tmps = SpecsXML_checktype(givenstruct, myseq, myenum, savewave, savepos, myRegionInfo, tmps)
 		if(strlen(tmps) != 0)
+			if(cmpstr(tmps, "-1")==0)
+				return -1
+			endif
 			param = stringfromlist(1,str)
 #if 0
 			strswitch(param)
@@ -710,7 +723,7 @@ static function SpecsXML_readparamstruct(file, givenstruct, savewave, savepos, m
 					str2num(SpecsXML_getvariable(file, "double"))
 					break
 				case "Source":
-					FReadLine file, tmps
+					tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 					SpecsXML_getenum(tmps, myenum)	
 					break
 				case "Threshold [mV]":
@@ -915,16 +928,14 @@ static function SpecsXML_readparamstruct(file, givenstruct, savewave, savepos, m
 			endswitch
 #endif
 		endif
-		Fstatus file
-	while (V_logEOF>V_filePOS)  	
+	while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
 
 	return 0
 end
 
 
 
-static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
-	variable file
+static function SpecsXML_readsq(seq, savewave, savepos, myRegionInfo)
 	struct xmlsequence &seq
 	wave /Z &savewave
 	variable &savepos
@@ -946,30 +957,39 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 	
 	strswitch(seq.type_name)
 		case "RegionGroupSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "RegionDataSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "ExcitationSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 	
 		case "DetectorSeq":
 			myRegionInfo.Detector.numdetectors = seq.length
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "PointSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "DoubleSeq":
 			if(seq.length==-1)
-				FReadLine file, tmps // <double>
-				FReadLine file, tmps //</sequence>
+				myRegionInfo.linecount +=2 // <double> //</sequence>
 				break
 			endif			
 			strswitch(seq.name)
@@ -977,10 +997,9 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 					savepos = 0
 					myRegionInfo.Ycurve_length = seq.length
 					Make /O/R/N=(seq.length,savepos) doubleseqwave
-					FReadLine file, tmps // <double>
-					SpecsXML_counts(file, doubleseqwave, savepos, seq.length)
-					FReadLine file, tmps // </double>
-					FReadLine file, tmps //</sequence>
+					myRegionInfo.linecount +=1 // <double>
+					SpecsXML_counts(doubleseqwave, savepos, seq.length, myRegionInfo)
+					myRegionInfo.linecount +=2 // <double> //</sequence>
 					tmps2 = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit), "_"+cleanname(myRegionInfo.YCurve_name))
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
@@ -992,18 +1011,16 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 					break
 				case "scaling_factors":
 					redimension /N=(seq.length, -1) $scalinglist
-					FReadLine file, tmps // <double>
-					SpecsXML_counts(file, $scalinglist, savepos, seq.length)
-					FReadLine file, tmps // <double>
-					FReadLine file, tmps //</sequence>
+					myRegionInfo.linecount +=1 // <double>
+					SpecsXML_counts($scalinglist, savepos, seq.length, myRegionInfo)
+					myRegionInfo.linecount +=2 // <double> //</sequence>
 					break
 				case "transmission":
 					savepos = 0
 					Make /O/R/N=(seq.length,savepos) doubleseqwave
-					FReadLine file, tmps // <double>
-					SpecsXML_counts(file, doubleseqwave, savepos, seq.length)
-					FReadLine file, tmps // </double>
-					FReadLine file, tmps //</sequence>
+					myRegionInfo.linecount +=1 // <double>
+					SpecsXML_counts(doubleseqwave, savepos, seq.length, myRegionInfo)
+					myRegionInfo.linecount +=2 // <double> //</sequence>
 					tmps2 = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit), "_transm")
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
@@ -1022,18 +1039,16 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 
 		case "CountsSeq":
 			if(seq.length==-1)
-				FReadLine file, tmps // </ulong>
-				FReadLine file, tmps // </sequence>
+				myRegionInfo.linecount +=2 // </ulong> // </sequence>
 				break
 			endif
 		
 			myRegionInfo.numcounts = seq.length
 			redimension /N=(seq.length, -1) $countlist
 			
-			FReadLine file, tmps // <ulong type_id="IDL:specs.de/SurfaceAnalysis/Counts:1.0" type_name="Counts">
-			SpecsXML_counts(file, $countlist, savepos, seq.length)
-			FReadLine file, tmps // </ulong>
-			FReadLine file, tmps // </sequence>
+			myRegionInfo.linecount +=1 // <ulong type_id="IDL:specs.de/SurfaceAnalysis/Counts:1.0" type_name="Counts">
+			SpecsXML_counts($countlist, savepos, seq.length, myRegionInfo)
+			myRegionInfo.linecount +=2 // </ulong> // </sequence>
 			break
 			
 		case "ScanSeq":
@@ -1044,11 +1059,15 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 				Make /O/R/N=(1,seq.length) $scalinglist
 			endif
 			savepos = -1
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)==-1)
+				return -1
+			endif
 			break
 			
 		case "ParameterSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "StringSeq":
@@ -1056,38 +1075,45 @@ static function SpecsXML_readsq(file, seq, savewave, savepos, myRegionInfo)
 				seq.length = 1
 			endif
 			for(i=0;i<seq.length;i+=1)
-				SpecsXML_getvariable(file, "string")
+				SpecsXML_getvariable("string", myRegionInfo)
 			endfor
-			FReadLine file, tmps //</sequence>
+			myRegionInfo.linecount +=1 //</sequence>
 			break
 			
 		case "CycleSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "YCurveSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 			
 		case "XYCurveSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 
 		case "CompactCycleSeq":
-			SpecsXML_readstructsafterseq(file, mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name)
+			if(SpecsXML_readstructsafterseq(mystruct, savewave, savepos, myRegionInfo, seq.length, seq.type_name) == -1)
+				return -1
+			endif
 			break
 		
-		
 		default:
-				Debugprintf2("Unknown sequence: "+seq.type_name,0)
+			Debugprintf2("Unknown sequence: "+seq.type_name,0)
+			return -1	
 			break
 	endswitch
 	return 0
 end
 
 
-static function SpecsXML_readstruct(file, givenstruct, savewave, savepos, myRegionInfo)
-	variable file
+static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo)
 	struct xmlstruct &givenstruct
 	wave /Z &savewave
 	variable &savepos
@@ -1099,22 +1125,26 @@ static function SpecsXML_readstruct(file, givenstruct, savewave, savepos, myRegi
 	string tmps = ""
 
 	do
-		FReadLine file, tmps
-		tmps = mycleanupstr(tmps)
+		tmps = mycleanupstr(myRegionInfo.filewave[myRegionInfo.linecount]); myRegionInfo.linecount +=1
 		If (strlen(tmps)==0)
 			return 0
 		elseIf (strsearch(tmps,"</struct>",0) == 0)
 			if(strsearch(givenstruct.type_name,"RegionData",0)==0)
 				// in this case it is end of region and we need to save the data
-				SpecsXML_savedetector(myRegionInfo)
+				if(SpecsXML_savedetector(myRegionInfo) == -1)
+					return -1
+				endif
 				SpecsXML_resetRegionInfo(myRegionInfo)
 			endif
 			return 0
 		endif
 
-		tmps = SpecsXML_checktype(file, mystruct, myseq, myenum, savewave, savepos, myRegionInfo, tmps)
+		tmps = SpecsXML_checktype(mystruct, myseq, myenum, savewave, savepos, myRegionInfo, tmps)
 		if(strlen(tmps) == 0)
 			continue
+		endif
+		if(cmpstr(tmps, "-1")==0)
+			return -1
 		endif
 		
 		tmps=SpecsXML_gettypename(tmps)
@@ -1391,24 +1421,21 @@ static function SpecsXML_readstruct(file, givenstruct, savewave, savepos, myRegi
 				break	
 			
 			case "Parameter":
-				SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo, tmps)
+				SpecsXML_readparamstruct(mystruct, savewave, savepos, myRegionInfo, tmps)
 				break
 			default:
 				Debugprintf2("Unknown struct: "+givenstruct.type_name,0)
 				break
 		endswitch
 
-		Fstatus file
-	while (V_logEOF>V_filePOS)  
+	while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
 	return 0
 end
 
 
-static function /S SpecsXML_getbetween(file)
-	variable file
-	string tmps
-	FReadLine file, tmps
-	tmps=mycleanupstr(tmps)
+static function /S SpecsXML_getbetween(myRegionInfo)
+	struct RegionInfo &myRegionInfo
+	string tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 	return tmps[strsearch(tmps, ">",0)+1,strsearch(tmps,"<",strsearch(tmps, ">",0)+1)-1]	
 end
  
@@ -1427,12 +1454,11 @@ static function /S SpecsXML_gettypename(str)
 end
 
 
-static function /S SpecsXML_getvariable(file, what)
-	variable file
+static function /S SpecsXML_getvariable(what, myRegionInfo)
 	string what
-	string tmps, returnstr=""
-	FReadLine file, tmps
-	tmps=mycleanupstr(tmps)
+	struct RegionInfo &myRegionInfo
+	string tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
+	string returnstr=""
 	if(strsearch(tmps, "<"+what+"/>",0)==0)
 		return ""
 	endif
@@ -1440,15 +1466,14 @@ static function /S SpecsXML_getvariable(file, what)
 		Debugprintf2("multiline parameter!!!: "+tmps,0)
 		returnstr+=TmpS[ strlen("<"+what+">"),inf]
 		do
-			FReadLine file, tmps
+			tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 			if(strsearch(tmps, "</"+what+">",0)>=0)
 				returnstr+=";"+tmps[0,strlen(TmpS)-strlen("</"+what+">")-1]
 				break
 			else
 				returnstr+=";"+tmps
 			endif
-			Fstatus file
-		while (V_logEOF>V_filePOS)  
+		while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
 	else
 		if(strsearch(tmps, "</"+what+">",0)>0)
 			returnstr = TmpS[ strlen("<"+what+">"),strlen(TmpS)-strlen("</"+what+">")-1]
@@ -1460,17 +1485,14 @@ static function /S SpecsXML_getvariable(file, what)
 end
 
 
-static function SpecsXML_counts(file, savewave, savepos, length)
-	variable file
+static function SpecsXML_counts(savewave, savepos, length, myRegionInfo)
 	wave &savewave
 	variable &savepos
 	variable length
-	variable i=0, tmpd=0
-	string tmps
-	for(i=0;i<length;i+=1)
-			FReadLine file, tmps
-			savewave[i][savepos]= str2num(mycleanupstr(tmps))
-	endfor
+	struct RegionInfo &myRegionInfo
+	savewave[][savepos]= str2num(myRegionInfo.filewave[myRegionInfo.linecount+p])
+	myRegionInfo.linecount += length
+	return 0
 end
 
 
@@ -1518,24 +1540,25 @@ function SpecsXML_check_file(file)
 	variable file
 	fsetpos file, 0
 	variable i=0
-	string tmps = mycleanupstr(myreadline(file))
+	string tmps = ""
+	FReadLine file, tmps
 	if(strsearch(tmps,"<?xml version=\"1.0\"?>",0) != 0)
 		fsetpos file, 0
 		return -1
 	endif
-	tmps = mycleanupstr(myreadline(file))
+	FReadLine file, tmps
 	if(strsearch(tmps,"<!-- CORBA XML document created by XMLSerializer",0) != 0)
 		fsetpos file, 0
 		return -1
 	endif
-	tmps = mycleanupstr(myreadline(file))
+	FReadLine file, tmps
 	if(strsearch(tmps,"<!DOCTYPE any [",0) != 0)
 		fsetpos file, 0
 		return -1
 	endif
 	// now check for beginning of data
 	for(i=0;i<50;i+=1) // maybe increase the number
-		tmps = mycleanupstr(myreadline(file))
+		FReadLine file, tmps
 		If (strlen(tmps)==0)
 			fsetpos file, 0
 			return -1
@@ -1588,34 +1611,51 @@ function SpecsXML_load_data([optfile])
 		appendtodetector = tmps
 	endif
 
+	variable n= StartMSTimer
+	
+	struct xmlsequence seq
+	struct RegionInfo myRegionInfo
+	SpecsXML_resetRegionInfo(myRegionInfo)
+	variable tmpd = -1
+	myRegionInfo.folder=GetDataFolder(1)
+	myRegionInfo.header= header
+	myRegionInfo.appendtodetector = appendtodetector
+	myRegionInfo.linecount = 0
+	
+	// load complete file into a text wave for faster processing
+	fstatus file
+	LoadWave/Q/J/V={"", "", 0, 0}/K=2/A=$("file") (S_path+S_fileName)
+	if(V_flag !=1)
+		loaderend(importloader)
+		return -1
+	endif
+	wave /T myRegionInfo.filewave = $(StringFromList(0, S_waveNames))
+	string wavetokill = GetDataFolder(1)+StringFromList(0, S_waveNames)
+
 	do
-		FReadLine file, tmps
-		tmps = mycleanupstr(tmps)
+		tmps = mycleanupstr(myRegionInfo.filewave[myRegionInfo.linecount]); myRegionInfo.linecount +=1
 		If (strlen(tmps)==0)
-			return 0
+			loaderend(importloader)
+			return -1
 		endif
 		If(strsearch(tmps,"<any version=\"1.6\">",0) == 0 || strsearch(tmps,"<any version=\"1.3\">",0) == 0 )
 			break
 		endif  
-		Fstatus file
-	while (V_logEOF>V_filePOS)  
-	struct xmlsequence seq
-	struct RegionInfo myRegionInfo
-	SpecsXML_resetRegionInfo(myRegionInfo)
-	variable tmpd = -1//, i=0
-	myRegionInfo.folder=GetDataFolder(1)
-	myRegionInfo.header= header
-	myRegionInfo.appendtodetector = appendtodetector
+	while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
+
 	do
-		FReadLine file, tmps
-		tmps = mycleanupstr(tmps)
+		tmps = mycleanupstr(myRegionInfo.filewave[myRegionInfo.linecount]); myRegionInfo.linecount +=1
 		If (strlen(tmps)==0)
-			return 0
+			loaderend(importloader)
+			return -1
 		endif
 		SpecsXML_getsq(tmps, seq)
 		strswitch(seq.type_name)
 			case "RegionGroupSeq":
-				SpecsXML_readsq(file, seq, $(""), tmpd, myRegionInfo)
+				if(SpecsXML_readsq(seq, $(""), tmpd, myRegionInfo) == -1)
+					loaderend(importloader)
+					return -1
+				endif
 				break
 			default:
 				if(strsearch(tmps, "</any>",0)==0)
@@ -1623,14 +1663,13 @@ function SpecsXML_load_data([optfile])
 					break
 				endif
 				Debugprintf2("unknown sequence",0)
-				//print tmps
+				loaderend(importloader)
 				return -1
 				break
 		endswitch
-
-		Fstatus file
-	while (V_logEOF>V_filePOS)  
-
+	while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
+	killwaves $wavetokill
+	print "Load time: ",StopMSTimer(n)/1E6
 	importloader.success = 1
 	loaderend(importloader)
 end
