@@ -413,6 +413,7 @@ Function phimultipak_load_data([optfile])
 		phiheader.SpectralRegDef[i].header.datalen = spectraheaderread.datalen
 		phiheader.SpectralRegDef[i].header.datastart = spectraheaderread.datastart
 		phiheader.SpectralRegDef[i].header.offset2 =spectraheaderread.offset2
+		phiheader.SpectralRegDef[i].header.yunit =spectraheaderread.yunit
 	endfor
 	
 	
@@ -426,15 +427,17 @@ Function phimultipak_load_data([optfile])
 	for( i = 0; i < phiheader.NoSpectralReg; i += 1 )
 		// get datatype of spectra
 		strswitch(phiheader.SpectralRegDef[i].header.datatype) //switch(phiheader.SpectralRegDef[i].header.datalen/phiheader.SpectralRegDef[i].header.points)
-			// only float or double
-			case "f4"://4:
+			case "u4":
+				type = 3
+				break
+			case "f4":
 				type = 4 // float
 				break
-			case "f8"://8:
+			case "f8":
 				type = 5 //double
 				break
 			default:
-				debugprintf2("Unknown datatype!",0)
+				debugprintf2("Unknown datatype: "+phiheader.SpectralRegDef[i].header.datatype,0)
 				return -1
 				break	
 		endswitch
@@ -446,11 +449,21 @@ Function phimultipak_load_data([optfile])
 		fsetpos file, binstart + phiheader.SpectralRegDef[i].header.datastart
 		
 		//read spectrum
-		FBinRead/B=0/F=(type) file, data // compared to vms import of same file in CasaXPS there is a difference in countrate?? cps vs. pure counts..
-		// CasaXPS --> pure counts
-		// cps saved in spe (check yunit == c/s)
-		//data *=phiheader.SpectralRegDef[i].dwelltime // now the counts are the same as in CasaXPS, but we need cps
-		
+		FBinRead /U/B=0/F=(type) file, data
+				
+		strswitch(phiheader.SpectralRegDef[i].header.yunit)
+			case "c/s":
+				if(str2num(get_flags("CB_DivLifeTime"))!=1)
+					data *=phiheader.SpectralRegDef[i].dwelltime
+				endif
+				break
+			default:
+				if(str2num(get_flags("CB_DivLifeTime"))==1)
+					data /=phiheader.SpectralRegDef[i].dwelltime
+				endif
+				break
+		endswitch
+
 		// are there bytes at the end of the spectrum? Read them?
 		if(phiheader.SpectralRegDef[i].header.offset2 != 0)
 			fsetpos file, binstart + phiheader.SpectralRegDef[i].header.offset2
@@ -471,13 +484,14 @@ Function phimultipak_load_data([optfile])
 		// T(E) = Epass*( a^2 / ( a^2+ (E/Epass)^2 ) )^b
 		TF[]=(phiheader.SpectralRegDef[i].Epass*(phiheader.Ta^2+(x/phiheader.SpectralRegDef[i].Epass)^2)^phiheader.Tb)
 		// here the calculated TE is somehow different??
-#endif		
-		
+#endif
+
 		// set the scale etc.
+		// use point scaling as sometimes "points != (ende-start)/step+1"
 		if(str2num(get_flags("posbinde"))==1)
-			SetScale/I  x,phiheader.SpectralRegDef[i].start1,phiheader.SpectralRegDef[i].ende1, "eV", data//, TF
+			SetScale/P  x,phiheader.SpectralRegDef[i].start1,phiheader.SpectralRegDef[i].step, "eV", data//, TF
 		else
-			SetScale/I  x,-phiheader.SpectralRegDef[i].start1,-phiheader.SpectralRegDef[i].ende1, "eV", data//, TF
+			SetScale/P  x,-phiheader.SpectralRegDef[i].start1,-phiheader.SpectralRegDef[i].step, "eV", data//, TF
 		endif
 		note data,header
 		
