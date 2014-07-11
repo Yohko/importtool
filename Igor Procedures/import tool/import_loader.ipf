@@ -249,24 +249,7 @@ Function /S cleanname(str)
 	str = cleanupname(str,0)
 	str= ReplaceString("_",str,"")
 	str= ReplaceString(" ",str,"")
-	variable maxlen = 20
-	
-#if 0	
-	if (strlen(str) >= max)
-		do 
-			Prompt str, "Enter new Name: "
-			DoPrompt "Experimentname to long (<="+num2str(max)+") (no ,.():_", str
-			str=ReplaceString(" ",str,"")
-			str=ReplaceString("_",str,"")
-			str=ReplaceString(",",str,"")
-			str=ReplaceString(".",str,"")
-			str=ReplaceString("(",str,"")
-			str=ReplaceString(")",str,"")
-			str=ReplaceString(":",str,"")
-		while (strlen(str) >= max)
-	endif
-#endif
-	return shortname(str, maxlen)
+	return shortname(str, 20)
 end
 
 
@@ -308,19 +291,13 @@ end
 function splitmatrix(matrix,name)
 	wave matrix
 	string name
-	variable rows = dimsize(matrix,0)
-	variable cols = dimsize(matrix,1)
-	variable i=0, j=0
+	variable i=0
 	string tmps=""
-	for(i=0;i<cols;i+=1)
+	for(i=0;i<dimsize(matrix,1);i+=1)
 		tmps=name+"_spk"+num2str(i)
 		//Rename loaded wave to cleaned-up filename
-		duplicate matrix, $tmps
-		WAVE w = $tmps
-		redimension /N=(rows) w
-		for(j=0;j<rows;j+=1)
-			w[j]=matrix[j][i]		
-		endfor	
+		duplicate /R=[0,*][i] matrix, $tmps
+		redimension /N=( dimsize(matrix,0)) $tmps // I dont want to have a (rows x 1) matrix
 	endfor
 	KillWaves/Z matrix	
 end
@@ -378,22 +355,6 @@ function read_dbl_le(file)
 	return val
 end
 
-
-function read_int16_le(file)
-	variable file
-	variable val
-	Fbinread/B=3/f=2 file, val
-	return val
-end
-
-function read_int32_le(file)
-	variable file
-	variable val
-	Fbinread/B=3/f=3 file, val
-	return val
-end
-
-
 function read_flt_le(file)
 	variable file
 	variable val
@@ -416,16 +377,6 @@ function read_uint16_le(file)
 	Fbinread/B=3/U/f=2 file, val
 	return val
 end
-
-
-Function/S TimeColon(timestr) //format HHMMSS (161959)
-	string timestr
-	string hh, mm, ss
-	hh=timestr[0,1]
-	mm=timestr[2,3]
-	ss=timestr[4,5]
-	return hh+":"+mm+":"+ss
-End
 
 
 Function/S StripDoubleQuotes(str)

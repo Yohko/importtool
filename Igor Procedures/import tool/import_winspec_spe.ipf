@@ -564,7 +564,7 @@ function WinspecSpe_load_data([optfile])
 	note w,header
 	note w, "Exposure time (sec): "+num2str(head1.exp_sec)
 	note w, "Date: "+cleanupname(head1.datec,1)
-	note w, "Time: "+TimeColon(head1.ExperimentTimeLocal)
+	note w, "Time: "+WinspecSpe_time(head1.ExperimentTimeLocal)
 	note w, "Comment1: "+cleanupname(head1.Comments0,1)
 	note w, "Comment2: "+cleanupname(head1.Comments1,1)
 	note w, "Comment3: "+cleanupname(head1.Comments2,1)
@@ -654,3 +654,13 @@ function WinspecSpe_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
+
+
+static Function/S WinspecSpe_time(timestr) //format HHMMSS (161959)
+	string timestr
+	string hh, mm, ss
+	hh=timestr[0,1]
+	mm=timestr[2,3]
+	ss=timestr[4,5]
+	return hh+":"+mm+":"+ss
+End

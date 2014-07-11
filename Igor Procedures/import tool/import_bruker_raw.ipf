@@ -154,7 +154,7 @@ static function BruckerRaw_load_version2(file,header)
 
 	variable i=0, y=0, cur_range= 0
 	string tmps=""
-	variable range_cnt = read_uint16_le(file)
+	variable range_cnt; Fbinread/B=3/U/f=2 file, range_cnt
 	Debugprintf2("range_cnt: "+num2str(range_cnt),1)
 	mybinread(file,162)
 	header += "DATE_TIME_MEASURE: " + mybinread(file, 20) + "\r"
@@ -168,7 +168,7 @@ static function BruckerRaw_load_version2(file,header)
 
 	mybinread(file,42) // move ptr to the start of 1st block
 	for (cur_range = 0; cur_range < range_cnt; cur_range+=1) 
-		variable cur_header_len = read_uint16_le(file)
+		variable cur_header_len; Fbinread/B=3/U/f=2 file, cur_header_len
 		if(cur_header_len<=48)
 			print num2str(cur_header_len)
 			Debugprintf2("Header to small! (<=48)",0)
@@ -176,7 +176,7 @@ static function BruckerRaw_load_version2(file,header)
 			return -1
 		endif
 
-		variable cur_range_steps = read_uint16_le(file)
+		variable cur_range_steps; Fbinread/B=3/U/f=2 file, cur_range_steps
 		mybinread(file,4)
 		header += "SEC_PER_STEP: " + num2str(read_flt_le(file)) + "\r"
 
