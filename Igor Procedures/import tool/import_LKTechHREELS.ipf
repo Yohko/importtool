@@ -4,6 +4,7 @@
 // LK-Tech HREELS Model EA5000MCA
 // http://www.lktech.com/products/EA5000MCA.php
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			Submenu "EELS"
@@ -11,6 +12,7 @@ Menu "Macros"
 			end			
 	end
 end
+#endif
 
 
 function LKHREELS_check_file(file)

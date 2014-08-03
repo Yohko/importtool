@@ -5,6 +5,7 @@
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/uxd.cpp)
 
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "XRD"
@@ -12,6 +13,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 // ###################### Diffrac-AT UXD ########################
 // Siemens/Bruker Diffrac-AT UXD text format (for powder diffraction data)

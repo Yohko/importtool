@@ -1,6 +1,7 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "PES"
@@ -8,6 +9,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 //static strconstant DsetBG = "BG"
 //static strconstant Dsetimage = "img"
@@ -1538,8 +1540,10 @@ static function KratosDSET_addnotenum(waves, name, num)
 	wave waves
 	string name
 	variable num
+	string tmps = ""
+	sprintf tmps, "%f", num
 	if(numtype(num)==0)
-		note waves, name+num2str(num)
+		note waves, name+tmps
 	endif
 end
 

@@ -10,6 +10,8 @@
 
 // no 2D spectra tested yet.... but should work
 
+
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "XRD"
@@ -17,7 +19,7 @@ Menu "Macros"
 			end
 	end
 end
-
+#endif
 
 // Princeton Instruments WinSpec SPE Format
 // Licence: Lesser GNU Public License 2.1 (LGPL)

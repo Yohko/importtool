@@ -5,6 +5,7 @@
 // The FOURYA/XFIT/Koalariet XDD procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/xfit_xdd.cpp)
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "XRD"
@@ -12,6 +13,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 
 // ###################### FOURYA/XFIT/Koalariet XDD file ########################

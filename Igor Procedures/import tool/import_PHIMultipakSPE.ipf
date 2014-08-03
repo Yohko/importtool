@@ -3,6 +3,7 @@
 
 // based on http://www.igorexchange.com/node/5692
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "PES"
@@ -10,7 +11,7 @@ Menu "Macros"
 			end
 	end
 end
-
+#endif
 
 static structure phiheader
 	variable energy

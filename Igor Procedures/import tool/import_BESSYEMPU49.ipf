@@ -3,6 +3,7 @@
 
 // EMP data file as for the U49/2-PGM2 at BESSYII
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 		submenu "PES"
@@ -10,6 +11,7 @@ Menu "Macros"
 		end
 	end
 end
+#endif
 
 
 static structure keyval

@@ -4,6 +4,7 @@
 // http://www.jawoollam.com/wvase.html
 
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 		submenu "FTIR-RAMAN-VASE"
@@ -11,6 +12,7 @@ Menu "Macros"
 		end
 	end
 end
+#endif
 
 
 function WVASE32_check_file(file)

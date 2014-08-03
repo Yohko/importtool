@@ -5,6 +5,7 @@
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/philips_raw.cpp)
 
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "XRD"
@@ -12,6 +13,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 // ###################### Philips RD raw scan format ########################
 // Philips RD raw scan format V3 (.rd) and V5 (.sd)

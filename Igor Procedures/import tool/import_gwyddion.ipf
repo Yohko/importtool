@@ -1,6 +1,7 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "AFM-Microscopes"
@@ -8,6 +9,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 // ###################### Gwyddion gwy ########################
 // http://gwyddion.net/documentation/user-guide-en/gwyfile-format.html

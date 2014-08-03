@@ -7,6 +7,7 @@
 
 // http://www.physics.arizona.edu/~smanne/DI/software/fileformats.html
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 		submenu "AFM-Microscopes"
@@ -14,7 +15,7 @@ Menu "Macros"
 		end
 	end
 end
-
+#endif
 
 static structure keyval
 	string key

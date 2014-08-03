@@ -12,6 +12,8 @@
 // National Physics Laboratory Report DMA(A)164 July 1988
 //  and on the analysis of sample files.
 
+
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "PES"
@@ -20,7 +22,7 @@ Menu "Macros"
 			end
 	end
 end
-
+#endif
 
 
 // dictionaries for VAMAS data

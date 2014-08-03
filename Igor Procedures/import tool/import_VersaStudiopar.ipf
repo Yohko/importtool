@@ -3,6 +3,7 @@
 
 // Device: http://www.princetonappliedresearch.com/Our-Products/Potentiostats/VersaSTAT-4.aspx
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 		submenu "E-Chem"
@@ -10,6 +11,7 @@ Menu "Macros"
 		end
 	end
 end
+#endif
 
 
 static structure param

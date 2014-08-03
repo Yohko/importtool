@@ -4,6 +4,7 @@
 // Reverse View 8'' LEED Optics with Retraction - Model RVL2000/8/R
 // http://www.lktech.com/products/rvl2000.php
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			Submenu "AES"
@@ -11,6 +12,7 @@ Menu "Macros"
 			end			
 	end
 end
+#endif
 
 
 function LKAES_check_file(file)

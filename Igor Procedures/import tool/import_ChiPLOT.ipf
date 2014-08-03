@@ -5,6 +5,7 @@
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/chiplot.cpp)
 
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "MISC"
@@ -12,6 +13,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 
 // ###################### chiplot ########################
