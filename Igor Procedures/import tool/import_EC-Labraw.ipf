@@ -5,6 +5,7 @@
 // http://www.bio-logic.info/potentiostat-electrochemistry-ec-lab/
 // based on https://github.com/chatcannon/galvani (cfffeee2e2 , 2014-05-02)
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 		submenu "E-Chem"
@@ -13,6 +14,7 @@ Menu "Macros"
 		end
 	end
 end
+#endif
 
 
 structure mprmoduleheader
@@ -45,6 +47,7 @@ structure alltypes
 	variable ID[100]
 	struct type type[100]
 endstructure
+
 
 static function BIOLOGICmpr_read_moduleobject(file, mprhdr)
 	variable file ; struct mprmoduleheader &mprhdr
@@ -84,684 +87,387 @@ end
 
 static function BIOLOGICmpr_check_datatype(ID, type)
 	variable ID; struct type &type
+
+	type.read = 1
 	switch(ID)
 		case 1:
-			type.type=1
-			type.name="mode"
-			type.wave_name = "mode"
-			type.mask = 3 // 0x03
+			type.type=1; type.name="mode"; type.wave_name = "mode"; type.mask = 3 // 0x03
 			if(type.readflags==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags = 1
 			endif
 			break
 		case 2:
-			type.type=1
-			type.name="ox/red"
-			type.wave_name = "oxred"
-			type.mask = 4 // 0x04
+			type.type=1; type.name="ox/red"; type.wave_name = "oxred"; type.mask = 4 // 0x04
 			if(type.readflags==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags = 1
 			endif
 			break
 		case 3:
-			type.type=1
-			type.name="error"
-			type.wave_name = "error"
-			type.mask = 8 // 0x08
+			type.type=1; type.name="error"; type.wave_name = "error"; type.mask = 8 // 0x08
 			if(type.readflags==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags = 1
 			endif
 			break
 		case 4:
-			type.type=5
-			type.name="time/s"
-			type.wave_name = "time"
-			type.read = 1
+			type.type=5; type.name="time/s"; type.wave_name = "time"
 			break
 		case 5:
-			type.type=4
-			type.name="control/V/mA"
-			type.wave_name = "controlP"
-			type.read = 1
+			type.type=4; type.name="control/V/mA"; type.wave_name = "controlP"
 			break
 		case 6:
-			type.type=4
-			type.name="Ewe/V"
-			type.wave_name = "Ewe"
-			type.read = 1
+			type.type=4; type.name= "Ewe/V"; type.wave_name = "Ewe"
 			break
 		case 7:
-			type.type=5
-			type.name="dQ/mA.h"
-			type.wave_name = "dQ"
-			type.read = 1
+			type.type=5; type.name="dQ/mA.h"; type.wave_name = "dQ"
 			break
 		case 8:
-			type.type=4
-			type.name="I/mA"
-			type.wave_name = "current"
-			type.read = 1
+			type.type=4; type.name="I/mA"; type.wave_name = "current"
 			break
 		case 9:
-			type.type=4 
-			type.name="Ece/V"
-			type.wave_name = "Ece"
-			type.read = 1
+			type.type=4 ; type.name="Ece/V"; type.wave_name = "Ece"
 			break
 		case 11:
-			type.type=5
-			type.name="I/mA"
-			type.wave_name = "current"
-			type.read = 1
+			type.type=5; type.name="I/mA"; type.wave_name = "current"
 			break
 		case 13:
-			type.type=5
-			type.name="(Q-Qo)/mA.h"
-			type.wave_name = "Q-Qo"
-			type.read = 1
+			type.type=5; type.name="(Q-Qo)/mA.h"; type.wave_name = "Q-Qo"
 			break
 		case 16:
-			type.type=4 
-			type.name="Analog IN 1/V"
-			type.wave_name = "Analog IN 1"
-			type.read = 1
+			type.type=4 ; type.name="Analog IN 1/V"; type.wave_name = "Analog IN 1"
 			break
 		case 17:
-			type.type=4 
-			type.name="Analog IN 2/V"
-			type.wave_name = "Analog IN 2"
-			type.read = 1
+			type.type=4; type.name="Analog IN 2/V"; type.wave_name = "Analog IN 2"
 			break
 		case 19:
-			type.type=4
-			type.name="control/V"
-			type.wave_name = "controlV"
-			type.read = 1
+			type.type=4; type.name="control/V"; type.wave_name = "controlV"
 			break
 		case 20:
-			type.type=4 
-			type.name="control/mA"
-			type.wave_name = "controlmA"
-			type.read = 1
+			type.type=4 ; type.name="control/mA"; 	type.wave_name = "controlmA"
 			break
 		case 21:
-			type.type=1
-			type.name="control changes"
-			type.wave_name = "controlchanges"
-			type.mask = 16 // 0x10
+			type.type=1; type.name="control changes"; type.wave_name = "controlchanges"; type.mask = 16 // 0x10
 			if(type.readflags==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags = 1
 			endif
 			break
 		case 23:
-			type.type=5
-			type.name="dQ/mA.h"
-			type.wave_name = "dq"
-			type.read = 1
+			type.type=5; type.name="dQ/mA.h"; type.wave_name = "dq"
 			break
 		case 24:
-			type.type=5
-			type.name="cyclic number"
-			type.wave_name = "cyclenumber"
-			type.read = 1
+			type.type=5; type.name="cyclic number"; type.wave_name = "cyclenumber"
 			break
 		case 31:
-			type.type=1
-			type.name="Ns changes"
-			type.wave_name = "Ns"
-			type.mask = 32 // 0x20
+			type.type=1; type.name="Ns changes"; type.wave_name = "Ns"; type.mask = 32 // 0x20
 			if(type.readflags==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags = 1
 			endif
 			break
 		case 32:
-			type.type=4
-			type.name="freq/Hz "
-			type.wave_name = "freq"
-			type.read = 1
+			type.type=4; type.name="freq/Hz"; type.wave_name = "freq"
 			break
 		case 33:
-			type.type=4
-			type.name="|Ewe|/V"
-			type.wave_name = "|Ewe|"
-			type.read = 1
+			type.type=4; type.name="|Ewe|/V"; type.wave_name = "|Ewe|"
 			break
 		case 34:
-			type.type=4
-			type.name="|I|/A"
-			type.wave_name = "|I|"
-			type.read = 1
+			type.type=4; type.name="|I|/A"; type.wave_name = "|I|"
 			break
 		case 35:
-			type.type=4
-			type.name="Phase(Z)/deg"
-			type.wave_name = "Phase(Z)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z)/deg"; type.wave_name = "Phase(Z)"
 			break
 		case 36:
-			type.type=4
-			type.name="|Z|/Ohm"
-			type.wave_name = "|Z|"
-			type.read = 1
+			type.type=4; type.name="|Z|/Ohm"; type.wave_name = "|Z|"
 			break
 		case 37:
-			type.type=4
-			type.name="Re(Z)/Ohm"
-			type.wave_name = "Re(Z)"
-			type.read = 1
+			type.type=4; type.name="Re(Z)/Ohm"; type.wave_name = "Re(Z)"
 			break
 		case 38:
-			type.type=4
-			type.name="-Im(Z)/Ohm"
-			type.wave_name = "-Im(Z)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z)/Ohm"; type.wave_name = "-Im(Z)"
 			break
 		case 39:
-			type.type=2
-			type.name="I Range"
-			type.wave_name = "I Range"
-			type.read = 1
+			type.type=2; type.name="I Range"; type.wave_name = "I Range"
 			break
 		case 50:
-			type.type=4
-			type.name="E0/V"
-			type.wave_name = "E0"
-			type.read = 1
+			type.type=4; type.name="E0/V"; type.wave_name = "E0"
 			break
 		case 65:
-			type.type=1
-			type.name="counter inc."
-			type.wave_name = "counter"
-			type.mask = 128 // 0x80
+			type.type=1; type.name="counter inc."; type.wave_name = "counter"; type.mask = 128 // 0x80
 			if(type.readflags==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags = 1
 			endif
 			break
 		case 70:
-			type.type=4
-			type.name="P/W"
-			type.wave_name = "power"
-			type.read = 1
+			type.type=4; type.name="P/W"; type.wave_name = "power"
 			break
 		case 73:
-			type.type=4
-			type.name="control/rpm"
-			type.wave_name = "control"
-			type.read = 1
+			type.type=4; type.name="control/rpm"; type.wave_name = "control"
 			break		
 		case 74:
-			type.type=5
-			type.name="Energy/W.h"
-			type.wave_name = "Energy"
-			type.read = 1
+			type.type=5; type.name="Energy/W.h"; type.wave_name = "Energy"
 			break
 		case 75:
-			type.type=4
-			type.name="Analog OUT/V"
-			type.wave_name = "Analog OUT"
-			type.read = 1
+			type.type=4; type.name="Analog OUT/V"; type.wave_name = "Analog OUT"
 			break
 		case 76:
-			type.type=4
-			type.name="<I>/mA"
-			type.wave_name = "<I>"
-			type.read = 1
+			type.type=4; type.name="<I>/mA"; type.wave_name = "<I>"
 			break
 		case 77:
-			type.type=4
-			type.name="<Ewe>/V"
-			type.wave_name = "<Ewe>"
-			type.read = 1
+			type.type=4; type.name="<Ewe>/V"; type.wave_name = "<Ewe>"
 			break
 		case 78:
-			type.type=4
-			type.name="Cs-2/µF-2"
-			type.wave_name = "Cs-2"
-			type.read = 1
+			type.type=4; type.name="Cs-2/µF-2"; type.wave_name = "Cs-2"
 			break
 		case 86:
-			type.type=4
-			type.name="Unk1"
-			type.wave_name = "Unk1"
-			type.read = 1
+			type.type=4; type.name="Unk1"; type.wave_name = "Unk1"
 			break
 		case 96:
-			type.type=4
-			type.name="|Ece|/V"
-			type.wave_name = "|Ece|"
-			type.read = 1
+			type.type=4; type.name="|Ece|/V"; type.wave_name = "|Ece|"
 			break
 		case 97:
-			type.type=4
-			type.name="|Ice|/A"
-			type.wave_name = "|Ice|"
-			type.read = 1
+			type.type=4; type.name="|Ice|/A"; type.wave_name = "|Ice|"
 			break
 		case 98:
-			type.type=4 
-			type.name="Phase(Zce)/deg"
-			type.wave_name = "Phase(Zce)"
-			type.read = 1
+			type.type=4; type.name="Phase(Zce)/deg"; type.wave_name = "Phase(Zce)"
 			break
 		case 99:
-			type.type=4 
-			type.name="|Zce|/Ohm"
-			type.wave_name = "|Zce|"
-			type.read = 1
+			type.type=4; type.name="|Zce|/Ohm"; type.wave_name = "|Zce|"
 			break
 		case 100:
-			type.type=4 
-			type.name="Re(Zce)/Ohm"
-			type.wave_name = "Re(Zce)"
-			type.read = 1
+			type.type=4; type.name="Re(Zce)/Ohm"; type.wave_name = "Re(Zce)"
 			break
 		case 101:
-			type.type=4
-			type.name="-Im(Zce)/Ohm"
-			type.wave_name = "-Im(Zce)"
-			type.read = 1
+			type.type=4; type.name="-Im(Zce)/Ohm"; type.wave_name = "-Im(Zce)"
 			break
 		case 131:
-			type.type=2
-			type.name="??"
-			type.wave_name = "??"
-			type.mask = 1 // 0x0001
+			type.type=2; type.name="??"; type.wave_name = "??"; type.mask = 1 // 0x0001
 			if(type.readflags2==1)
 				type.read = 0
 			else
-				type.read = 1
 				type.readflags2 = 1
 			endif
 			break
 		case 163:
-			type.type=4
-			type.name="|Estack|/V"
-			type.wave_name = "|Estack|"
-			type.read = 1
+			type.type=4; type.name="|Estack|/V"; type.wave_name = "|Estack|"
 			break
 		case 169:
-			type.type=4
-			type.name="Cs/µF"
-			type.wave_name = "Cs"
-			type.read = 1
+			type.type=4; type.name="Cs/µF"; type.wave_name = "Cs"
 			break
 		case 172:
-			type.type=4
-			type.name="Cp/µF"
-			type.wave_name = "Cp"
-			type.read = 1
+			type.type=4; type.name="Cp/µF"; type.wave_name = "Cp"
 			break
 		case 173:
-			type.type=4
-			type.name="Cp-2/µF-2"
-			type.wave_name = "Cp-2"
-			type.read = 1
+			type.type=4; type.name="Cp-2/µF-2"; type.wave_name = "Cp-2"
 			break
 		case 209:
-			type.type=5
-			type.name="pad number"
-			type.wave_name = "pad number"
-			type.read = 1
+			type.type=5; type.name="pad number"; type.wave_name = "pad number"
 			break
 		case 241:
-			type.type=4
-			type.name="|E1|/V"
-			type.wave_name = "|E1|"
-			type.read = 1
+			type.type=4; type.name="|E1|/V"; type.wave_name = "|E1|"
 			break
 		case 242:
-			type.type=4
-			type.name="|E2|/V"
-			type.wave_name = "|E2|"
-			type.read = 1
+			type.type=4; type.name="|E2|/V"; type.wave_name = "|E2|"
 			break
 		case 243:
-			type.type=4
-			type.name="|E3|/V"
-			type.wave_name = "|E3|"
-			type.read = 1
+			type.type=4; type.name="|E3|/V"; type.wave_name = "|E3|"
 			break
 		case 244:
-			type.type=4
-			type.name="|E4|/V"
-			type.wave_name = "|E4|"
-			type.read = 1
+			type.type=4; type.name="|E4|/V"; type.wave_name = "|E4|"
 			break
 		case 245:
-			type.type=4
-			type.name="|E5|/V"
-			type.wave_name = "|E5|"
-			type.read = 1
+			type.type=4; type.name="|E5|/V"; type.wave_name = "|E5|"
 			break
 		case 246:
-			type.type=4
-			type.name="|E6|/V"
-			type.wave_name = "|E6|"
-			type.read = 1
+			type.type=4; type.name="|E6|/V"; type.wave_name = "|E6|"
 			break
 		case 247:
-			type.type=4
-			type.name="|E7|/V"
-			type.wave_name = "|E7|"
-			type.read = 1
+			type.type=4; type.name="|E7|/V"; type.wave_name = "|E7|"
 			break
 		case 248:
-			type.type=4
-			type.name="|E8|/V"
-			type.wave_name = "|E8|"
-			type.read = 1
+			type.type=4; type.name="|E8|/V"; type.wave_name = "|E8|"
 			break
 		case 271:
-			type.type=4
-			type.name="Phase(Z1)/deg"
-			type.wave_name = "Phase(Z1)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z1)/deg"; type.wave_name = "Phase(Z1)"
 			break
 		case 272:
-			type.type=4
-			type.name="Phase(Z2)/deg"
-			type.wave_name = "Phase(Z2)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z2)/deg"; type.wave_name = "Phase(Z2)"
 			break
 		case 273:
-			type.type=4
-			type.name="Phase(Z3)/deg"
-			type.wave_name = "Phase(Z3)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z3)/deg"; type.wave_name = "Phase(Z3)"
 			break
 		case 274:
-			type.type=4
-			type.name="Phase(Z4)/deg"
-			type.wave_name = "Phase(Z4)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z4)/deg"; type.wave_name = "Phase(Z4)"
 			break
 		case 275:
-			type.type=4
-			type.name="Phase(Z5)/deg"
-			type.wave_name = "Phase(Z5)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z5)/deg"; type.wave_name = "Phase(Z5)"
 			break
 		case 276:
-			type.type=4
-			type.name="Phase(Z6)/deg"
-			type.wave_name = "Phase(Z6)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z6)/deg"; type.wave_name = "Phase(Z6)"
 			break
 		case 277:
-			type.type=4
-			type.name="Phase(Z7)/deg"
-			type.wave_name = "Phase(Z7)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z7)/deg"; type.wave_name = "Phase(Z7)"
 			break
 		case 278:
-			type.type=4
-			type.name="Phase(Z8)/deg"
-			type.wave_name = "Phase(Z8)"
-			type.read = 1
+			type.type=4; type.name="Phase(Z8)/deg"; type.wave_name = "Phase(Z8)"
 			break
 		case 301:
-			type.type=4
-			type.name="|Z1|/Ohm"
-			type.wave_name = "|Z1|"
-			type.read = 1
+			type.type=4; type.name="|Z1|/Ohm"; type.wave_name = "|Z1|"
 			break
 		case 302:
-			type.type=4
-			type.name="|Z2|/Ohm"
-			type.wave_name = "|Z2|"
-			type.read = 1
+			type.type=4; type.name="|Z2|/Ohm"; type.wave_name = "|Z2|"
 			break
 		case 303:
-			type.type=4
-			type.name="|Z3|/Ohm"
-			type.wave_name = "|Z3|"
-			type.read = 1
+			type.type=4; type.name="|Z3|/Ohm"; type.wave_name = "|Z3|"
 			break
 		case 304:
-			type.type=4
-			type.name="|Z4|/Ohm"
-			type.wave_name = "|Z4|"
-			type.read = 1
+			type.type=4; type.name="|Z4|/Ohm"; type.wave_name = "|Z4|"
 			break
 		case 305:
-			type.type=4
-			type.name="|Z5|/Ohm"
-			type.wave_name = "|Z5|"
-			type.read = 1
+			type.type=4; type.name="|Z5|/Ohm"; type.wave_name = "|Z5|"
 			break
 		case 306:
-			type.type=4
-			type.name="|Z6|/Ohm"
-			type.wave_name = "|Z6|"
-			type.read = 1
+			type.type=4; type.name="|Z6|/Ohm"; type.wave_name = "|Z6|"
 			break
 		case 307:
-			type.type=4
-			type.name="|Z7|/Ohm"
-			type.wave_name = "|Z7|"
-			type.read = 1
+			type.type=4; type.name="|Z7|/Ohm"; type.wave_name = "|Z7|"
 			break
 		case 308:
-			type.type=4
-			type.name="|Z8|/Ohm"
-			type.wave_name = "|Z8|"
-			type.read = 1
+			type.type=4; type.name="|Z8|/Ohm"; type.wave_name = "|Z8|"
 			break
 		case 331:
-			type.type=4
-			type.name="Re(Z1)/Ohm"
-			type.wave_name = "Re(Z1)"
-			type.read = 1
+			type.type=4; type.name="Re(Z1)/Ohm"; type.wave_name = "Re(Z1)"
 			break
 		case 332:
-			type.type=4
-			type.name="Re(Z2)/Ohm"
-			type.wave_name = "Re(Z2)"
-			type.read = 1
+			type.type=4; type.name="Re(Z2)/Ohm"; type.wave_name = "Re(Z2)"
 			break
 		case 333:
-			type.type=4
-			type.name="Re(Z3)/Ohm"
-			type.wave_name = "Re(Z3)"
-			type.read = 1
+			type.type=4; type.name="Re(Z3)/Ohm"; type.wave_name = "Re(Z3)"
 			break
 		case 334:
-			type.type=4
-			type.name="Re(Z4)/Ohm"
-			type.wave_name = "Re(Z4)"
-			type.read = 1
+			type.type=4; type.name="Re(Z4)/Ohm"; type.wave_name = "Re(Z4)"
 			break
 		case 335:
-			type.type=4
-			type.name="Re(Z5)/Ohm"
-			type.wave_name = "Re(Z5)"
-			type.read = 1
+			type.type=4; type.name="Re(Z5)/Ohm"; type.wave_name = "Re(Z5)"
 			break
 		case 336:
-			type.type=4
-			type.name="Re(Z6)/Ohm"
-			type.wave_name = "Re(Z6)"
-			type.read = 1
+			type.type=4; type.name="Re(Z6)/Ohm"; type.wave_name = "Re(Z6)"
 			break
 		case 337:
-			type.type=4
-			type.name="Re(Z7)/Ohm"
-			type.wave_name = "Re(Z7)"
-			type.read = 1
+			type.type=4; type.name="Re(Z7)/Ohm"; type.wave_name = "Re(Z7)"
 			break
 		case 338:
-			type.type=4
-			type.name="Re(Z8)/Ohm"
-			type.wave_name = "Re(Z8)"
-			type.read = 1
+			type.type=4; type.name="Re(Z8)/Ohm"; type.wave_name = "Re(Z8)"
 			break
 		case 361:
-			type.type=4
-			type.name="-Im(Z1)/Ohm"
-			type.wave_name = "-Im(Z1)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z1)/Ohm"; type.wave_name = "-Im(Z1)"
 			break
 		case 362:
-			type.type=4
-			type.name="-Im(Z2)/Ohm"
-			type.wave_name = "-Im(Z2)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z2)/Ohm"; type.wave_name = "-Im(Z2)"
 			break
 		case 363:
-			type.type=4
-			type.name="-Im(Z3)/Ohm"
-			type.wave_name = "-Im(Z3)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z3)/Ohm"; type.wave_name = "-Im(Z3)"
 			break
 		case 364:
-			type.type=4
-			type.name="-Im(Z4)/Ohm"
-			type.wave_name = "-Im(Z4)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z4)/Ohm"; type.wave_name = "-Im(Z4)"
 			break
 		case 365:
-			type.type=4
-			type.name="-Im(Z5)/Ohm"
-			type.wave_name = "-Im(Z5)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z5)/Ohm"; type.wave_name = "-Im(Z5)"
 			break
 		case 366:
-			type.type=4
-			type.name="-Im(Z6)/Ohm"
-			type.wave_name = "-Im(Z6)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z6)/Ohm"; type.wave_name = "-Im(Z6)"
 			break
 		case 367:
-			type.type=4
-			type.name="-Im(Z7)/Ohm"
-			type.wave_name = "-Im(Z7)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z7)/Ohm"; type.wave_name = "-Im(Z7)"
 			break
 		case 368:
-			type.type=4
-			type.name="-Im(Z8)/Ohm"
-			type.wave_name = "-Im(Z8)"
-			type.read = 1
+			type.type=4; type.name="-Im(Z8)/Ohm"; type.wave_name = "-Im(Z8)"
 			break
 		case 391:
-			type.type=4
-			type.name="<E1>/V"
-			type.wave_name = "E1"
-			type.read = 1
+			type.type=4; type.name="<E1>/V"; type.wave_name = "E1"
 			break
 		case 392:
-			type.type=4
-			type.name="<E2>/V"
-			type.wave_name = "E2"
-			type.read = 1
+			type.type=4; type.name="<E2>/V"; type.wave_name = "E2"
 			break
 		case 393:
-			type.type=4
-			type.name="<E3>/V"
-			type.wave_name = "E3"
-			type.read = 1
+			type.type=4; type.name="<E3>/V"; type.wave_name = "E3"
 			break
 		case 394:
-			type.type=4
-			type.name="<E4>/V"
-			type.wave_name = "E4"
-			type.read = 1
+			type.type=4; type.name="<E4>/V"; type.wave_name = "E4"
 			break
 		case 395:
-			type.type=4
-			type.name="<E5>/V"
-			type.wave_name = "E5"
-			type.read = 1
+			type.type=4; type.name="<E5>/V"; type.wave_name = "E5"
 			break
 		case 396:
-			type.type=4
-			type.name="<E6>/V"
-			type.wave_name = "E6"
-			type.read = 1
+			type.type=4; type.name="<E6>/V"; type.wave_name = "E6"
 			break
 		case 397:
-			type.type=4
-			type.name="<E7>/V"
-			type.wave_name = "E7"
-			type.read = 1
+			type.type=4; type.name="<E7>/V"; type.wave_name = "E7"
 			break
 		case 398:
-			type.type=4
-			type.name="<E8>/V"
-			type.wave_name = "E8"
-			type.read = 1
+			type.type=4; type.name="<E8>/V"; type.wave_name = "E8"
 			break
 		case 422:
-			type.type=4
-			type.name="Phase(Zstack)/deg"
-			type.wave_name = "Phase"
-			type.read = 1
+			type.type=4; type.name="Phase(Zstack)/deg"; type.wave_name = "Phase"
 			break
 		case 423:
-			type.type=4
-			type.name="|Zstack|/Ohm"
-			type.wave_name = "Zstack"
-			type.read = 1
+			type.type=4; type.name="|Zstack|/Ohm"; type.wave_name = "Zstack"
 			break
 		case 426:
-			type.type=4
-			type.name="<Estack>/V"
-			type.wave_name = "Estack"
-			type.read = 1
+			type.type=4; type.name="<Estack>/V"; type.wave_name = "Estack"
 			break
 		case 424:
-			type.type=4
-			type.name="Re(Zstack)/Ohm"
-			type.wave_name = "Re(Zstack)"
-			type.read = 1
+			type.type=4; type.name="Re(Zstack)/Ohm"; type.wave_name = "Re(Zstack)"
 			break
 		case 425:
-			type.type=4
-			type.name="-Im(Zstack)/Ohm"
-			type.wave_name = "-Im(Zstack)"
-			type.read = 1
+			type.type=4; type.name="-Im(Zstack)/Ohm"; type.wave_name = "-Im(Zstack)"
 			break
 		case 434:
-			type.type=4
-			type.name="(Q-Qo)/C"
-			type.wave_name = "Q"
-			type.read = 1
+			type.type=4; type.name="(Q-Qo)/C"; type.wave_name = "Q"
 			break
 		case 435:
-			type.type=4
-			type.name="dQ/C"
-			type.wave_name = "dQ"
-			type.read = 1
+			type.type=4; type.name="dQ/C"; type.wave_name = "dQ"
 			break
 		case 436:
-			type.type=4
-			type.name="Ece dc/V"
-			type.wave_name = "Ece dc"
-			type.read = 1
+			type.type=4; type.name="Ece dc/V"; type.wave_name = "Ece dc"
 			break
 		default:
 				Debugprintf2("Unknown ColID: "+num2str(ID),0)
 				return -1
 			break
 	endswitch
+	return 0
+end
+
+
+static function BIOLOGICmpr_read_types(file, types,n_columns, bytes)
+	variable file; struct alltypes &types; variable n_columns, bytes
+	
+	struct type type; type.readflags = 0; type.readflags2 = 0
+	variable i=0, tmpd = 0
+
+	for(i=0;i<n_columns;i+=1)
+		fbinread /B=3/U/f=(bytes) file, tmpd// ; print tmpd, i
+		types.ID[i]=tmpd
+		if(BIOLOGICmpr_check_datatype(tmpd, type)==-1)
+			return -1
+		endif
+		types.type[i].type=type.type
+		types.type[i].name=type.name
+		types.type[i].wave_name = type.wave_name
+		types.type[i].read = type.read
+		types.type[i].mask = type.mask
+	endfor
+	// remaining_headers = 
 	return 0
 end
 
@@ -777,57 +483,20 @@ static function BIOLOGICmpr_read_datamodule(file, mprhdr)
 	fbinread /B=3/U/f=1 file, n_columns// ; print n_columns
 	variable i = 0, j=0, tmpd=0
 	string tmps = ""
-	struct type type; type.readflags = 0; type.readflags2 = 0
 	struct alltypes types
 	
-
+	// read type ID's
 	switch(mprhdr.version)
 		case 0:
-			for(i=0;i<n_columns;i+=1)
-				fbinread /B=3/U/f=1 file, tmpd// ; print tmpd, i
-				types.ID[i]=tmpd
-				if(BIOLOGICmpr_check_datatype(tmpd, type)==-1)
-					return -1
-				endif
-				types.type[i].type=type.type
-				types.type[i].name=type.name
-				types.type[i].wave_name = type.wave_name
-				types.type[i].read = type.read
-				types.type[i].mask = type.mask
-			endfor
-			//remaining_headers  = 
+			BIOLOGICmpr_read_types(file, types,n_columns, 1)
 			mybinread(file, 100-5-n_columns)
 			break
 		case 1: //CV_MP-MEA module.mpr
-			for(i=0;i<n_columns;i+=1)
-				fbinread /B=3/U/f=2 file, tmpd// ; print tmpd, i
-				types.ID[i]=tmpd
-				if(BIOLOGICmpr_check_datatype(tmpd, type)==-1)
-					return -1
-				endif
-				types.type[i].type=type.type
-				types.type[i].name=type.name
-				types.type[i].wave_name = type.wave_name
-				types.type[i].read = type.read
-				types.type[i].mask = type.mask
-			endfor
-			// remaining_headers = 
+			BIOLOGICmpr_read_types(file, types,n_columns, 2)
 			mybinread(file, 195-5-2*n_columns)
 			break
 		case 2:
-			for(i=0;i<n_columns;i+=1)
-				fbinread /B=3/U/f=2 file, tmpd// ; print tmpd, i
-				types.ID[i]=tmpd
-				if(BIOLOGICmpr_check_datatype(tmpd, type)==-1)
-					return -1
-				endif
-				types.type[i].type=type.type
-				types.type[i].name=type.name
-				types.type[i].wave_name = type.wave_name
-				types.type[i].read = type.read
-				types.type[i].mask = type.mask
-			endfor
-			// remaining_headers = 
+			BIOLOGICmpr_read_types(file, types,n_columns, 2)
 			mybinread(file, 405-5-2*n_columns)
 			break
 		default:
@@ -1137,7 +806,6 @@ function BIOLOGICmpr_load_data([optfile])
 				mybinread(file, mprhdr.length)			
 				break
 			default:
-			
 				Debugprintf2("----------------- Unknown Module type: "+mprhdr.shortname,0)
 				// skip data and go to beginning of next block
 				mybinread(file, mprhdr.length)			
