@@ -709,6 +709,10 @@ end
 function BIOLOGICmpr_check_file(file)
 	variable file
 	fsetpos file, 0
+	fstatus file
+	if(V_logEOF<54)
+		return -1
+	endif
 	string tmps = mybinread(file, 48)
 	variable tmpd = 1
 	Fbinread /B=3/F=3 file, tmpd	// 4x NULL
