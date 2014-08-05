@@ -214,9 +214,7 @@ function /S mybinread(file, count)
 	variable count
 	variable i
 	string line = ""
-	for (i=0;i<count;i+=1)
-		line+="1"
-	endfor
+	line = PadString(line, count, 0x20)
 	FBinread/B=3 file, line
 	return line
 end
