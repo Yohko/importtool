@@ -31,6 +31,44 @@ static strconstant techs = "AES diff;AES dir;EDX;ELS;FABMS;FABMS energy spec;ISS
 static strconstant scans = "REGULAR;IRREGULAR;MAPPING"
 
 
+static structure Vamas_CasaXPS_region
+	string name
+	variable RSF
+	variable startBG
+	variable endBG
+	string BGType
+	variable avwidth
+	variable startoffset
+	variable endoffset
+	string crosssection
+	string tag
+	variable energy
+endstructure
+
+
+static structure Vamas_CasaXPS_comp
+	string name
+	variable RSF
+	string lineshape
+	variable shape
+	variable area
+	variable area_L
+	variable area_U
+	variable FWHM
+	variable FWHM_L
+	variable FWHM_U
+	variable position
+	variable position_L
+	variable position_U
+	string tag
+	variable compindex
+	variable asymmetryindex
+	variable concentration
+	variable MASS
+	variable energy
+endstructure
+
+
 function Vamas_check_file(file)
 	variable file
 	fsetpos file, 0
@@ -127,7 +165,7 @@ function Vamas_load_data([optfile])
 			return -1
 		endif
 		tmps=mycleanupstr(tmps)
-		headercomment += "comment #"+num2str(i+1)+": "+tmps+"\r"
+		headercomment += "header comment #"+num2str(i+1)+": "+tmps+"\r"
 	endfor
 	
 	string exp_mode = read_line_trim(file)
@@ -276,7 +314,6 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	Note ycols, "block id: "+ blockid
 	Note ycols, "sample identifier: "+ read_line_trim(file)
 
-	//print blockid
 	if (includew[0]==1)
 		Note ycols, "year: " + read_line_trim(file)
 	endif
@@ -301,6 +338,10 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	variable cmt_lines=0
 	if (includew[7]==1) // skip comments on this block
 		cmt_lines = read_line_int(file)
+		if(numtype(cmt_lines)!=0)
+			Debugprintf2("Error opening Vamas file (cmt_lines)!",0)
+			return -1
+		endif
 		for (i = 0; i <cmt_lines; i+=1) 
 			FReadLine file, tmps
 			if(strlen(tmps) == 0)
@@ -308,7 +349,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 				return -1
 			endif
 			tmps=mycleanupstr(tmps)
-			note ycols, "Comment #"+num2str(i+1)+": "+stripstrfirstlastspaces(tmps)
+			note ycols, "spectra comment #"+num2str(i+1)+": "+stripstrfirstlastspaces(tmps)
 		endfor
 //		if(Vamas_skip_lines(file, cmt_lines)==-1)
 //			//loaderend(impname,1,file, dfSave)
@@ -449,6 +490,10 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	
 	if (includew[31]==1)
 		cor_var = read_line_int(file)
+		if(numtype(cor_var)!=0)
+			Debugprintf2("Error opening Vamas file (cor_var)!",0)
+			return -1
+		endif
 		//inclusionlist[40] = cor_var
 		// columns initialization
 		Redimension/N=(-1,cor_var) ycols
@@ -466,11 +511,11 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	endif
 	if (includew[33]==1)
 		dwelltime =  read_line_int(file)
-		note ycols, "signal collection time: "+  num2str(dwelltime)//read_line_trim(file)
+		note ycols, "signal collection time: "+  num2str(dwelltime)
 	endif
 	if (includew[34]==1)
 		scancount =  read_line_int(file)
-		note ycols, "# of scans to compile this blk: "+  num2str(scancount)//read_line_trim(file)
+		note ycols, "# of scans to compile this blk: "+  num2str(scancount)
 	endif
 	if (includew[35]==1)
 		note ycols, "signal time correction: "+  read_line_trim(file)
@@ -582,7 +627,164 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	endif
 
 	splitmatrix(ycols, blockid)
+	for(i=0;i<cor_var;i+=1)
+		if(i==0) // detector
+			rename $(blockid+"_spk"+num2str(i)), $(blockid)
+			Vamas_casaInfo($(blockid))
+		elseif(i==1) // transmission function
+			if(str2num(get_flags("includetransmission")) == 1&& str2num(get_flags("justdetector"))==0)
+				rename $(blockid+"_spk"+num2str(i)), $(blockid+"_TF")
+			else
+				killwaves $(blockid+"_spk"+num2str(i))
+			endif
+		else // additional channels??
+			if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
+				rename $(blockid+"_spk"+num2str(i)), $(blockid+"_ADC"+num2str(i-2))
+			else
+				killwaves $(blockid+"_spk"+num2str(i))
+			endif
+			
+		endif
+	endfor
 	Debugprintf2("exported: "+blockid,0)
+	return 0
+end
+
+
+static function Vamas_casaInfo(detector)
+	wave detector
+	string notes =  note(detector)
+	if(cmpstr(stripstrfirstlastspaces(StringByKey("spectra comment #1", notes, ":", "\r")),"Casa Info Follows")==0)
+		Debugprintf2("... File is a CasaXPS VMS file.",1)
+		variable tmp = str2num(stripstrfirstlastspaces(StringByKey("spectra comment #2", notes, ":", "\r")))
+		variable i=2+tmp+1
+		if(tmp!=0)
+			i+=1
+		endif
+		tmp = str2num(stripstrfirstlastspaces(StringByKey("spectra comment #"+num2str(i), notes, ":", "\r")))
+		i+=tmp+1
+		if(tmp!=0)
+			i+=1
+		endif
+		variable nregions = str2num(stripstrfirstlastspaces(StringByKey("spectra comment #"+num2str(i), notes, ":", "\r")))
+		if(nregions < 1)
+			return -1 // no regions 
+		endif
+		variable j=0
+		for(j=0;j<nregions;j+=1)
+			i+=1
+			Vamas_casaInfo_region(detector, stripstrfirstlastspaces(StringByKey("spectra comment #"+num2str(i), notes, ":", "\r")), j)
+		endfor
+		i+=1
+		variable ncomp = str2num(stripstrfirstlastspaces(StringByKey("spectra comment #"+num2str(i), notes, ":", "\r")))
+		if(ncomp < 1)
+			return -1 // no components
+		endif
+		for(j=0;j<ncomp;j+=1)
+			i+=1
+			Vamas_casaInfo_comp(detector, stripstrfirstlastspaces(StringByKey("spectra comment #"+num2str(i), notes, ":", "\r")), j)
+		endfor
+	endif
+end
+
+
+static function Vamas_casaInfo_region(detector, param, n)
+	wave detector
+	string param
+	variable n
+
+	struct Vamas_CasaXPS_region region_param
+
+	param=param[strlen("CASA region (*"),inf]
+	region_param.name = param[0,strsearch(param,"*)",0)-1] ; param = param[strlen(region_param.name)+strlen("*) (*"),inf]
+	region_param.BGType = param[0,strsearch(param,"*)",0)-1]; param = param[strlen(region_param.BGType)+strlen("*) "),inf]
+	region_param.startBG = str2num(stringfromlist(0,param," "))
+	region_param.endBG = str2num(stringfromlist(1,param," "))
+	region_param.RSF = str2num(stringfromlist(2,param," "))
+	region_param.avwidth = str2num(stringfromlist(3,param," "))
+	region_param.startoffset = str2num(stringfromlist(4,param," "))
+	region_param.endoffset = str2num(stringfromlist(5,param," "))
+	region_param.tag = param[strsearch(param,"(*",0)+2,strsearch(param,"*)",0)-1]
+
+	if(str2num(get_flags("vskineticenergy"))==0)
+		region_param.energy = str2num(stripstrfirstlastspaces(StringByKey("analysis source characteristic energy", note(detector), ":", "\r")))
+		region_param.startBG = region_param.energy - region_param.startBG
+		region_param.endBG = region_param.energy - region_param.endBG
+		
+		if(str2num(get_flags("posbinde")) == 0)
+			region_param.startBG *=-1
+			region_param.endBG *=-1
+		endif	
+	endif
+
+	strswitch(region_param.BGType)
+		case "Shirley":
+			string tmps = nameofwave(detector)+"R"+num2str(n)
+			Duplicate /O/R=(region_param.startBG,region_param.endBG) detector, $tmps
+			wave back = $tmps
+			tmps = nameofwave(detector)+"BGR"+num2str(n)
+			Duplicate /O/R=(region_param.startBG,region_param.endBG) detector, $tmps
+			wave spec = $tmps
+			Vamas_BG_Shirley(back,iterations=50)
+			spec-=back
+			break
+		default:
+			Debugprintf2("Unknown BG type!",1)
+			break
+	endswitch
+	
+	return 0
+end
+
+
+static function Vamas_casaInfo_comp(detector, param, n)
+	wave detector
+	string param
+	variable n
+	string tmps = nameofwave(detector)+"c"+num2str(n)
+	duplicate detector, $tmps
+	wave comp = $tmps
+	struct Vamas_CasaXPS_comp comp_param
+
+	param=param[strlen("CASA comp (*"),inf]
+	comp_param.name = param[0,strsearch(param,"*)",0)-1] ; param = param[strlen(comp_param.name)+strlen("*) (*"),inf]
+	comp_param.lineshape = param[0,strsearch(param,"*)",0)-1]; param = param[strlen(comp_param.lineshape)+strlen("*) "),inf]
+	comp_param.shape = str2num(comp_param.lineshape[strsearch(comp_param.lineshape,"(",0)+1,strsearch(comp_param.lineshape,")",0)-1])
+	comp_param.lineshape = comp_param.lineshape[0,strsearch(comp_param.lineshape,"(",0)-1]
+	comp_param.area=str2num(stringfromlist(1,param," "))
+	comp_param.area_L=str2num(stringfromlist(2,param," "))
+	comp_param.area_U=str2num(stringfromlist(3,param," "))
+	comp_param.FWHM=str2num(stringfromlist(7,param," "))
+	comp_param.FWHM_L=str2num(stringfromlist(8,param," "))
+	comp_param.FWHM_U=str2num(stringfromlist(9,param," "))
+	comp_param.position=str2num(stringfromlist(13,param," "))
+	comp_param.position_L=str2num(stringfromlist(14,param," "))
+	comp_param.position_U=str2num(stringfromlist(15,param," "))
+	comp_param.RSF=str2num(stringfromlist(19,param," "))
+	comp_param.MASS=str2num(stringfromlist(21,param," "))
+	comp_param.compindex=str2num(stringfromlist(23,param," "))
+	comp_param.tag=param[strsearch(param,"(*",0)+2,strsearch(param,"*)",0)-1]
+	comp_param.energy = 0
+	variable posbind=1
+	if(str2num(get_flags("vskineticenergy"))==0)
+		comp_param.energy = str2num(stripstrfirstlastspaces(StringByKey("analysis source characteristic energy", note(detector), ":", "\r")))
+		comp_param.position = comp_param.energy - comp_param.position
+		if(str2num(get_flags("posbinde")) == 0)
+			posbind=-1
+		endif	
+	endif
+	
+	strswitch(comp_param.lineshape)
+		case "GL":
+			comp = Vamas_LS_GLA(x, comp_param.area, posbind*comp_param.position, comp_param.FWHM/2, comp_param.shape/100)
+			break
+		case "SGL":
+			comp = Vamas_LS_SGLA(x, comp_param.area, posbind*comp_param.position, comp_param.FWHM/2, comp_param.shape/100)
+			break
+		default:
+			Debugprintf2("Unknown line shape!",1)
+			break
+	endswitch
 	return 0
 end
 
@@ -656,7 +858,7 @@ function Vamasrpt_load_data([optfile])
 		Redimension/N=(counter, -1) cols
 		line=myreadline(file)
 		if(strlen(line)==0 || itemsinlist(line,"	") != components)
-			print "Error in reading CasaXPS report file!"
+			Debugprintf2("Error in reading CasaXPS report file!",0)
 			break
 		endif
 		for(i=0;i<itemsinlist(line,"	");i+=1)
@@ -740,3 +942,98 @@ function Vamasrpt_load_data([optfile])
 	loaderend(importloader)
 end
 
+
+static function Vamas_LS_Gauss(x, height, center, hwhm, shape)
+	variable x, height, center, hwhm, shape
+	return height*exp(-ln(2)*(1-shape)*((x-center)/hwhm)^2)
+end
+
+
+static function Vamas_LS_GaussA(x, area, center, hwhm, shape)
+	variable x, area, center, hwhm, shape
+	return Vamas_LS_Gauss(x, area/hwhm/sqrt(pi/ln(2)), center, hwhm, shape)
+end
+
+
+static function Vamas_LS_Lorentz(x, height, center, hwhm, shape)
+	variable x, height, center, hwhm, shape
+	return height/(1+(shape)*((x-center)/hwhm)^2)
+end
+
+
+static function Vamas_LS_LorentzA(x, area, center, hwhm, shape)
+	variable x, area, center, hwhm, shape
+	return  Vamas_LS_Lorentz(x, area/hwhm/pi, center, hwhm, shape)
+end
+
+
+static function Vamas_LS_GL(x, height, center, hwhm, shape)
+	variable x, height, center, hwhm, shape
+	return height*Vamas_LS_Gauss(x, 1, center, hwhm, shape)*Vamas_LS_Lorentz(x, 1, center, hwhm, shape)
+end
+
+
+static function Vamas_LS_GLA(x, area, center, hwhm, shape)
+	variable x, area, center, hwhm, shape
+	return area/hwhm*sqrt(1/pi/sqrt(pi/ln(2)))*Vamas_LS_Gauss(x, 1, center, hwhm, shape)*Vamas_LS_Lorentz(x, 1, center, hwhm, shape)
+end
+
+
+static function Vamas_LS_SGL(x, height, center, hwhm, shape)
+	variable x, height, center, hwhm, shape
+	return height*((1-shape)*Vamas_LS_Gauss(x, 1, center, hwhm, 0)+shape*Vamas_LS_Lorentz(x, 1, center, hwhm, 1))
+end
+
+
+static function Vamas_LS_SGLA(x, area, center, hwhm, shape)
+	variable x, area, center, hwhm, shape
+	return Vamas_LS_Gauss(x, area*(1-shape), center, hwhm, 0)+shape*Vamas_LS_LorentzA(x, area*shape, center, hwhm, 1)
+end
+
+
+static function Vamas_BG_Shirley(back, [iterations])
+	// http://www.casaxps.com/help_manual/manual_updates/peak_fitting_in_xps.pdf page 5
+	wave back
+	variable iterations
+	iterations = paramIsDefault(iterations) ? 100 : iterations
+	
+	duplicate  /O/FREE back, A1
+	duplicate  /O/FREE back, A2
+	duplicate  /O/FREE back, S1; S1 = 0
+	duplicate  /O/FREE back, tmpspec
+	// refining the BG
+	variable k=0, i=0
+	for(k=0;k<iterations;k+=1)
+		A2[]=back[p]
+		integrate A2
+		A1[]=A2[dimsize(back,0)-1]-A2[p]
+		// BG calculation based on original spectra
+		S1[]=tmpspec[p]-tmpspec[0]+abs(tmpspec[dimsize(tmpspec,0)-1]-tmpspec[0])*(A2[p]/(A1[p]+A2[p]))
+		// http://www.phy.ilstu.edu/slh/chi-square.pdf
+		variable chi =0
+		for(i=0;i<dimsize(back, 0);i+=1)
+			if(back[i]!=0)
+				chi += ((back[i]-S1[i])^2)/back[i]
+			endif
+		endfor
+		Debugprintf2("Chi^2: "+num2str(chi),1)
+		if(chi==0)
+			break
+		endif
+		// save new BG corrected spectra
+		duplicate /O S1, back
+	endfor
+	// save the Shirley BG
+	back[]=tmpspec[p]-S1[p]
+	return 0
+end
+
+
+static function Vamas_BG_Tougaard(back, B, C, D, T0)
+	wave back
+	variable B, C, D, T0
+	
+	
+	
+	return 0
+end
