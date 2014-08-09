@@ -1,6 +1,7 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
+#ifdef showmenu
 Menu "Macros"
 	submenu "Import Tool "+importloaderversion
 			submenu "PES"
@@ -8,6 +9,7 @@ Menu "Macros"
 			end
 	end
 end
+#endif
 
 
 // some xy exported by SpecsLab2 are interpolated, some are not?
@@ -62,6 +64,7 @@ static Structure Detectors
 	wave w_deadtime		// ns
 	wave w_threshold 	// mV
 	variable numdetectors
+	variable act_det
 endstructure
 
 
@@ -104,6 +107,7 @@ static structure RegionInfo
 	variable Ycurve_length
 	string comment
 	string appendtodetector
+	string remoteinfo_name
 
 	variable linecount
 	wave /T filewave
@@ -118,7 +122,7 @@ static function SpecsXML_resetRegionInfo(myRegionInfo)
 	tmps = directory+":w_shift"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_shift = $tmps
 	tmps = directory+":w_gain"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_gain = $tmps
 	tmps = directory+":w_deadtime"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_deadtime = $tmps
-	tmps = directory+":w_thresold"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_threshold = $tmps
+	tmps = directory+":w_threshold"; Make /O/D/N=(0) $tmpS; wave  myRegionInfo.Detector.w_threshold = $tmps
 	myRegionInfo.Detector.numdetectors=0
 	
 	myRegionInfo.nameforwave = ""
@@ -154,6 +158,7 @@ static function SpecsXML_resetRegionInfo(myRegionInfo)
 	myRegionInfo.Ycurve_delta = 0
 	myRegionInfo.Ycurve_curves = 0
 	myRegionInfo.Ycurve_length = 0
+	myRegionInfo.remoteinfo_name = ""
 
 	myRegionInfo.comment = ""
 end
@@ -449,7 +454,7 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 	Note  savewave,"Effective Workfunction: " + num2str(myRegionInfo.effective_workfunction)
 	Note  savewave,"Source: " + myRegionInfo.Source_name
 	//	Note  savewave,"Remote: " + remote
-	//	Note  savewave,"RemoteInfo: " + remoteInfo				
+	Note  savewave,"RemoteInfo name: " + myRegionInfo.remoteinfo_name
 	Note  savewave, "Comment: " + myRegionInfo.comment
 
 	variable Unixtime  = myRegionInfo.times+2082844800
@@ -637,10 +642,16 @@ static function SpecsXML_readstructsafterseq(givenstruct, savewave, savepos, myR
 	
 	variable i, j
 	string tmps
+	
 	for(i=0;i<length;i+=1)
 		j=i
 		tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 		SpecsXML_getstruct(tmps, givenstruct, name)
+		strswitch(givenstruct.type_name)
+			case "Detector":
+				myRegionInfo.Detector.act_det = i
+				break
+		endswitch
 		if(SpecsXML_readstruct(givenstruct, savewave, j, myRegionInfo) == -1)
 			return -1
 		endif
@@ -678,7 +689,7 @@ static function /S SpecsXML_checktype(givenstruct, givenseq, givenenum, savewave
 			endif
 			return ""
 		elseIf (strsearch(str,"<enum",0) == 0)
-			SpecsXML_getenum(str, givenenum)	
+			SpecsXML_getenum(str, givenenum)
 			return ""
 		elseIf (strsearch(str,"/>",0) !=  -1)
 			return ""
@@ -699,7 +710,6 @@ static function SpecsXML_readparamstruct(givenstruct, savewave, savepos, myRegio
 	
 	struct xmlsequence myseq
 	struct xmlenum myenum
-	string param
 
 	
 	
@@ -709,12 +719,10 @@ static function SpecsXML_readparamstruct(givenstruct, savewave, savepos, myRegio
 	endif
 
 	do 
-		tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
-		tmps = mycleanupstr(tmps)
+		tmps = mycleanupstr(myRegionInfo.filewave[myRegionInfo.linecount]); myRegionInfo.linecount +=1
 		If (strlen(tmps)==0)
-			return 0
+			return -1
 		elseIf (strsearch(tmps,"</any>",0) == 0)
-			//just skipping anatyhing between right now
 			return 0
 		endif
 		tmps = SpecsXML_checktype(givenstruct, myseq, myenum, savewave, savepos, myRegionInfo, tmps)
@@ -722,220 +730,203 @@ static function SpecsXML_readparamstruct(givenstruct, savewave, savepos, myRegio
 			if(cmpstr(tmps, "-1")==0)
 				return -1
 			endif
-			param = stringfromlist(1,str)
-#if 0
-			strswitch(param)
+			strswitch(stringfromlist(1,str))
 				case "Current [nA]":
-					str2num(SpecsXML_getvariable(file, "double"))
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
 					break
 				case "Energy [eV]":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Source":
-					tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
-					SpecsXML_getenum(tmps, myenum)	
-					break
-				case "Threshold [mV]":
-					myregionInfo.Detector.threshold[savepos] = str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Deadtime [ns]":
-					myregionInfo.Detector.deadtime[savepos] = str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Excitation range (min max step)":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "Wavelength set timeout [ms]":
-					str2num(SpecsXML_getvariable(file, "long"))
-					break
-				case "Wavelength set delay [ms]":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Energy correction slope":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Energy correction intercept":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Use intensity scaling":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break
-				case "ADC channel number":
-					str2num(SpecsXML_getvariable(file, "ulong"))
-					break
-				case "ADC input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Use wait on threshold":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break
-				case "Threshold value":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC threshold channel number":
-					str2num(SpecsXML_getvariable(file, "ulong"))
-					break
-				case "ADC threshold input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Threshold timeout [ms]":
-					str2num(SpecsXML_getvariable(file, "long"))
-					break
-				case "Offset":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "Style":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "Color":
-					str2num(SpecsXML_getvariable(file, "ulong"))
-					break
-				case "Interpolation":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break
-				case "File":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "Group":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "First of group":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break
-				case "Comment":
-					//print "Comment: ", SpecsXML_getvariable(file, "string")
-					myRegionInfo.comment = SpecsXML_getvariable(file, "string")
-					break
-				case "Logfile":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "ADC channel 1 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 1 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 1 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 2 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 2 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 2 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 3 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 3 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 3 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 4 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 4 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 4 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 5 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 5 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 5 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 6 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 6 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 6 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 7 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 7 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 7 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "ADC channel 8 active":
-					str2num(SpecsXML_getvariable(file, "boolean"))
-					break			
-				case "    channel 8 name":
-					SpecsXML_getvariable(file, "string")
-					break
-				case "    channel 8 input scaling":
-					str2num(SpecsXML_getvariable(file, "double"))
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
 					break
 				case "Anode":
-					SpecsXML_getbetween(file)
+////					SpecsXML_getbetween(file)
 					break
 				case "Power [W]":
-					str2num(SpecsXML_getvariable(file, "double"))
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
 					break
 				case "Voltage [kV]":
-					str2num(SpecsXML_getvariable(file, "double"))
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
 					break
 				case "Angle [deg]":
-					str2num(SpecsXML_getvariable(file, "double"))
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Wavelength set timeout [ms]":
+					//SpecsXML_getvariable("long", tmps, myRegionInfo)
+					break
+				case "Wavelength set delay [ms]":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Energy correction slope":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Energy correction intercept":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Use intensity scaling":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break
+				case "ADC channel number":
+					//SpecsXML_getvariable("ulong", tmps, myRegionInfo)
+					break
+				case "ADC input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Use wait on threshold":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break
+				case "Threshold value":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC threshold channel number":
+					//SpecsXML_getvariable("ulong", tmps, myRegionInfo)
+					break
+				case "ADC threshold input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Threshold timeout [ms]":
+					//SpecsXML_getvariable("long", tmps, myRegionInfo)
+					break
+				case "Offset":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "Style":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "Color":
+					//SpecsXML_getvariable("ulong", tmps, myRegionInfo)
+					break
+				case "Interpolation":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break
+				case "File":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "Group":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "First of group":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break
+				case "Comment":
+					myRegionInfo.comment = SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "Logfile":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "ADC channel 1 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 1 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 1 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 2 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 2 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 2 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 3 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 3 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 3 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 4 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 4 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 4 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 5 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 5 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 5 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 6 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 6 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 6 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 7 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 7 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 7 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
+					break
+				case "ADC channel 8 active":
+					//SpecsXML_getvariable("boolean", tmps, myRegionInfo)
+					break			
+				case "    channel 8 name":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
+					break
+				case "    channel 8 input scaling":
+					//SpecsXML_getvariable("double", tmps, myRegionInfo)
 					break
 				case "End of acquisition":
-					SpecsXML_getbetween(file)
+//					SpecsXML_getbetween(file)
 					break
-				case "Background Method":
-					SpecsXML_getbetween(file) //eigentlich enum
+//				case "Background Method": // enum
+//					break
+				case "Excitation range (min max step)":
+					//SpecsXML_getvariable("string", tmps, myRegionInfo)
 					break
-				case "FWHM":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
+//				case "FWHM": // --> Double-E struct
+//					break
+//				case "Counts": // --> Double-E struct
+//					break
+//				case "Count-BG": // --> Double-E struct
+//					break
+//				case "Rate": // --> Double-E struct
+//					break
+//				case "Rate-BG": // --> Double-E struct
+//					break
+//				case "Area": // --> Double-E struct
+//					break
+//				case "PktLeft": // --> Point struct
+//					break
+//				case "PktRight": // --> Point struct
+//					break
+//				case "Asymmetry": // --> Double-E struct
+//					break
+//				case "FWHM-Annotation": // --> Point struct
+//					break
+//				case "Source": // enum
+//					break
+				case "Threshold [mV]":
+					myregionInfo.Detector.w_threshold[myRegionInfo.Detector.act_det] = str2num(SpecsXML_getvariable("double", tmps, myRegionInfo))
 					break
-				case "Counts":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					break
-				case "Count-BG":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					break
-				case "Rate":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					break
-				case "Rate-BG":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					break
-				case "Area":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					//str2num(SpecsXML_getvariable(file, "double"))
-					break
-				case "PktLeft":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					break
-				case "PktRight":
-					//SpecsXML_readparamstruct(file, mystruct, savewave, savepos, myRegionInfo)
-					break
-				case "Asymmetry":
-				
-					break
-				case "FWHM-Annotation":
+				case "Deadtime [ns]":
+					myregionInfo.Detector.w_deadtime[myRegionInfo.Detector.act_det] = str2num(SpecsXML_getvariable("double", tmps, myRegionInfo))
 					break
 				default:
-					Debugprintf2("Unknown paramerer!: "+param,0)
+					Debugprintf2("Unknown paramerer!: "+stringfromlist(1,str),0)
 					break
 			endswitch
-#endif
 		endif
 	while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
 
@@ -1089,7 +1080,8 @@ static function SpecsXML_readsq(seq, savewave, savepos, myRegionInfo)
 				seq.length = 1
 			endif
 			for(i=0;i<seq.length;i+=1)
-				SpecsXML_getvariable("string", myRegionInfo)
+				tmps2 = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
+				SpecsXML_getvariable("string", tmps2, myRegionInfo)
 			endfor
 			myRegionInfo.linecount +=1 //</sequence>
 			break
@@ -1202,13 +1194,13 @@ static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo
 			case "Detector":
 				strswitch(stringfromlist(0,tmps))
 					case "position":
-						myRegionInfo.Detector.w_position[savepos] = str2num(stringfromlist(1,tmps))
+						myRegionInfo.Detector.w_position[myRegionInfo.Detector.act_det] = str2num(stringfromlist(1,tmps))
 						break
 					case "shift":
-						myRegionInfo.Detector.w_shift[savepos] = str2num(stringfromlist(1,tmps))
+						myRegionInfo.Detector.w_shift[myRegionInfo.Detector.act_det] = str2num(stringfromlist(1,tmps))
 						break
 					case "gain":
-						myRegionInfo.Detector.w_gain[savepos] = str2num(stringfromlist(1,tmps))
+						myRegionInfo.Detector.w_gain[myRegionInfo.Detector.act_det] = str2num(stringfromlist(1,tmps))
 						break
 					default:
 						Debugprintf2("Unknown Detectorstruct element: "+tmps,0)
@@ -1317,8 +1309,10 @@ static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo
 			case "Double_E":
 				strswitch(stringfromlist(0,tmps))
 					case "value":
+						//str2num(stringfromlist(1,tmps))
 						break
 					case "error":
+						//str2num(stringfromlist(1,tmps))
 						break
 					default:
 						Debugprintf2("Unknown Double_Estruct element: "+tmps,0)
@@ -1426,7 +1420,7 @@ static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo
 			case "RemoteInfo":
 				strswitch(stringfromlist(0,tmps))
 					case "name":
-						//myRegionInfo.Source_name  = stringfromlist(1,tmps)
+						myRegionInfo.remoteinfo_name  = stringfromlist(1,tmps)
 						break
 					default:
 						Debugprintf2("Unknown RemoteInfostruct element: "+tmps,0)
@@ -1468,29 +1462,29 @@ static function /S SpecsXML_gettypename(str)
 end
 
 
-static function /S SpecsXML_getvariable(what, myRegionInfo)
+static function /S SpecsXML_getvariable(what, str, myRegionInfo)
 	string what
+	string str
 	struct RegionInfo &myRegionInfo
-	string tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
 	string returnstr=""
-	if(strsearch(tmps, "<"+what+"/>",0)==0)
+	if(strsearch(str, "<"+what+"/>",0)==0)
 		return ""
 	endif
-	if(strsearch(tmps, "</"+what+">",0)==-1) // multiline comment for strings or value arrays
-		Debugprintf2("multiline parameter!!!: "+tmps,0)
-		returnstr+=TmpS[ strlen("<"+what+">"),inf]
+	if(strsearch(str, "</"+what+">",0)==-1) // multiline comment for strings or value arrays
+		Debugprintf2("multiline parameter!!!: "+str,1)
+		returnstr+=str[ strlen("<"+what+">"),inf]
 		do
-			tmps = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
-			if(strsearch(tmps, "</"+what+">",0)>=0)
-				returnstr+=";"+tmps[0,strlen(TmpS)-strlen("</"+what+">")-1]
+			str = myRegionInfo.filewave[myRegionInfo.linecount]; myRegionInfo.linecount +=1
+			if(strsearch(str, "</"+what+">",0)>=0)
+				returnstr+=";"+str[0,strlen(str)-strlen("</"+what+">")-1]
 				break
 			else
-				returnstr+=";"+tmps
+				returnstr+=";"+str
 			endif
 		while(myRegionInfo.linecount<dimsize(myRegionInfo.filewave,0))
 	else
-		if(strsearch(tmps, "</"+what+">",0)>0)
-			returnstr = TmpS[ strlen("<"+what+">"),strlen(TmpS)-strlen("</"+what+">")-1]
+		if(strsearch(str, "</"+what+">",0)>0)
+			returnstr = str[ strlen("<"+what+">"),strlen(str)-strlen("</"+what+">")-1]
 		else
 			returnstr= ""
 		endif
