@@ -359,7 +359,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,110,0,"Object Aborted","","","")//FID_aborted
 	//KratosDSET_initaddobject(Dsetobject,111,0,"Lower limit","","","")//FID_lower_limit
 	//KratosDSET_initaddobject(Dsetobject,112,0,"Upper limit","","","")//FID_upper_limit
-	//KratosDSET_initaddobject(Dsetobject,113,0,"Instrument name","","","")//AID_instrument
+	KratosDSET_initaddobject(Dsetobject,113,6,"Instrument name","","","")//AID_instrument
 	//KratosDSET_initaddobject(Dsetobject,114,0,"Transmission Function","","","")//FID_transmission_func
 	//KratosDSET_initaddobject(Dsetobject,115,0,"Type of Ion Gun","","","")//FID_ion_gun_type
 	//KratosDSET_initaddobject(Dsetobject,116,0,"Etch Position ID","","","")//FID_etch_position_id
@@ -1185,6 +1185,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3266,5,"Spectrum scan step size","","","")//AID_last_spectrum_step_size
 	KratosDSET_initaddobject(Dsetobject,3267,5,"Dwell/sweep time","","","")//AID_last_dwell_time
 	KratosDSET_initaddobject(Dsetobject,3268,5,"Dwell/sweep time","","","")//AID_snapshot_last_dwell_time
+	KratosDSET_initaddobject(Dsetobject,3269,3,"The point of viewed when acquisition is in progress","","","")//???
 	//KratosDSET_initaddobject(Dsetobject,3269,0,"This Id',27h,'s a camera as either SAC or SEC","","","")//AID_Nova_camera_id
 	//KratosDSET_initaddobject(Dsetobject,3270,0,"degree of spherical correction","","","")//AID_spherical_correction_value
 	KratosDSET_initaddobject(Dsetobject,3273,3,"Ion Gun Gas State","","","")//AID_nicpu_igun_gas_state
@@ -1593,11 +1594,9 @@ end
 static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 	wave wavetosave; string namewave; struct KratosDsetobject &Dsetobject; variable scaleflag
 	
-	variable i =0, j=0
-	string tmps=namewave
-	Make /O/R/N=(1)  $tmps /wave=savewave
+	string tmps=""
+	Make /O/R/N=(1)  $namewave /wave=savewave
 	duplicate /O wavetosave, savewave
-	KratosDSET_setnote(Dsetobject, savewave)
 	if(scaleflag==0) // normal spectrum
 		if(strsearch(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 5)],"Kinetic Energy",0)==0)	
 			tmps=Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 6)]
@@ -1620,21 +1619,18 @@ static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 			savewave/=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 7)])
 		endif
 	elseif(scaleflag==2) // mapping image
-		i = Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 26)]
-		j= Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)]
+		variable points = Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)]
 		tmps = "imagetemp"
-		make/O /N=(j,i) $tmps /wave=imagetemp
-		for(i=0;i<Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 26)];i+=1)
-			for(j=0;j<Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)];j+=1)
-				imagetemp[j][i]=savewave[i*Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)]+j]
-			endfor
-		endfor
+		make/O /N=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 26)]) $tmps /wave=imagetemp
+		imagetemp[][]=savewave[q*points+p]
 		duplicate /O imagetemp, savewave
 		tmps=Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 6)]
 		SetScale/P  x,Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3001)], Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3003)], tmps, savewave
 		SetScale/P  y,Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3002)], Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3004)], tmps, savewave
 		killwaves imagetemp
 	endif
+	KratosDSET_setnote(Dsetobject, savewave)
+	return 0
 end
 
 
@@ -1793,7 +1789,7 @@ static function KratosDSET_read_object_list_s(file, Dsetobjectlist)
 		endif
 		// now the name of the Block
 		tmps=""
-		for(j=0;j<4*4;J+=1)
+		for(j=0;j<4*4;j+=1)
 			tmps+=mybinreadBE(file,1) //name of object
 		endfor
 		Dsetobjectlist.object_name[i][0]=tmps
