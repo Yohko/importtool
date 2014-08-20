@@ -309,8 +309,8 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,60,0,"Etch table","","","")//FID_etch_table
 	//KratosDSET_initaddobject(Dsetobject,61,3,"Loop index limit","","","")//AID_counter_limit
 	//KratosDSET_initaddobject(Dsetobject,62,0,"Map geometry","","","")//FID_map_geometry
-	KratosDSET_initaddobject(Dsetobject,63,5,"Pre-etch delay","","","")//FID_pre_etch_delay // check this against 174.dset
-	KratosDSET_initaddobject(Dsetobject,64,5,"Post etch delay","","","")//FID_post_etch_delay // check this against 174.dset
+	KratosDSET_initaddobject(Dsetobject,63,5,"Pre-etch delay","","","")//FID_pre_etch_delay
+	KratosDSET_initaddobject(Dsetobject,64,5,"Post etch delay","","","")//FID_post_etch_delay
 	//KratosDSET_initaddobject(Dsetobject,65,0,"Registration coords","","","")//FID_registration
 	//KratosDSET_initaddobject(Dsetobject,66,0,"Multi-point","","","")//FID_multi_point
 	//KratosDSET_initaddobject(Dsetobject,67,0,"Control","","","")//FID_control
@@ -841,7 +841,6 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,597,0,"Axis HS scan x-offset","","","")//IID_hs_x_offset_factor
 	//KratosDSET_initaddobject(Dsetobject,598,0,"Axis HS scan y-offset","","","")//IID_hs_y_offset_factor
 	//KratosDSET_initaddobject(Dsetobject,599,0,"Electron Gun PSU type","","","")//IID_eg_psu_type
-	
 	//KratosDSET_initaddobject(Dsetobject,600,0,"Process identifier","","","")//PID_process
 	//KratosDSET_initaddobject(Dsetobject,601,0,"Gaussian width","","","")//PID_gauss_width
 	//KratosDSET_initaddobject(Dsetobject,602,0,"Smooth type","","","")//PID_smooth_type
