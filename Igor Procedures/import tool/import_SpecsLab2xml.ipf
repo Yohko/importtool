@@ -11,6 +11,7 @@ Menu "Macros"
 end
 #endif
 
+static constant timinglist = 0
 
 // some xy exported by SpecsLab2 are interpolated, some are not?
 // only FAT is sometimes interpolated, not XAS, FE...
@@ -111,6 +112,7 @@ static structure RegionInfo
 
 	variable linecount
 	wave /T filewave
+	string filename
 endstructure
 
 
@@ -462,6 +464,16 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 	Note  savewave, "Time Of Recording (UTC): "+Secs2Date(Unixtime,-2)+" ; "+ Secs2Time(Unixtime,3)
 	Note  savewave, "Time Of Recording (GMT): "+Secs2Date(Unixtime+60*2*60,-2)+" ; "+ Secs2Time(Unixtime+60*2*60,3)
 
+	if(timinglist)
+		string nb = "SpecsLab2XMLResults"
+		string nbtext = ""
+		sprintf nbtext, "%s\t%s %s\t%s %s\t%d\r", myRegionInfo.RegionName, Secs2Date(Unixtime,-2), Secs2Time(Unixtime,3), Secs2Date(Unixtime+60*2*60,-2), Secs2Time(Unixtime+60*2*60,3), Unixtime
+		if (WinType(nb) == 0)
+			NewNotebook /N=$nb /F=0
+		endif
+		// Insert text in notebook
+		Notebook $nb, text = nbtext
+	endif
 	
 	if(mode==1)	
 		SetScale d, 0,0,"cps", savewave
@@ -1629,9 +1641,10 @@ function SpecsXML_load_data([optfile])
 	myRegionInfo.header= header
 	myRegionInfo.appendtodetector = appendtodetector
 	myRegionInfo.linecount = 0
+	fstatus file
+	myRegionInfo.filename = S_fileName
 	
 	// load complete file into a text wave for faster processing
-	fstatus file
 	LoadWave/Q/J/V={"", "", 0, 0}/K=2/A=$("file") (S_path+S_fileName)
 	if(V_flag !=1)
 		loaderend(importloader)
@@ -1639,6 +1652,17 @@ function SpecsXML_load_data([optfile])
 	endif
 	wave /T myRegionInfo.filewave = $(StringFromList(0, S_waveNames))
 	string wavetokill = GetDataFolder(1)+StringFromList(0, S_waveNames)
+
+	if(timinglist)
+		string nb = "SpecsLab2XMLResults"
+		string nbtext =myRegionInfo.filename+"\r"
+		nbtext +="Region Name\tUTC\tGMT\tUnixtime\r"
+		if (WinType(nb) == 0)
+			NewNotebook /N=$nb /F=0
+		endif
+		// Insert text in notebook
+		Notebook $nb, text = nbtext
+	endif
 
 	do
 		tmps = mycleanupstr(myRegionInfo.filewave[myRegionInfo.linecount]); myRegionInfo.linecount +=1
