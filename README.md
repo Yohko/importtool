@@ -5,14 +5,45 @@ General import tool for IgorPro for importing data files from different hardware
 
 **Supported formats**:
 
-  - SpecsLab2 *.xml and *.xy
-  - SpecsLab1 *.exp
-  - Kratos Vision *.dset
+  - Agilent Binary Waveform *.bin
+  - BESSYII EMP *.dat
+  - Canberra AccuSpec MCA *.mca
+  - Canberra CNF *.cnf
+  - ChiPlot *.chi
+  - Crystallographic Binary Files *.cbf
+  - DBWS *.dwb, *.rit, *.neu
+  - EC-Lab raw *.mpr
+  - EC-Lab text *.mpt
+  - FOURYA/XFIT/Koalariet *.xdd
   - Gwyddion 2.x *.gwy
-  - Omicron SCALA *.par
+  - Kratos Vision *.dset
+  - LK-Tech AES *.dat
+  - LK-Tech HREELS *.dat
   - Nanotec WSxM *.stp
-  - Veeco *.hdf
+  - NSLS beamline X15B *.dat
+  - Omicron SCALA *.par
+  - Phi Multipak *.spe
+  - Philips RD raw scan *.rd, *.sd
+  - Philips UDF *.udf
+  - Princeton Instruments WinSpec *.spe
+  - RIET7 *.dat, *.rit
+  - Rigaku *.dat
+  - Siemens/Bruker Diffrac-AT Raw *.raw
+  - Siemens/Bruker Diffrac-AT UXD *.uxd
+  - Sietronics Sieray CPI *.cpi
+  - SpecsLab1 *.exp
+  - SpecsLab2 *.xml and *.xy
   - Spectra *.#
+  - SSRL ASCII EXAFS data *.dat
+  - SSRL BINARY EXAFS data *.dat
+  - SSRL µEXAFS data *.dat
+  - UKSOFT2001 *.dat, *.dav
+  - VAMAS *.vms
+  - Veeco *.hdf
+  - Veeco Nanoscope III *.#
+  - VersaStudio data *.par
+  - WVASE32 *.dat
+  - XAS Data Interchange *.xdi
 
 **Installation**:
 
@@ -39,3 +70,4 @@ In order to change the behaviour of the import tool change the settings (importf
 
 **Credits**:
   - Parts of the procedures are based on xylib by Marcin Wojdyr
+  - Jan Ilavsky (Crystallographic Binary Files)
