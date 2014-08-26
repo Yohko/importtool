@@ -64,7 +64,7 @@ end
 
 function Xdi_load_data_info(importloader)
 	struct importloader &importloader
-	importloader.name = "XAS Data Interchange  data"
+	importloader.name = "XAS Data Interchange data"
 	importloader.filestr = "*.xdi"
 	importloader.category = "XAS"
 end

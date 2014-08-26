@@ -1,6 +1,6 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
-strconstant importloaderversion = "0.43.29"
+#pragma version = 0.5
 //#define showmenu
 
 #pragma version=importloaderversion

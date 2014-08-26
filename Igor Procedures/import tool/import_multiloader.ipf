@@ -3,7 +3,7 @@
 
 
 Menu "Macros"
-	submenu "Import Tool "+importloaderversion
+	submenu "Import Tool"
 			"Multi file loader v0.1", multiLoader_MakePanel()
 	end
 end
