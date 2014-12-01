@@ -843,7 +843,7 @@ function Vamasrpt_load_data([optfile])
 	if(loaderstart(importloader, optfile=optfile)!=0)
 		return -1
 	endif
-	string header = importloader.header
+	string header = importloader.header+"\r"
 	variable file = importloader.file
 	header+="Line 1: "+myreadline(file)+"\r"
 	header+="Line 2: "+myreadline(file)+"\r"
@@ -852,7 +852,7 @@ function Vamasrpt_load_data([optfile])
 	variable components =  itemsinlist(names,"	"), i=0
 	variable counter=1
 	string line="spectra"
-	Make /O/R/N=(counter,components)  $line /wave=cols
+	Make /O/D/N=(counter,components)  $line /wave=cols
 	Note cols, header
 	do
 		Redimension/N=(counter, -1) cols
@@ -870,12 +870,13 @@ function Vamasrpt_load_data([optfile])
 		
 	variable j=0
 	variable ekinstart=0, ekinend=1, ebinstart=0, ebinend=1
+	variable mymax=0, mymin=0
 	
 	Display
 	string windowname = S_name
 	string tmps=""
 	for(i=0;i<dimsize(cols,1);i+=1)
-		tmps=StringFromList(i,names,"	")+"_"+num2str(i+1)
+		tmps=cleanname(StringFromList(i,names,"	"))+"_"+num2str(i+1)
 		//Rename loaded wave to cleaned-up filename
 		duplicate cols, $tmps
 		WAVE w = $tmps
@@ -884,33 +885,57 @@ function Vamasrpt_load_data([optfile])
 			w[j]=cols[j][i]		
 		endfor	
 		if(i==0)
-			if (checkEnergyScale(w, 8E-5))
+//			if (checkEnergyScale(w, 8E-5))
 				ekinstart=w[0]
 				ekinend=w[dimsize(w,0)-1]
-			endif
+//			endif
 		endif
 		if(i==1)
-			if(checkEnergyScale(w, 8E-5))
+//			if(checkEnergyScale(w, 8E-5))
 				ebinstart=w[0]
 				ebinend=w[dimsize(w,0)-1]
-			endif
+//			endif
 		endif
+		if(i==2)
+			WaveStats/Q w
+			mymax =  V_max
+			mymin = V_min
+		endif
+		
 		if(i>1)
+		
 			if(str2num(get_flags("posbinde")) == 0)
 				SetScale/I  x,-ebinstart,-ebinend,"eV", w
 			else
 				SetScale/I  x,ebinstart,ebinend,"eV", w
 			endif
-			AppendToGraph /W=$windowname w
+
+
+			tmps = addtowavename(tmps, "N")
+			duplicate /O w, $tmps
+			wave wn =$tmps
+			if(mymax !=0)
+				wn -=V_min
+				wn /= (mymax -mymin)
+			endif
+			AppendToGraph /W=$windowname wn
+
+
+			if(i==dimsize(cols,1)-1)
+				tmps="residual_0"
+				WAVE residual = $tmps
+				residual-=w
+
+				tmps="residual_0N"
+				WAVE residual = $tmps
+				residual-=wn
+			endif
 		endif
 		if(i==2)
 			tmps="residual_0"
 			duplicate w, $tmps
-		endif
-		if(i==dimsize(cols,1)-1)
-			tmps="residual_0"
-			WAVE residual = $tmps
-			residual-=w
+			tmps="residual_0N"
+			duplicate wn, $tmps
 		endif
 
 	endfor
