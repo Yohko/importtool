@@ -89,6 +89,50 @@ static function /S nanoscopeIII_getparams(str, keyval)
 end
 
 
+static function nanoscopeIII_clearheader(nanoscopeheader)
+	struct nanoscopeheader &nanoscopeheader
+	variable i=0
+	for(i=0;i<100;i+=1)
+		nanoscopeheader.imageobject[i].Dataoffset = NaN
+		nanoscopeheader.imageobject[i].Datalength = NaN
+		nanoscopeheader.imageobject[i].bytes_pixel = NaN
+		nanoscopeheader.imageobject[i].Startcontext = ""
+		nanoscopeheader.imageobject[i].Datatype = ""
+		nanoscopeheader.imageobject[i].DataTypeDescription = ""
+		nanoscopeheader.imageobject[i].myNote = ""
+		nanoscopeheader.imageobject[i].Planefit = ""
+		nanoscopeheader.imageobject[i].Framedirection = ""
+		nanoscopeheader.imageobject[i].Capturestartline = NaN
+		nanoscopeheader.imageobject[i].ColorTableIndex = NaN
+		nanoscopeheader.imageobject[i].Sampsline = NaN
+		nanoscopeheader.imageobject[i].Numberoflines = NaN
+		nanoscopeheader.imageobject[i].AspectRatio = NaN
+		nanoscopeheader.imageobject[i].ScanSizeX = NaN
+		nanoscopeheader.imageobject[i].ScanSizeY = NaN
+		nanoscopeheader.imageobject[i].ScanSizeUnit = ""
+		nanoscopeheader.imageobject[i].ScanLine = ""
+		nanoscopeheader.imageobject[i].LineDirection = ""
+		nanoscopeheader.imageobject[i].Highpass = NaN
+		nanoscopeheader.imageobject[i].Lowpass = NaN
+		nanoscopeheader.imageobject[i].RealtimePlanefit = ""
+		nanoscopeheader.imageobject[i].OfflinePlanefit = ""
+		nanoscopeheader.imageobject[i].ValiddatastartX = NaN
+		nanoscopeheader.imageobject[i].ValiddatastartY = NaN
+		nanoscopeheader.imageobject[i].ValiddatalenX = NaN
+		nanoscopeheader.imageobject[i].ValiddatalenY = NaN
+		nanoscopeheader.imageobject[i].Tipxwidthcorrectionfactor = NaN
+		nanoscopeheader.imageobject[i].Tipywidthcorrectionfactor = NaN
+		nanoscopeheader.imageobject[i].Tipxwidthcorrectionfactorsigma = NaN
+		nanoscopeheader.imageobject[i].Tipywidthcorrectionfactorsigma = NaN
+		nanoscopeheader.imageobject[i].ImageData = ""
+		nanoscopeheader.imageobject[i].magnify = ""
+		nanoscopeheader.imageobject[i].scale = ""
+		nanoscopeheader.imageobject[i].offset = ""
+		nanoscopeheader.imageobject[i].name = ""
+	endfor
+end
+
+
 function nanoscopeIII_check_file(file)
 	variable file
 	fsetpos file, 0
@@ -133,6 +177,7 @@ function nanoscopeIII_load_data([optfile])
 	string tmps
 	struct keyval keyval
 	struct nanoscopeheader nanoscopeheader
+	nanoscopeIII_clearheader(nanoscopeheader)
 	variable run = 1
 	variable imagecount = 0
 
@@ -318,16 +363,23 @@ function nanoscopeIII_load_data([optfile])
 					nanoscopeheader.imageobject[imagecount-1].Tipywidthcorrectionfactorsigma = str2num(keyval.val)
 				endif
 				break
-			case "@2":
-				if(imagecount != 0)
-					if(strsearch(keyval.val,"Image Data",0)==0)
-						tmps=keyval.val
-						tmps=tmps[strsearch(keyval.val,"\"",0)+1,inf]
-						nanoscopeheader.imageobject[imagecount-1].name = tmps[0,strsearch(tmps,"\"",0)-1]
-					endif
-				endif
-				break
 			default:
+				if(strsearch(keyval.key,"@",0)==0 && numtype(str2num(keyval.key[1,inf]))==0 )
+					variable num = str2num(keyval.key[1,inf])
+					if(num>100)
+						break
+					endif
+					string key = keyval.val[0,strsearch(keyval.val,":",1)-1]
+					string val = keyval.val[strsearch(keyval.val,":",1)+1,inf]
+					strswitch(key)
+						case "Image Data":
+							tmps=val[strsearch(val,"\"",0)+1,inf]
+							nanoscopeheader.imageobject[imagecount-1].name = tmps[0,strsearch(tmps,"\"",0)-1]
+							break
+						default:
+							break					
+					endswitch
+				endif			
 				break
 		endswitch
 		fstatus file
@@ -353,38 +405,59 @@ function nanoscopeIII_load_data([optfile])
 		image[][]=imagetemp[p][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original picture
 
 		// save notes to image
-		note image, header
-		note image, "Start context: "+nanoscopeheader.imageobject[i].Startcontext
-		note image, "Data type: "+nanoscopeheader.imageobject[i].Datatype
-		note image, "Data Type Description: "+nanoscopeheader.imageobject[i].DataTypeDescription
-		note image, "Note: "+nanoscopeheader.imageobject[i].myNote
-		note image, "Plane fit: "+nanoscopeheader.imageobject[i].Planefit
-		note image, "Frame direction: "+nanoscopeheader.imageobject[i].Framedirection
-		note image, "Capture start line: "+num2str(nanoscopeheader.imageobject[i].Capturestartline)
-		note image, "Color Table Index: "+num2str(nanoscopeheader.imageobject[i].ColorTableIndex)
-		note image, "Samps/line: "+num2str(nanoscopeheader.imageobject[i].Sampsline)
-		note image, "Number of lines: "+num2str(nanoscopeheader.imageobject[i].Numberoflines)
-//		note image, "Aspect Ratio: "+num2str(nanoscopeheader.imageobject[i].AspectRatio)
-//		note image, num2str(nanoscopeheader.imageobject[i].ScanSizeX)
-//		note image, num2str(nanoscopeheader.imageobject[i].ScanSizeY)
-//		note image, nanoscopeheader.imageobject[i].ScanSizeUnit
-		note image, "Scan Line: "+nanoscopeheader.imageobject[i].ScanLine
-		note image, "Line Direction: "+nanoscopeheader.imageobject[i].LineDirection
-		note image, "Highpass: "+num2str(nanoscopeheader.imageobject[i].Highpass)
-		note image, "Lowpass: "+num2str(nanoscopeheader.imageobject[i].Lowpass)
-		note image, "Realtime Planefit: "+nanoscopeheader.imageobject[i].RealtimePlanefit
-		note image, "Offline Planefit: "+nanoscopeheader.imageobject[i].OfflinePlanefit
-		note image, "Valid data start X: "+num2str(nanoscopeheader.imageobject[i].ValiddatastartX)
-		note image, "Valid data start Y: "+num2str(nanoscopeheader.imageobject[i].ValiddatastartY)
-		note image, "Valid data len X: "+num2str(nanoscopeheader.imageobject[i].ValiddatalenX)
-		note image, "Valid data len Y: "+num2str(nanoscopeheader.imageobject[i].ValiddatalenY)
-		note image, "Tip x width correction factor: "+num2str(nanoscopeheader.imageobject[i].Tipxwidthcorrectionfactor)
-		note image, "Tip y width correction factor: "+num2str(nanoscopeheader.imageobject[i].Tipywidthcorrectionfactor)
-		note image, "Tip x width correction factor sigma: "+num2str(nanoscopeheader.imageobject[i].Tipxwidthcorrectionfactorsigma)
-		note image, "Tip y width correction factor sigma: "+num2str(nanoscopeheader.imageobject[i].Tipywidthcorrectionfactorsigma)
+		nanoscopeIII_addnotestr(image, "", header)
+		nanoscopeIII_addnotestr(image, "Start context: ", nanoscopeheader.imageobject[i].Startcontext)
+		nanoscopeIII_addnotestr(image, "Data type: ", nanoscopeheader.imageobject[i].Datatype)
+		nanoscopeIII_addnotestr(image, "Data Type Description: ", nanoscopeheader.imageobject[i].DataTypeDescription)
+		nanoscopeIII_addnotestr(image, "Note: ", nanoscopeheader.imageobject[i].myNote)
+		nanoscopeIII_addnotestr(image, "Plane fit: ", nanoscopeheader.imageobject[i].Planefit)
+		nanoscopeIII_addnotestr(image, "Frame direction: ", nanoscopeheader.imageobject[i].Framedirection)
+		nanoscopeIII_addnotenum(image, "Capture start line: ", nanoscopeheader.imageobject[i].Capturestartline)
+		nanoscopeIII_addnotenum(image, "Color Table Index: ", nanoscopeheader.imageobject[i].ColorTableIndex)
+		nanoscopeIII_addnotenum(image, "Samps/line: ", nanoscopeheader.imageobject[i].Sampsline)
+		nanoscopeIII_addnotenum(image, "Number of lines: ", nanoscopeheader.imageobject[i].Numberoflines)
+//		nanoscopeIII_addnotenum(image, "Aspect Ratio: ", nanoscopeheader.imageobject[i].AspectRatio)
+//		nanoscopeIII_addnotenum(image, "", nanoscopeheader.imageobject[i].ScanSizeX)
+//		nanoscopeIII_addnotenum(image, "", nanoscopeheader.imageobject[i].ScanSizeY)
+//		nanoscopeIII_addnotestr(image, "", nanoscopeheader.imageobject[i].ScanSizeUnit)
+		nanoscopeIII_addnotestr(image, "Scan Line: ", nanoscopeheader.imageobject[i].ScanLine)
+		nanoscopeIII_addnotestr(image, "Line Direction: ", nanoscopeheader.imageobject[i].LineDirection)
+		nanoscopeIII_addnotenum(image, "Highpass: ", nanoscopeheader.imageobject[i].Highpass)
+		nanoscopeIII_addnotenum(image, "Lowpass: ", nanoscopeheader.imageobject[i].Lowpass)
+		nanoscopeIII_addnotestr(image, "Realtime Planefit: ", nanoscopeheader.imageobject[i].RealtimePlanefit)
+		nanoscopeIII_addnotestr(image, "Offline Planefit: ", nanoscopeheader.imageobject[i].OfflinePlanefit)
+		nanoscopeIII_addnotenum(image, "Valid data start X: ", nanoscopeheader.imageobject[i].ValiddatastartX)
+		nanoscopeIII_addnotenum(image, "Valid data start Y: ", nanoscopeheader.imageobject[i].ValiddatastartY)
+		nanoscopeIII_addnotenum(image, "Valid data len X: ", nanoscopeheader.imageobject[i].ValiddatalenX)
+		nanoscopeIII_addnotenum(image, "Valid data len Y: ", nanoscopeheader.imageobject[i].ValiddatalenY)
+		nanoscopeIII_addnotenum(image, "Tip x width correction factor: ", nanoscopeheader.imageobject[i].Tipxwidthcorrectionfactor)
+		nanoscopeIII_addnotenum(image, "Tip y width correction factor: ", nanoscopeheader.imageobject[i].Tipywidthcorrectionfactor)
+		nanoscopeIII_addnotenum(image, "Tip x width correction factor sigma: ", nanoscopeheader.imageobject[i].Tipxwidthcorrectionfactorsigma)
+		nanoscopeIII_addnotenum(image, "Tip y width correction factor sigma: ", nanoscopeheader.imageobject[i].Tipywidthcorrectionfactorsigma)
 	endfor
 
 	importloader.success = 1
 	loaderend(importloader)
 end
 
+
+static function nanoscopeIII_addnotestr(waves, name, str)
+	wave waves
+	string name
+	string str
+	if(strlen(str)>0)
+		note waves, name+str
+	endif
+end
+
+
+static function nanoscopeIII_addnotenum(waves, name, num)
+	wave waves
+	string name
+	variable num
+	if(numtype(num)==0)
+		string tmps = ""
+		sprintf tmps, "%f", num
+		note waves, name+tmps
+	endif
+end

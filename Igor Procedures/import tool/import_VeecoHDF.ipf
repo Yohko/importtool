@@ -1,6 +1,8 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
+// used by:
+// - Veeco di CP-II 
 
 #ifdef showmenu
 Menu "Macros"
