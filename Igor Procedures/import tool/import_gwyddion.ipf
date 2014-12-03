@@ -1,17 +1,6 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "AFM-Microscopes"
-				"Load Gwyddion SPM				*.gwy	file... b1", gwy_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Gwyddion gwy ########################
 // http://gwyddion.net/documentation/user-guide-en/gwyfile-format.html
 // http://gwyddion.net/gwydump.php
 
@@ -240,7 +229,7 @@ function gwy_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Gwyddion GWY"
 	importloader.filestr = "*.gwy"
-	importloader.category = "AFM"
+	importloader.category = "SPM"
 end
 
 
@@ -269,5 +258,3 @@ function gwy_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-// ###################### Gwyddion gwy END ######################

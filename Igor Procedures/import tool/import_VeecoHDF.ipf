@@ -4,16 +4,6 @@
 // used by:
 // - Veeco di CP-II 
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "AFM-Microscopes"
-				"Load Veeco HDF v3.2			*.hdf	file... b1", VeecoHDF_load_data()
-			end
-	end
-end
-#endif
-
 static constant MAGIC_SIZE = 4
 static constant Micrometer = 1e-6
 static constant HDF4_SD    = 702
@@ -121,7 +111,7 @@ function VeecoHDF_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Hierarchical Data Format"
 	importloader.filestr = "*.hdf"
-	importloader.category = "AFM"
+	importloader.category = "SPM"
 end
 
 
@@ -253,4 +243,3 @@ static function VeecoHDF_read(file,header)
 	image[][]=imagetemp[p][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original image
 	return 0
 end
-

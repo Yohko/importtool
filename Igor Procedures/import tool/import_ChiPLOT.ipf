@@ -5,18 +5,6 @@
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/chiplot.cpp)
 
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "MISC"
-				"Load ChiPlot					*.chi	file... beta", ChiPlot_load_data()
-			end
-	end
-end
-#endif
-
-
-// ###################### chiplot ########################
 // chiplot text format - 4 line of headers followed by x y data lines
 // Description from
 // http://www.esrf.eu/computing/scientific/FIT2D/FIT2D_REF/node115.html
@@ -138,7 +126,7 @@ function ChiPlot_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "ChiPlot"
 	importloader.filestr = "*.chi"
-	importloader.category = "plot"
+	importloader.category = "misc"
 end
 
 
@@ -201,5 +189,3 @@ function ChiPlot_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-// ###################### chiplot END ######################

@@ -1,18 +1,6 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "AFM-Microscopes"
-				"Load Omicron SCALA			*.par	file... b1", SCALA_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Omicron SCALA ########################
-
 
 static structure scalaimages
 	string channelname
@@ -120,7 +108,7 @@ function SCALA_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Omicron SCALA"
 	importloader.filestr = "*.par"
-	importloader.category = "AFM"
+	importloader.category = "SPM"
 end
 
 
@@ -500,6 +488,3 @@ static function SCALA_read_header_file(file, header, fileheader)
 	while(V_logEOF>V_filePOS)
 
 end
-
-
-// ###################### Omicron SCALA END ######################

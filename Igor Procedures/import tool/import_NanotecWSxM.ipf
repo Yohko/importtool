@@ -1,17 +1,6 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "AFM-Microscopes"
-				"Load Nanotec WSxM				*.stp	file... b1", WSxM_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Nanotec WSxM ########################
 //http://www.igorexchange.com/node/1825
 //http://www.nanotec.es/products/wsxm/file_structure.php
 
@@ -59,7 +48,7 @@ function WSxM_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Nanotec WSxM"
 	importloader.filestr = "*.stp"
-	importloader.category = "AFM"
+	importloader.category = "SPM"
 end
 
 
@@ -245,5 +234,3 @@ function WSxM_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-// ###################### Nanotec WSxM END ######################

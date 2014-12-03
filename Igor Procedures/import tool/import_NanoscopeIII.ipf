@@ -7,16 +7,6 @@
 
 // http://www.physics.arizona.edu/~smanne/DI/software/fileformats.html
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-		submenu "AFM-Microscopes"
-			"Load Veeco Nanoscope III		*.00#	file... alpha",nanoscopeIII_load_data()
-		end
-	end
-end
-#endif
-
 static structure keyval
 	string key
 	string val
@@ -153,7 +143,7 @@ function nanoscopeIII_load_data_info(importloader)
 	struct importloader &importloader
 	importloader.name = "Veeco Nanoscope III"
 	importloader.filestr =  "*.000,*.001,*.002,*.003,*.004,*.005,*.006,*.007,*.008,*.009"
-	importloader.category = "AFM"
+	importloader.category = "SPM"
 end
 
 
