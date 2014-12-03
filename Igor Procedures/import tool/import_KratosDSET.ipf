@@ -228,16 +228,15 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	struct KratosDsetobject &Dsetobject
 
 	NewDatafolder /O root:Packages ; NewDatafolder /O $directory
-	string tmps = ""
+	Make /FREE/O/D/N=(0) IDlist ; wave Dsetobject.IDlist = IDlist
+	Make /FREE/O/B/U/N=(0) type ; wave Dsetobject.type = type
+	Make /FREE/O/T/N=(0) name ; wave /T Dsetobject.name = name
+	Make /FREE/O/T/N=(0) strvalue ; wave /T Dsetobject.strvalue = strvalue
+	Make /FREE/O/D/N=(0) numvalue ; wave Dsetobject.numvalue = numvalue
+	Make /FREE/O/T/N=(0) units ; 	wave /T Dsetobject.units = units
+	Make /FREE/O/T/N=(0) flags ; wave /T Dsetobject.flags = flags
+	Make /FREE/O/T/N=(0) nameofdatawave ; wave /T Dsetobject.nameofdatawave = nameofdatawave
 
-	tmpS = directory+":IDlist" ; Make /O/D/N=(0) $tmpS ; wave Dsetobject.IDlist = $tmpS
-	tmpS = directory+":type" ; Make /O/B/U/N=(0) $tmpS ; wave Dsetobject.type = $tmpS
-	tmpS = directory+":name" ; Make /O/T/N=(0) $tmpS ; wave /T Dsetobject.name = $tmpS
-	tmpS = directory+":strvalue" ; Make /O/T/N=(0) $tmpS ; wave /T Dsetobject.strvalue = $tmpS
-	tmpS = directory+":numvalue" ; Make /O/D/N=(0) $tmpS ; wave Dsetobject.numvalue = $tmpS
-	tmpS = directory+":units" ;	Make /O/T/N=(0) $tmpS ; 	wave /T Dsetobject.units = $tmpS
-	tmpS = directory+":flags" ; Make /O/T/N=(0) $tmpS ; wave /T Dsetobject.flags = $tmpS
-	tmpS = directory+":nameofdatawave" ; Make /O/T/N=(0) $tmpS ; wave /T Dsetobject.nameofdatawave = $tmpS
 
 	Dsetobject.objectname = ""
 	Dsetobject.lastID = ""
@@ -1619,14 +1618,12 @@ static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 		endif
 	elseif(scaleflag==2) // mapping image
 		variable points = Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)]
-		tmps = "imagetemp"
-		make/O /N=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 26)]) $tmps /wave=imagetemp
+		make/FREE/O/D /N=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 25)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 26)]) imagetemp
 		imagetemp[][]=savewave[q*points+p]
 		duplicate /O imagetemp, savewave
 		tmps=Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 6)]
 		SetScale/P  x,Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3001)], Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3003)], tmps, savewave
 		SetScale/P  y,Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3002)], Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3004)], tmps, savewave
-		killwaves imagetemp
 	endif
 	KratosDSET_setnote(Dsetobject, savewave)
 	return 0
@@ -1729,11 +1726,10 @@ end
 static function KratosDSET_read_object_list(file, Dsetobjectlist)
 	variable file; struct KratosDsetobjectlist &Dsetobjectlist
 
-	string tmps= ""
 	// initialize Dsetobjectlist
-	tmpS = directory+":object_offsets" ; Make /O/D/N=(Dsetobjectlist.maxobjects,4) $tmpS ; wave Dsetobjectlist.object_offsets = $tmpS
-	tmpS = directory+":object_name" ; Make /O/T/N=(Dsetobjectlist.maxobjects,3) $tmpS ; wave /T Dsetobjectlist.object_name = $tmpS
-	tmpS = directory+":object_nextlist" ; Make /O/D/N=(ceil(Dsetobjectlist.maxobjects/64)) $tmpS ; wave Dsetobjectlist.object_nextlist = $tmpS
+	Make /FREE /O/D/N=(Dsetobjectlist.maxobjects,4) object_offsets ; wave Dsetobjectlist.object_offsets = object_offsets
+	Make /FREE /O/T/N=(Dsetobjectlist.maxobjects,3) object_name ; wave /T Dsetobjectlist.object_name = object_name
+	Make /FREE /O/D/N=(ceil(Dsetobjectlist.maxobjects/64)) object_nextlist ; wave Dsetobjectlist.object_nextlist = object_nextlist
 	Dsetobjectlist.object_offsets = 0
 	Dsetobjectlist.object_nextlist = 0
 	Dsetobjectlist.object_name = ""
@@ -1743,6 +1739,7 @@ static function KratosDSET_read_object_list(file, Dsetobjectlist)
 	variable i = 0
 	do 
 		Fbinread /U/B=2/F=3 file, nextoffsetblock // absolute offset to next offsetblock
+		string tmps= ""
 		sprintf tmps, "%08.0f", nextoffsetblock ; Debugprintf2("Next offset block at: "+tmps,1)
 		if(nextoffsetblock!=0)
 			Dsetobjectlist.object_nextlist[i]=nextoffsetblock
