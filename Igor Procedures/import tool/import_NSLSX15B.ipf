@@ -12,7 +12,7 @@ function NSLSX15B_check_file(file)
 	variable tmpd = 0
 	fbinread /U/B=3/F=3 file, tmpd
 	fstatus file
-	if(numtype(tmpd)!=0 || tmpd<=0 || tmpd >= V_logEOF)
+	if(numtype(tmpd)!=0 || tmpd<=0 || tmpd >= V_logEOF || (tmpd-4)<=0)
 		fsetpos file, 0
 		return -1
 	endif
@@ -47,7 +47,7 @@ function NSLSX15B_load_data([optfile])
 	variable file = importloader.file
 
 	variable headerlen =0, tmpd = 0
-	fbinread /U/B=3/F=3 file, headerlen // length of header (mosly 212)
+	fbinread /U/B=3/F=3 file, headerlen // length of header (mostly 212)
 	Fbinread /B=3/F=3 file, tmpd
 	header +="\rcomment: "+mybinread(file, tmpd)
 	mybinread(file, 80-tmpd)
