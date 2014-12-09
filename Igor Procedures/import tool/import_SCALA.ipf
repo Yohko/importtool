@@ -2,21 +2,30 @@
 #pragma rtGlobals=3		// Use modern global access method.
 
 
-static structure scalaimages
+static structure SCALA_image
+	variable type
 	string channelname
+	string parameter
 	string filename
 	string direction
 	string displayname
-	variable minrawval
-	variable maxrawval
-	variable minrealval
-	variable maxrealval
+	variable r_min
+	variable r_max
+	variable p_min
+	variable p_max
 	variable resolution
+	variable specnpoints
+	variable specstart
+	variable specend
+	variable specinc
+	variable specacqtime
+	variable specdelay
+	string specfeedback
 	string unit
 endstructure
 
 
-static Structure scalaheader
+static Structure SCALA_header
 	variable format
 	variable version
 	string system
@@ -36,9 +45,14 @@ static Structure scalaheader
 	variable yoff  // in nm
 	string method
 	string dualmode
-	variable gapv
-	variable feedset
-	variable loopgain
+	variable delay1
+	variable delay2
+	variable gapv1
+	variable gapv2
+	variable feedset1
+	variable feedset2
+	variable loopgain1
+	variable loopgain2
 	variable xres
 	variable yres
 	variable measgapv
@@ -66,7 +80,7 @@ static Structure scalaheader
 	variable calFN
 	variable calFL
 	variable itotal
-	struct scalaimages images[100] // how many are actually supported?
+	struct SCALA_image images[100] // how many are actually supported?
 	variable imagecount
 endstructure
 
@@ -123,17 +137,27 @@ function SCALA_load_data([optfile])
 	string header = importloader.header
 	variable file = importloader.file
 
-	struct scalaheader fileheader
+	struct SCALA_header fileheader
 	//read the header file
 	SCALA_read_header_file(file, header,fileheader)
 	Debugprintf2("Found #"+num2str(fileheader.imagecount)+" images!",0)
 	// now read the image files
 	SCALA_read_image_files(file, header,fileheader)
 	//read channels --> seem to be signed 2byte int (word)
-	//data is in separate files (forward --> 0; backward --> 1
+	//data is in separate files
+	
+	// Topographic Channels:
 	// height and current
-	//*.tb* --> current
-	//*.tf* --> height
+	// *.tf* --> forward
+	// *.tb* --> backward
+	
+	// Spectroscopic Channels:
+	// *.sf* --> forward
+	// *.sb* --> backward
+	
+	// Counter data
+	// *.tlf*
+	
 	importloader.success = 1
 	loaderend(importloader)
 end
@@ -142,16 +166,36 @@ end
 static function SCALA_read_image_files(file, header,fileheader)
 	variable file
 	string header
-	struct scalaheader &fileheader
+	struct SCALA_header &fileheader
 	Fstatus file
 	string filepath=S_path
 	variable i=0,fileread
-	string tmps
+	string tmps, units
 	for(i=0;i<fileheader.imagecount;i+=1)
-		tmps=num2str(i)+"_"+fileheader.images[i].channelname+"_"+fileheader.images[i].direction//getnameforwave(file)+"_"+num2str(i)
-		Make /O/R/N=(fileheader.xpixel,fileheader.ypixel)  $tmps /wave=image
+		tmps = fileheader.images[i].channelname+"_"+fileheader.images[i].direction
+		units = fileheader.images[i].unit
+		switch(fileheader.images[i].type)
+			case 0:
+				// Topography channels (. tfn, . tbn) are stored line by line, beginning with lower left corner.
+				tmps="Topo_"+tmps
+				Make /O/R/N=(fileheader.xpixel,fileheader.ypixel)  $tmps /wave=image
+				break
+			case 1:
+				// Spectroscopy channels (. sfn, . sbn) are stored as a sequence of frames. 
+				// Each of these is a line by line image assigned to one value of the independent spectroscopy parameter.
+				tmps="Spec_"+tmps
+				Make /O/R/N=(fileheader.xpoints,fileheader.ylines,fileheader.images[i].specnpoints)  $tmps /wave=image
+				SetScale/I z,fileheader.images[i].specstart,fileheader.images[i].specend,  units, image
+				break
+			default:
+				return -1
+				break		
+		endswitch
+
 		SetScale/I  x,0,fileheader.xsize, "nm", image
 		SetScale/I  y,0,fileheader.ysize, "nm", image
+		SetScale d,0,0,units image
+
 		note image, header
 		note image, "Fileinfo: "+filepath+fileheader.images[i].filename
 		note image, "Channel name: "+fileheader.images[i].channelname
@@ -159,15 +203,29 @@ static function SCALA_read_image_files(file, header,fileheader)
 		note image, "Name: "+fileheader.images[i].displayname
 		note image, "Unit: "+fileheader.images[i].unit
 		note image, "Resolution: "+num2str(fileheader.images[i].resolution)
-		note image, "Min Raw Value: "+num2str(fileheader.images[i].minrawval)
-		note image, "Max Raw Value: "+num2str(fileheader.images[i].maxrawval)
-		note image, "Min Real Value: "+num2str(fileheader.images[i].minrealval)
-		note image, "Max Real Value: "+num2str(fileheader.images[i].maxrealval)
+		note image, "Min Raw Value: "+num2str(fileheader.images[i].r_min)
+		note image, "Max Raw Value: "+num2str(fileheader.images[i].r_max)
+		note image, "Min Real Value: "+num2str(fileheader.images[i].p_min)
+		note image, "Max Real Value: "+num2str(fileheader.images[i].p_max)
 		Open/R/Z=2 fileread as filepath+fileheader.images[i].filename
 		Debugprintf2("... exporting: "+filepath+fileheader.images[i].filename,0)
-		Fbinread/B=1/F=2 fileread, image
+		Fbinread/B=2/F=2 fileread, image
 		Duplicate/FREE image, imagetemp
-		image[][]=imagetemp[p][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original picture
+
+
+		//  flip image and 
+		// Conversion to Physical Values
+		variable scaling = (fileheader.images[i].p_max-fileheader.images[i].p_min)/(fileheader.images[i].r_max-fileheader.images[i].r_min)
+		switch(fileheader.images[i].type)
+			case 0: /// Topography channels (. tfn, . tbn) are stored line by line, beginning with lower left corner.
+				image[][]=imagetemp[p][DimSize(image, 1)-q-1] // we have to mirror the wave to get the original picture
+				image[][]=fileheader.images[i].p_min+(image[p][q]-fileheader.images[i].r_min)*scaling
+				break
+			case 1:
+				image[][][]=imagetemp[p][DimSize(image, 1)-q-1][r]
+				image[][][]=fileheader.images[i].p_min+(image[p][q][r]-fileheader.images[i].r_min)*scaling
+				break
+		endswitch
 		close fileread
 	endfor
 end
@@ -195,7 +253,7 @@ end
 static function SCALA_read_header_file(file, header, fileheader)
 	variable file
 	string header
-	struct scalaheader &fileheader
+	struct SCALA_header &fileheader
 	fileheader.imagecount=0
 	Fstatus file
 	string tmps=""
@@ -284,17 +342,41 @@ static function SCALA_read_header_file(file, header, fileheader)
 				fileheader.dualmode=StringFromList(1, tmps, "#")
 				Debugprintf2("Dual mode: "+fileheader.dualmode,1)
 				break
+			case "Delay":
+				fileheader.delay1=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Delay 1: "+num2str(fileheader.delay1),1)
+				if(cmpstr(fileheader.dualmode,"On")==0)
+					FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+					fileheader.delay2=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+					Debugprintf2("Delay 2: "+num2str(fileheader.delay2),1)
+				endif
+				break
 			case "Gap Voltage":
-				fileheader.gapv=str2num(StringFromList(1, tmps, "#"))
-				Debugprintf2("Gap Voltage: "+num2str(fileheader.gapv),1)
+				fileheader.gapv1=str2num(StringFromList(1, tmps, "#"))
+				Debugprintf2("Gap Voltage 1: "+num2str(fileheader.gapv1),1)
+				if(cmpstr(fileheader.dualmode,"On")==0)
+					FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+					fileheader.gapv2=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+					Debugprintf2("Gap Voltage 2: "+num2str(fileheader.gapv2),1)
+				endif
 				break
 			case "Feedback Set":
-				fileheader.feedset=str2num(StringFromList(1, tmps, "#"))
-				Debugprintf2("Feedback Set: "+num2str(fileheader.feedset),1)
+				fileheader.feedset1=str2num(StringFromList(1, tmps, "#"))
+				Debugprintf2("Feedback Set 1: "+num2str(fileheader.feedset1),1)
+				if(cmpstr(fileheader.dualmode,"On")==0)
+					FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+					fileheader.feedset2=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+					Debugprintf2("Feedback Set 2: "+num2str(fileheader.feedset2),1)
+				endif
 				break
 			case "Loop Gain":
-				fileheader.loopgain=str2num(StringFromList(1, tmps, "#"))
-				Debugprintf2("Loop Gain: "+num2str(fileheader.loopgain),1)
+				fileheader.loopgain1=str2num(StringFromList(1, tmps, "#"))
+				Debugprintf2("Loop Gain 1: "+num2str(fileheader.loopgain1),1)
+				if(cmpstr(fileheader.dualmode,"On")==0)
+					FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+					fileheader.loopgain2=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+					Debugprintf2("Loop Gain 2: "+num2str(fileheader.loopgain2),1)	
+				endif
 				break
 			case "X Resolution":
 				fileheader.xres=str2num(StringFromList(1, tmps, "#"))
@@ -421,51 +503,35 @@ static function SCALA_read_header_file(file, header, fileheader)
 				break
 			case "UCB CounterSyncCycles":
 				break
-			case "UCB_Counter":
-				break
-			case "UCB CounterMode":
-				break
-			case "UCB CounterIntTime":
-				break
-			case "UCB CounterSyncCycles":
-				break
-			case "UCB_Counter":
-				break
-			case "UCB CounterMode":
-				break
-			case "UCB CounterIntTime":
-				break
-			case "UCB CounterSyncCycles":
-				break
-			case "UCB_Counter":
-				break
-			case "UCB CounterMode":
-				break
-			case "UCB CounterIntTime":
-				break
-			case "UCB CounterSyncCycles":
+			// Spectroscopy Extra Settings.
+			case "V Parameter":
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps) // ramp speed
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps) // T1
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps) // T2
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps) // T3
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps) // T4
 				break
 			case "Topographic Channel":
-				// for each picture  --> has still to be done
 				Debugprintf2("Topographic Channel: "+num2str(fileheader.imagecount)+"		#########",1)
 				fileheader.imagecount+=1
+				fileheader.images[fileheader.imagecount-1].type = 0
 				fileheader.images[fileheader.imagecount-1].channelname=StringFromList(1, tmps, "#")
 				Debugprintf2("Channel name: "+fileheader.images[fileheader.imagecount-1].channelname,1)
 				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
 				fileheader.images[fileheader.imagecount-1]. direction=stripstrfirstlastspaces(tmps)
 				Debugprintf2("Direction: "+fileheader.images[fileheader.imagecount-1]. direction,1)
 				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
-				fileheader.images[fileheader.imagecount-1].minrawval=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
-				Debugprintf2("Min raw val: "+num2str(fileheader.images[fileheader.imagecount-1].minrawval),1)
+				fileheader.images[fileheader.imagecount-1].r_min=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Min raw val: "+num2str(fileheader.images[fileheader.imagecount-1].r_min),1)
 				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
-				fileheader.images[fileheader.imagecount-1].maxrawval=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
-				Debugprintf2("Max raw val: "+num2str(fileheader.images[fileheader.imagecount-1].maxrawval),1)
+				fileheader.images[fileheader.imagecount-1].r_max=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Max raw val: "+num2str(fileheader.images[fileheader.imagecount-1].r_max),1)
 				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
-				fileheader.images[fileheader.imagecount-1].minrealval=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
-				Debugprintf2("Min real val: "+num2str(fileheader.images[fileheader.imagecount-1].minrealval),1)
+				fileheader.images[fileheader.imagecount-1].p_min=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Min real val: "+num2str(fileheader.images[fileheader.imagecount-1].p_min),1)
 				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
-				fileheader.images[fileheader.imagecount-1].maxrealval=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
-				Debugprintf2("Max real val: "+num2str(fileheader.images[fileheader.imagecount-1].maxrealval),1)
+				fileheader.images[fileheader.imagecount-1].p_max=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Max real val: "+num2str(fileheader.images[fileheader.imagecount-1].p_max),1)
 				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
 				fileheader.images[fileheader.imagecount-1].resolution=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
 				Debugprintf2("Resolution: "+num2str(fileheader.images[fileheader.imagecount-1].resolution),1)
@@ -480,8 +546,67 @@ static function SCALA_read_header_file(file, header, fileheader)
 				Debugprintf2("Displayname: "+fileheader.images[fileheader.imagecount-1].displayname,1)
 				Debugprintf2("Topographic Channel: "+num2str(fileheader.imagecount)+"end	#########",1)
 			break
+		case "Spectroscopy Channel":
+				Debugprintf2("Spectroscopy Channel : "+num2str(fileheader.imagecount)+"		#########",1)
+				fileheader.imagecount+=1
+				fileheader.images[fileheader.imagecount-1].type = 1
+				fileheader.images[fileheader.imagecount-1].channelname=StringFromList(1, tmps, "#")
+				Debugprintf2("Channel name: "+fileheader.images[fileheader.imagecount-1].channelname,1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].parameter=ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],"")
+				Debugprintf2("Parameter: "+fileheader.images[fileheader.imagecount-1].parameter,1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1]. direction=stripstrfirstlastspaces(tmps)
+				Debugprintf2("Direction: "+fileheader.images[fileheader.imagecount-1]. direction,1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].r_min=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Min raw val: "+num2str(fileheader.images[fileheader.imagecount-1].r_min),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].r_max=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Max raw val: "+num2str(fileheader.images[fileheader.imagecount-1].r_max),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].p_min=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Min real val: "+num2str(fileheader.images[fileheader.imagecount-1].p_min),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].p_max=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Max real val: "+num2str(fileheader.images[fileheader.imagecount-1].p_max),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].resolution=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Resolution: "+num2str(fileheader.images[fileheader.imagecount-1].resolution),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].unit=ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],"")
+				Debugprintf2("Unit: "+fileheader.images[fileheader.imagecount-1].unit,1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specnpoints=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Points: "+num2str(fileheader.images[fileheader.imagecount-1].specnpoints),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specstart=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Start: "+num2str(fileheader.images[fileheader.imagecount-1].specstart),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specend=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("End: "+num2str(fileheader.images[fileheader.imagecount-1].specend),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specinc=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Increment: "+num2str(fileheader.images[fileheader.imagecount-1].specinc),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specacqtime=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Acquisition time: "+num2str(fileheader.images[fileheader.imagecount-1].specacqtime),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specdelay=str2num(ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],""))
+				Debugprintf2("Delay time: "+num2str(fileheader.images[fileheader.imagecount-1].specdelay),1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].specfeedback=ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],"")
+				Debugprintf2("Feedback: "+fileheader.images[fileheader.imagecount-1].specfeedback,1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].filename=ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],"")
+				Debugprintf2("Filename: "+fileheader.images[fileheader.imagecount-1].filename,1)
+				FReadLine file, tmps ; tmps = mycleanupstr(tmps)
+				fileheader.images[fileheader.imagecount-1].displayname=ReplaceString(" ",tmps[0,strsearch(tmps,";",0)-1],"")
+				Debugprintf2("Displayname: "+fileheader.images[fileheader.imagecount-1].displayname,1)
+				Debugprintf2("Topographic Channel: "+num2str(fileheader.imagecount)+"end	#########",1)
+			break
 		default:
-		//nothing found
+			//nothing found
 			break
 		endswitch
 		fstatus file
