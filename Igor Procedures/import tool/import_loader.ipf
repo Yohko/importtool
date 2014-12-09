@@ -625,3 +625,16 @@ function /S get_flags(type)
 	
 	return "-1"
 end
+
+
+function /S loader_addtowavename(sn, sna)
+	string sn, sna
+	string srn=""
+	//PossiblyQuoteName(objname)
+	if (strsearch(sn[strlen(sn)-1,strlen(sn)],"'",0) ==0)
+		srn= sn[0,strlen(sn)-2]+sna+"'"
+	else
+		srn=sn+sna
+	endif
+	return srn
+end
