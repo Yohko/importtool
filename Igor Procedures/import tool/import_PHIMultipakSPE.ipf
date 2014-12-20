@@ -3,16 +3,6 @@
 
 // based on http://www.igorexchange.com/node/5692
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "PES"
-				"Load PHI Multipak				*.spe	file... beta", phimultipak_load_data()
-			end
-	end
-end
-#endif
-
 static structure phiheader
 	variable energy
 	variable Ta
@@ -430,6 +420,9 @@ Function phimultipak_load_data([optfile])
 		strswitch(phiheader.SpectralRegDef[i].header.datatype) //switch(phiheader.SpectralRegDef[i].header.datalen/phiheader.SpectralRegDef[i].header.points)
 			case "u4":
 				type = 3
+				break
+			case "u8": // works for now
+				type = 5
 				break
 			case "f4":
 				type = 4 // float
