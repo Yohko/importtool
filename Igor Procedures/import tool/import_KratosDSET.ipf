@@ -1,18 +1,7 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "PES"
-				"Load Kratos Ultra				*.dset	file... v0.2", KratosDSET_load_data()
-			end
-	end
-end
-#endif
 
-//static strconstant DsetBG = "BG"
-//static strconstant Dsetimage = "img"
 static strconstant Gtmpwavename = "tmpwave_"
 static strconstant directory = "root:Packages:KratosDSET"
 
@@ -461,7 +450,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,213,0,"Detector number","","","")//FID_detector_number
 	//KratosDSET_initaddobject(Dsetobject,214,0,"Separation ratio","","","")//FID_separation_ratio
 	//KratosDSET_initaddobject(Dsetobject,215,0,"# detectors","","","")//FID_no_of_detectors
-	KratosDSET_initaddobject(Dsetobject,221,0,"Background to a spectrum","","","BG")//FID_spectrum_background; Dsetobject.addtovaluewave=DsetBG
+	KratosDSET_initaddobject(Dsetobject,221,0,"Background to a spectrum","","","BG")//FID_spectrum_background
 	//KratosDSET_initaddobject(Dsetobject,222,0,"Component Max Height","","","")//FID_comp_height
 	//KratosDSET_initaddobject(Dsetobject,223,0,"Component Width","","","")//FID_comp_width
 	//KratosDSET_initaddobject(Dsetobject,224,0,"Component start","","","")//FID_comp_start
@@ -996,7 +985,20 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3077,5,"Peak Area at Reference Energy","","","")//AID_tune_peak_area
 	KratosDSET_initaddobject(Dsetobject,3078,5,"Intensity at Reference Energy","","","")//AID_tune_intensity
 	//KratosDSET_initaddobject(Dsetobject,3079,0,"Actual Etch Time Performed","","","")//AID_actual_etch_time
-	KratosDSET_initaddobject(Dsetobject,3080,3,"Xray Reference Energy","","0=1253.688;1=1486.708;2=0;3=2984.2;4=21.22;5=40.81;6=2042.4;7=4510.8991;8=1486.708","")//AID_xray_energy_reference
+	KratosDSET_initaddobject(Dsetobject,3080,3,"Xray Reference Energy","","0=1253.6;1=1486.61;2=0.0;3=2984.2;4=21.21;5=40.80;6=2042.4;7=4510;8=1486.69","")//AID_xray_energy_reference
+	//offset: 107028
+	//static strconstant f_energy_reference_names					= "Mg;Al;K.E.;Ag;He I;He II;Zr;Ti;Al (Mono)"
+	//offset: 47000
+	//static strconstant f_energy_reference_values					= "1253.60;1486.61;0;2984.20;21.21;40.80;2042.40;4510;1486.69"
+	//	66 66 66 66 66 96 93 40	-->	1253.6
+	//	3D 0A D7 A3 70 3A 97 40	-->	1486.61
+	//	00 00 00 00 00 00 00 00	-->	0.0
+	//	66 66 66 66 66 50 A7 40	-->	2984.2
+	//	F6 28 5C 8F C2 35 35 40	-->	21.21
+	//	66 66 66 66 66 66 44 40	-->	40.80
+	//	9A 99 99 99 99 E9 9F 40	-->	2042.4
+	//	00 00 00 00 00 9E B1 40	-->	4510.0
+	//	F6 28 5C 8F C2 3A 97 40	-->	1486.69
 	KratosDSET_initaddobject(Dsetobject,3081,3,"OBJECT identification tag","","","")//AID_object_tag
 	KratosDSET_initaddobject(Dsetobject,3082,3,"Map acquire sequence","","3=F_DO_1ST_LINE_OF_ALL_MAPS_BEFORE_2ND_LINE_OF_1ST_MAP","")//AID_acquire_sequence
 	KratosDSET_initaddobject(Dsetobject,3083,3,"# lines of map completed","","","")//AID_map_lines_completed
