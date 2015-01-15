@@ -52,6 +52,7 @@ function /S multiLoader_select_files(fileFilters)
 	return outputPaths
 end
 
+
 function multiLoader_autoloader()
 
 	string fileFilters = "All Files:.*;"
@@ -188,6 +189,18 @@ function multiLoader_loadbutton(ba) : ButtonControl
 end
 
 
+function multiLoader_info(ba) : ButtonControl
+	STRUCT WMButtonAction &ba
+	switch( ba.eventCode )
+		case 2: // mouse up
+			Debugprintf2("(C) 2012-2015 Matthias Richter\r\rhttps://github.com/Yohko/importtool",2)
+			break
+	endswitch
+	return 0
+end
+end
+
+
 Function multiLoader_changedcategory(pa) : PopupMenuControl
 	STRUCT WMPopupAction &pa
 	switch(pa.eventCode)
@@ -216,6 +229,8 @@ Function multiLoader_MakePanel()
 
 		Button button_load,pos={100,330},size={80,20},title="Load",fSize=14, proc=multiLoader_loadbutton
 		Button button_autoload,pos={10,330},size={80,20},title="Auto Load",fSize=14, proc=multiLoader_autoloadbutton // need a working xx_check_file() function for each file type
+
+		Button button_about,pos={210,10},size={80,20},title="About ...",fSize=14, proc=multiLoader_info
 
 		SetDrawEnv textrgb= (26205,52428,1),fstyle= 21,fsize= 14;DelayUpdate
 		DrawText 110,80,"Settings"
