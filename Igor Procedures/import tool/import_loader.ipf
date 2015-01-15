@@ -215,7 +215,12 @@ function /S mybinread(file, count)
 	variable i
 	string line = ""
 	line = PadString(line, count, 0x20)
-	FBinread/B=3 file, line
+	fstatus file
+	if(V_filepos+count<V_logeof)
+		FBinread/B=3 file, line
+	else
+		line = ""
+	endif
 	return line
 end
 
