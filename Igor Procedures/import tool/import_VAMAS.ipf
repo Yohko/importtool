@@ -910,8 +910,12 @@ function Vamasrpt_load_data([optfile])
 				SetScale/I  x,ebinstart,ebinend,"eV", w
 			endif
 
+			if (  strsearch(tmps[strlen(tmps)-1,strlen(tmps)],"'",0) ==0)
+				tmps= tmps[0,strlen(tmps)-2]+"N"+"'"
+			else
+				tmps=tmps+"N"
+			endif
 
-			tmps = addtowavename(tmps, "N")
 			duplicate /O w, $tmps
 			wave wn =$tmps
 			if(mymax !=0)
