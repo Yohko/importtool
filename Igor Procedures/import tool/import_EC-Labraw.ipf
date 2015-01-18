@@ -5,18 +5,6 @@
 // http://www.bio-logic.info/potentiostat-electrochemistry-ec-lab/
 // based on https://github.com/chatcannon/galvani (cfffeee2e2 , 2014-05-02)
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-		submenu "E-Chem"
-			"EC-Lab raw						*.mpr	file... beta", BIOLOGICmpr_load_data()
-			//"EC-Lab procressed				*.mpp	file... beta", //BIOLOGICmpp_load_data()
-		end
-	end
-end
-#endif
-
-
 structure mprmoduleheader
 	//char shortname[10]
 	//char longname[25] // somehow it reads the wrong amount of chars
@@ -821,5 +809,3 @@ function BIOLOGICmpr_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-

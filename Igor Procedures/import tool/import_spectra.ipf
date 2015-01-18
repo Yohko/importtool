@@ -6,17 +6,6 @@
 // - Presenter (SPECTRA files)
 // - SPECS LHS (*.#) ??
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-		submenu "PES"
-			"Load OmicronSpectra			*.1		file... v1.1", Spectra_load_data()
-		end
-	end
-end
-#endif
-
-
 function Spectra_check_file(file)
 	variable file
 	fsetpos file, 0

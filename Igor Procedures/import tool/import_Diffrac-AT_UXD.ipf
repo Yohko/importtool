@@ -4,18 +4,6 @@
 // The Diffrac-AT UXD procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/uxd.cpp)
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Siemens-Bruker Diffrac-AT	*.uxd	file... b1", Uxd_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Diffrac-AT UXD ########################
 // Siemens/Bruker Diffrac-AT UXD text format (for powder diffraction data)
 
 // A header (with file-scope parameters) is followed by block sections.
@@ -248,5 +236,3 @@ function Uxd_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-// ###################### Diffrac-AT UXD END ######################

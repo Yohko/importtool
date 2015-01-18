@@ -4,19 +4,6 @@
 // The Philips UDF procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/philips_udf.cpp)
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Philips						*.udf	file... b1", Udf_load_data()
-			end
-	end
-end
-#endif
-
-
-// ###################### Philips UDF format ########################
 // Philips UDF format - powder diffraction data from Philips diffractometers
 
 // Sample Fragment: ("#xxx": comments added by me; ...: omitted lines)
@@ -188,6 +175,3 @@ function Udf_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-
-// ###################### Philips UDF format END ######################

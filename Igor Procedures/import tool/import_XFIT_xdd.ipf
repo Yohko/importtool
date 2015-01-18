@@ -1,23 +1,8 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-
 // The FOURYA/XFIT/Koalariet XDD procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/xfit_xdd.cpp)
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load XFIT						*.xdd	file... b1", XfitXdd_load_data()
-			end
-	end
-end
-#endif
-
-
-// ###################### FOURYA/XFIT/Koalariet XDD file ########################
-// FOURYA/XFIT/Koalariet XDD file
 
 static function /S XfitXdd_skip_c_style_comments(file)
 	variable file
@@ -213,5 +198,3 @@ function XfitXdd_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-// ###################### FOURYA/XFIT/Koalariet XDD file END ######################

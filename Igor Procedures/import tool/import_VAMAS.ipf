@@ -13,18 +13,6 @@
 //  and on the analysis of sample files.
 
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "PES"
-				"Load VAMAS					*.vms	file... v1.0", Vamas_load_data()
-				"Load and graph CasaXPS reports", Vamas_loadplot_report()
-			end
-	end
-end
-#endif
-
-
 // dictionaries for VAMAS data
 static strconstant exps = "MAP;MAPDP;MAPSV;MAPSVDP;NORM;SDP;SDPSV;SEM;NOEXP"
 static strconstant techs = "AES diff;AES dir;EDX;ELS;FABMS;FABMS energy spec;ISS;SIMS;SIMS energy spec;SNMS;SNMS energy spec;UPS;XPS;XRF"

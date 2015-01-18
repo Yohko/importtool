@@ -4,17 +4,6 @@
 // The Brucker Raw procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/brucker_raw.cpp)
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Siemens-Bruker Diffrac-AT	*.raw	file... b1", BruckerRaw_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Siemens/Bruker Diffrac-AT Raw ########################
 // Siemens/Bruker Diffrac-AT Raw Format version 1/2/3
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 
@@ -29,7 +18,6 @@ end
 // Later it was improved based on section
 // "A.1 DIFFRAC^plus V3 RAW File Structure" of the manual:
 // "DIFFRAC^plus FILE EXCHANGE and XCH" Release 2002.
-
 
 
 function BruckerRaw_check_file(file)
@@ -370,4 +358,3 @@ static function BruckerRaw_load_version1_01(file,header)
 	endfor
 end
 
-// ###################### Siemens/Bruker Diffrac-AT Raw END ######################

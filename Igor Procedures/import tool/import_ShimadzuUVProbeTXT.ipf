@@ -1,5 +1,5 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
-#pragma rtGlobals=1		// Use modern global access method.
+#pragma rtGlobals=3		// Use modern global access method.
 
 // Shimadzu SolidSpec-3700 UV-VIS-NIR SPECTROPHOTOMETER
 

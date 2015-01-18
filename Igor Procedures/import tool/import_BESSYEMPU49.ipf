@@ -1,17 +1,7 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
-#pragma rtGlobals=1		// Use modern global access method.
+#pragma rtGlobals=3		// Use modern global access method.
 
 // EMP data file as for the U49/2-PGM2 at BESSYII
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-		submenu "PES"
-			"Load Bessy EMP U49				*.dat	file... beta", BessyEMPU49_load_data()
-		end
-	end
-end
-#endif
 
 
 static structure keyval

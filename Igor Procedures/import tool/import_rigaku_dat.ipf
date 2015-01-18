@@ -4,18 +4,6 @@
 // The Rigaku procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/rigaku_dat.cpp)
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Rigaku						*.dat	file... b1", Rigaku_load_data()
-			end
-	end
-end
-#endif
-
-
-// ###################### Rigaku ########################
 // Rigaku .dat format - powder diffraction data from Rigaku diffractometers
 // http://sdpd.univ-lemans.fr/course/week-1/sdpd-1.html
 
@@ -206,5 +194,3 @@ function Rigaku_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-// ###################### Rigaku END ######################

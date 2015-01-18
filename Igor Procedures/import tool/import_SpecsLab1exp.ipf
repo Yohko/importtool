@@ -1,17 +1,6 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "PES"
-				"Load SpecsLab1					*.exp	file... alpha", Specslabexp_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### SpecsLab I *.exp ########################
 
 static Structure SpecsLabexpinfo
 	string header
@@ -322,6 +311,3 @@ static function /S Specslabexp_getinfo(file)
 	endif
 	return list	
 end
-
-
-// ###################### SpecsLab I *.exp END ######################

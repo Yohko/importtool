@@ -3,18 +3,6 @@
 
 // http://www.jawoollam.com/wvase.html
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-		submenu "FTIR-RAMAN-VASE"
-				"WVASE32						*.dat	file... b1", WVASE32_load_data() 
-		end
-	end
-end
-#endif
-
-
 function WVASE32_check_file(file)
 	variable file
 	fsetpos file, 0

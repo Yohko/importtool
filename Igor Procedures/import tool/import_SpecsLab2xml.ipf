@@ -1,16 +1,6 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "PES"
-				"Load SpecsLab2					*.xml	file... v1.1", SpecsXML_load_data()
-			end
-	end
-end
-#endif
-
 static constant timinglist = 0
 
 // some xy exported by SpecsLab2 are interpolated, some are not?

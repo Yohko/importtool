@@ -1,18 +1,7 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
-#pragma rtGlobals=1		// Use modern global access method.
+#pragma rtGlobals=3		// Use modern global access method.
 
 // Device: http://www.princetonappliedresearch.com/Our-Products/Potentiostats/VersaSTAT-4.aspx
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-		submenu "E-Chem"
-			"VersaStudio						*.par	file... beta", VersaStudio_load_data()
-		end
-	end
-end
-#endif
-
 
 static structure param
 	string key

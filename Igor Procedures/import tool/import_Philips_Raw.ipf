@@ -4,18 +4,6 @@
 // The Philips RD raw procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/philips_raw.cpp)
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Philips RD Raw Scan V3 		*.rd	*.sd		file... b1", PhilipsRaw_load_data() //V5 --> sd not tested yet
-			end
-	end
-end
-#endif
-
-// ###################### Philips RD raw scan format ########################
 // Philips RD raw scan format V3 (.rd) and V5 (.sd)
 
 static Structure SSEread
@@ -127,6 +115,3 @@ function PhilipsRaw_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-
-// ###################### Philips RD raw scan format END ######################

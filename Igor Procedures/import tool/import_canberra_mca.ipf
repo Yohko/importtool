@@ -4,20 +4,7 @@
 // The Canberra Mca procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/canberra_mca.cpp)
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Canberra AccuSpec  *.dat 	*.mca	file... b1", CanberraMca_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Canberra AccuSpec MCA ########################
 // Canberra AccuSpec MCA
-
 // based on a chapter from an unknown instruction, pages B1-B5:
 // APPENDIX B: FILE STRUCTURES
 // "Spectral data acquired on the MCA system are directly
@@ -135,4 +122,3 @@ function test()
 	print raw+ " --> "+num2str(val2)
 end
 #endif
-// ###################### Canberra AccuSpec MCA END ######################

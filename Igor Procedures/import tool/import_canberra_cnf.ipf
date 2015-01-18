@@ -4,19 +4,6 @@
 // The Canberra Cnf procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/canberra_cnf.cpp)
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Canberra CNF 				*.cnf	file... b0", CanberraCnf_load_data() // comments dont work yet
-			end
-	end
-end
-#endif
-
-// ###################### Canberra CNF (aka CAM format) ########################
-
 // Canberra CNF (aka CAM format) with spectral data from Genie software
 // Based on code from Jim Fitzgerald that is used in FitzPeaks (Gamma Analysis
 // and Calibration Software, http://www.jimfitz.demon.co.uk/fitzpeak.htm).
@@ -327,6 +314,3 @@ function CanberraCnf_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-
-// ###################### Canberra CNF (aka CAM format) END ######################

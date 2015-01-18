@@ -5,18 +5,6 @@
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/dbws.cpp)
 
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load DBWS	 		*.dwb *.rit	*.neu	file... b1", Dbws_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### DBWS data file ########################
-
 function Dbws_check_file(file)
 	variable file
 	fsetpos file, 0
@@ -139,4 +127,3 @@ function Dbws_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-// ###################### DBWS data file END ######################

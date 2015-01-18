@@ -4,17 +4,6 @@
 // LK-Tech HREELS Model EA5000MCA
 // http://www.lktech.com/products/EA5000MCA.php
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			Submenu "EELS"
-				"LK-Tech HREELS Model EA5000MCA	*.dat	file... b1", LKHREELS_load_data()
-			end			
-	end
-end
-#endif
-
-
 function LKHREELS_check_file(file)
 	variable file
 	fsetpos file, 0
@@ -100,4 +89,3 @@ function LKHREELS_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-

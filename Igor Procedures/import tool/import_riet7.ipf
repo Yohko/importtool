@@ -4,18 +4,6 @@
 // The RIET7/LHPM/CSRIET procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/riet7.cpp)
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"RIET7-ILL_D1A5-PSI_DMC		*.dat	file... b1",  Riet7_load_data()
-			end
-	end
-end
-#endif
-
-
-// ###################### RIET7/LHPM/CSRIET DAT ########################
 // RIET7/LHPM/CSRIET DAT,  ILL_D1A5 and PSI_DMC formats
 // .dat is popular extension for data, we want to avoid false positives.
 // This format has line starting with three numbers: start step end
@@ -200,6 +188,3 @@ function Riet7_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-
-// ###################### RIET7/LHPM/CSRIET DAT END ######################

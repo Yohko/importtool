@@ -4,18 +4,6 @@
 // The Sietronics Sieray CPI procedure is based on xylib by Marcin Wojdyr:
 // https://github.com/wojdyr/xylib (https://github.com/wojdyr/xylib/blob/master/xylib/cpi.cpp)
 
-
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "XRD"
-				"Load Sietronics Sieray 			*.cpi	file... b1",  Cpi_load_data()
-			end
-	end
-end
-#endif
-
-// ###################### Sietronics Sieray CPI ########################
 // Sietronics Sieray CPI format
 // format example:
 
@@ -129,6 +117,3 @@ function Cpi_load_data([optfile])
 	importloader.success = 1
 	loaderend(importloader)
 end
-
-
-// ###################### Sietronics Sieray CPI END ######################

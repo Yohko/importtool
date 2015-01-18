@@ -1,23 +1,9 @@
 // Licence: Lesser GNU Public License 2.1 (LGPL)
 #pragma rtGlobals=3		// Use modern global access method.
 
-#ifdef showmenu
-Menu "Macros"
-	submenu "Import Tool "+importloaderversion
-			submenu "PES"
-				"Load SpecsLab2					*.xy		file... v1.3", SpecslabXY_load_data()
-			end
-	end
-end
-#endif
-
-
-// ###################### SpecsLab XY ########################
-
 // based on procudure from SPECS:
 // copyright 2006-2007 by SPECS GmbH , Berlin, Germany
 // Import Filter for xy files produced by SpecsLab2
-
 
 static Function SpecslabXY_grepDataTitle(str)
 		string str
@@ -49,6 +35,7 @@ static Function SpecslabXY_grepDataTitle(str)
 
 		return numRead
 end
+
 
 static Function/S SpecslabXY_grepLine(str)
 		string str
@@ -501,8 +488,7 @@ Function SpecslabXY_load_data([optfile])
 	loaderend(importloader)
 end
 
+
 static Function SpecslabXY_CleanUp()
 	KillDataFolder root:constants47110815
 End 
-
-// ###################### SpecsLab XY END ######################
