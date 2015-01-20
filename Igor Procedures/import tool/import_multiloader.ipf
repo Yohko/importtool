@@ -198,7 +198,6 @@ function multiLoader_info(ba) : ButtonControl
 	endswitch
 	return 0
 end
-end
 
 
 Function multiLoader_changedcategory(pa) : PopupMenuControl
