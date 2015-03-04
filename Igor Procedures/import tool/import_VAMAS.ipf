@@ -618,7 +618,9 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	for(i=0;i<cor_var;i+=1)
 		if(i==0) // detector
 			rename $(blockid+"_spk"+num2str(i)), $(blockid)
-			Vamas_casaInfo($(blockid))
+			if(str2num(get_flags("justdetector"))==0)
+				Vamas_casaInfo($(blockid))
+			endif
 		elseif(i==1) // transmission function
 			if(str2num(get_flags("includetransmission")) == 1&& str2num(get_flags("justdetector"))==0)
 				rename $(blockid+"_spk"+num2str(i)), $(blockid+"_TF")
