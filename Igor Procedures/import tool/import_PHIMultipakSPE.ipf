@@ -189,7 +189,7 @@ Function phimultipak_load_data([optfile])
 				header += "\rFileDesc: "+keyval.val
 				break
 			case "SoftwareVersion":
-				header += "\r: "+keyval.val
+				header += "\rSoftwareVersion: "+keyval.val
 				break
 			case "InstrumentModel":
 				header += "\rInstrumentModel: "+keyval.val
@@ -369,6 +369,9 @@ Function phimultipak_load_data([optfile])
 			case "SpatialAreaDesc":
 				break
 			case "SpatialHRPhotoCor":
+				break
+			case "LensConstant":
+				header += "\rLensConstant: "+keyval.val
 				break
 			case "EOFH":
 				Debugprintf2("end of header",1)
