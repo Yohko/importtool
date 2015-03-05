@@ -11,7 +11,7 @@
 
 constant false				= 0
 constant true				= 1
-
+strconstant loader_directory = "root:Packages:Import_Tool:flags:"
 
 //importflags #################################################
 function init_flags()
@@ -66,6 +66,9 @@ function init_flags()
 	endif
 	if(exists(mypath+":f_DivTF")!=2)
 		variable /G  $(mypath+":f_DivTF") 				= 0			// create a new wave and devide Detector by Transmission function
+	endif
+	if(exists(mypath+":f_askenergy")!=2)
+		variable /G  $(mypath+":f_askenergy") 			= 0			// ask for the excitation energy
 	endif
 end
 //ende importflags ##############################################
@@ -555,78 +558,26 @@ end
 function /S get_flags(type)
 	string type
 	
-	NVAR myincludeADC = root:Packages:Import_Tool:flags:includeADC
-	NVAR myCB_DivScans = root:Packages:Import_Tool:flags:CB_DivScans
-	NVAR myCB_DivLifetime = root:Packages:Import_Tool:flags:CB_DivLifeTime
-	NVAR myDivDetectorGain = root:Packages:Import_Tool:flags:DivDetectorGain
-	NVAR myInterpolieren = root:Packages:Import_Tool:flags:Interpolieren
-	NVAR myChanneltronEinzeln = root:Packages:Import_Tool:flags:ChanneltronEinzeln
-	SVAR mysuffix = root:Packages:Import_Tool:flags:suffix
-	NVAR myposbinde = root:Packages:Import_Tool:flags:posbinde
-	NVAR mysinglescans = root:Packages:Import_Tool:flags:singlescans
-	NVAR myimporttoroot = root:Packages:Import_Tool:flags:importtoroot
-	NVAR myconverttoWN = root:Packages:Import_Tool:flags:converttoWN
-	NVAR myincludetransmission = root:Packages:Import_Tool:flags:includetransmission
-	NVAR myvskineticenergy = root:Packages:Import_Tool:flags:vskineticenergy
-	NVAR myaskforappenddet = root:Packages:Import_Tool:flags:askforappenddet
-	NVAR myjustdetector = root:Packages:Import_Tool:flags:justdetector
-	NVAR f_DivTF = root:Packages:Import_Tool:flags:f_DivTF
+	variable n_objects_NVAR = CountObjects(loader_directory,2)
+	variable n_objects_SVAR = CountObjects(loader_directory,3)
+	string cmp_type
+	variable i=0
+	for(i=0;i<n_objects_NVAR;i+=1)
+		cmp_type = GetIndexedObjName(loader_directory,2,i)
+		if(cmpstr(type, cmp_type,1) ==0)
+			NVAR f_type_N =$(loader_directory+cmp_type)
+			return num2str(f_type_N)
+		endif
+	endfor
+	for(i=0;i<n_objects_SVAR;i+=1)
+		cmp_type = GetIndexedObjName(loader_directory,3,i)
+		if(cmpstr(type, cmp_type,1) ==0)
+			SVAR f_type_S =$(loader_directory+cmp_type)
+			return f_type_S
+		endif
+	endfor
 	
-	strswitch(type)
-		case "includeADC":
-			return num2str(myincludeADC)
-			break
-		case "CB_DivScans":
-			return num2str(myCB_DivScans)
-			break
-		case "CB_DivLifeTime":
-			return num2str(myCB_DivLifeTime)
-			break
-		case "DivDetectorGain":
-			return num2str(myDivDetectorGain)
-			break
-		case "Interpolieren":
-			return num2str(myInterpolieren)
-			break
-		case "ChanneltronEinzeln":
-			return num2str(myChanneltronEinzeln)
-			break
-		case "suffix":
-			return mysuffix
-			break
-		case "posbinde":
-			return num2str(myposbinde)
-			break
-		case "singlescans":
-			return num2str(mysinglescans)
-			break
-		case "importtoroot":
-			return num2str(myimporttoroot)
-			break
-		case "converttoWN":
-			return num2str(myconverttoWN)
-			break
-		case "includetransmission":
-			return num2str(myincludetransmission)
-			break
-		case "vskineticenergy":
-			return num2str(myvskineticenergy)
-			break
-		case "askforappenddet":
-			return num2str(myaskforappenddet)
-			break
-		case "justdetector":
-			return num2str(myjustdetector)
-			break
-		case "f_DivTF":
-			return num2str(f_DivTF)
-			break
-		default:
-			debugprintf2("Unknown Flag: "+type,1)
-			return "-1"
-			break
-	endswitch
-	
+	debugprintf2("Unknown Flag: "+type,1)
 	return "-1"
 end
 

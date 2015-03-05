@@ -218,7 +218,7 @@ Function multiLoader_MakePanel()
 	else
 		init_flags()
 
-		NewPanel/K=1/W=(381,55,680,420)/N=Multiloader
+		NewPanel/K=1/W=(381,55,680,435)/N=Multiloader
 		ModifyPanel fixedSize=1,noEdit=1
 
 		PopupMenu popup_category,pos={10,10},size={115,20},title="Category  ",fSize=12, proc=multiLoader_changedcategory
@@ -226,8 +226,8 @@ Function multiLoader_MakePanel()
 		PopupMenu popup_loader,pos={10,36},size={115,20},title="File Loader",fSize=12
 		PopupMenu popup_loader,mode=1,value=#"multiLoader_listfuncofcateg()"
 
-		Button button_load,pos={100,330},size={80,20},title="Load",fSize=14, proc=multiLoader_loadbutton
-		Button button_autoload,pos={10,330},size={80,20},title="Auto Load",fSize=14, proc=multiLoader_autoloadbutton // need a working xx_check_file() function for each file type
+		Button button_load,pos={100,350},size={80,20},title="Load",fSize=14, proc=multiLoader_loadbutton
+		Button button_autoload,pos={10,350},size={80,20},title="Auto Load",fSize=14, proc=multiLoader_autoloadbutton // need a working xx_check_file() function for each file type
 
 		Button button_about,pos={210,10},size={80,20},title="About ...",fSize=14, proc=multiLoader_info
 
@@ -257,6 +257,7 @@ Function multiLoader_MakePanel()
 		CheckBox check9 title="convert to cm^-1",pos={150,170+y},variable=$("root:Packages:Import_Tool:flags:converttoWN")
 		CheckBox check10 title="vs. Ekin",pos={150,190+y},variable=$("root:Packages:Import_Tool:flags:vskineticenergy")
 		CheckBox check11 title="pos. Ebind",pos={150,210+y},variable=$("root:Packages:Import_Tool:flags:posbinde")
+		CheckBox check_askenergy title="ask for Eph",pos={150,230+y},variable=$("root:Packages:Import_Tool:flags:f_askenergy")
 		// storing
 		SetDrawEnv textrgb= (65535,0,0),fstyle= 1;DelayUpdate
 		DrawText 10,160+y,"Storing"
@@ -265,14 +266,18 @@ Function multiLoader_MakePanel()
 		SetVariable setvar0  title="suffix",pos={10,210+y},size={115,20},value=$("root:Packages:Import_Tool:flags:suffix")
 
 		SetDrawLayer UserBack
+		// spectra
 		SetDrawEnv linethick= 2,linefgc= (65535,21845,0),fillpat= 0
 		DrawRRect 5,85,135, 215
+		// storing
 		SetDrawEnv linethick= 2,linefgc= (65535,21845,0),fillpat= 0
-		DrawRRect 5,220,135, 315
+		DrawRRect 5,220,135, 335
+		// counts (y-axis)	
 		SetDrawEnv linethick= 2,linefgc= (65535,21845,0),fillpat= 0
 		DrawRRect 145,85,275, 215
+		// x-axis
 		SetDrawEnv linethick= 2,linefgc= (65535,21845,0),fillpat= 0
-		DrawRRect 145,220,275, 315
+		DrawRRect 145,220,275, 335
 	endif
 	return 0
 end
