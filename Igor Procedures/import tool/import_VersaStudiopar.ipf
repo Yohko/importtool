@@ -3,7 +3,7 @@
 
 // Device: http://www.princetonappliedresearch.com/Our-Products/Potentiostats/VersaSTAT-4.aspx
 
-static structure param
+static structure VersaStudio_param
 	string key
 	string val
 	string group
@@ -11,7 +11,7 @@ static structure param
 endstructure
 
 
-static structure header
+static structure VersaStudio_header
 	string header
 	string applicationName
 	string applicationVersion
@@ -34,7 +34,7 @@ endstructure
 
 
 static function VersaStudio_getparam(str, param)
-	string str ; struct param &param
+	string str ; struct VersaStudio_param &param
 	param.key = ""
 	param.val = ""
 	param.group = ""
@@ -154,8 +154,8 @@ function VersaStudio_load_data([optfile])
 	string header = importloader.header
 	variable file = importloader.file
 	
-	struct param param
-	struct header hdr
+	struct VersaStudio_param param
+	struct VersaStudio_header hdr
 	hdr.header = header
 	string savepath = ""
 	
@@ -217,10 +217,10 @@ end
 
 
 static function VersaStudio_read_application(file, hdr)
-	variable file; struct header &hdr
+	variable file; struct VersaStudio_header &hdr
 
 	variable run = 1
-	struct param param
+	struct VersaStudio_param param
 
 	do
 		VersaStudio_getparam(mycleanupstr(myreadline(file)), param)
@@ -247,10 +247,10 @@ end
 
 
 static function VersaStudio_read_instrument(file, hdr)
-	variable file; struct header &hdr
+	variable file; struct VersaStudio_header &hdr
 
 	variable run = 1
-	struct param param
+	struct VersaStudio_param param
 
 	do
 		VersaStudio_getparam(mycleanupstr(myreadline(file)), param)
@@ -283,10 +283,10 @@ end
 
 
 static function VersaStudio_read_experiment(file, hdr)
-	variable file; struct header &hdr
+	variable file; struct VersaStudio_header &hdr
 	
 	variable run = 1
-	struct param param
+	struct VersaStudio_param param
 
 	do
 		VersaStudio_getparam(mycleanupstr(myreadline(file)), param)
@@ -331,9 +331,9 @@ end
 
 
 static function VersaStudio_read_segement(file, hdr)
-	variable file; struct header &hdr
+	variable file; struct VersaStudio_header &hdr
 
-	struct param param
+	struct VersaStudio_param param
 	variable run = 1, datacount = 1, i=0
 	string tmps = "", definition = ""
 	
