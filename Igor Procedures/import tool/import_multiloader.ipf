@@ -320,7 +320,7 @@ function /S multiLoader_guess_filetype(file)
 			if(exists(tmps)==6)
 				FUNCREF multiLoader_proto_check_file f_check = $(tmps)
 				Debugprintf2(" ... checking against: "+ReplaceString("_check_file",tmps,""),1)
-				if(f_check(file)==1)
+				if(f_check(file)>=1)
 					Debugprintf2(".. found: "+ReplaceString("_check_file",tmps,""),0)
 					return ReplaceString("_check_file",tmps,"")
 				endif
