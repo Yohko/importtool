@@ -294,13 +294,14 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 
 //	variable cor_var = 0 // # of corresponding variables
 
-	string blockid ="SPK"+num2str(count)+read_line_trim(file)
+	string blockid = read_line_trim(file)
+	string sampleid = read_line_trim(file)
+
 	blockid = cleanname(blockid)
-	Make /O/R/N=(10)  $blockid /wave=ycols
+	Make /O/R/N=(10)  $(cleanname(sampleid[0,10])+"_"+num2str(count)+"_"+blockid[0,10]) /wave=ycols
 	Note ycols, headercomment
-	
 	Note ycols, "block id: "+ blockid
-	Note ycols, "sample identifier: "+ read_line_trim(file)
+	Note ycols, "sample identifier: "+ sampleid
 
 	if (includew[0]==1)
 		Note ycols, "year: " + read_line_trim(file)
@@ -468,7 +469,23 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 			x_start = read_line_int(file)
 			x_step = read_line_int(file)
 		else
-			Debugprintf2("Only REGULAR scans are supported now",0)
+			cor_var = read_line_int(file)
+			if(numtype(cor_var)!=0)
+				Debugprintf2("Error opening Vamas file (cor_var)!",0)
+				return -1
+			endif
+			x_name =  read_line_trim(file)
+			note ycols, "abscissa label: "+ x_name
+			note ycols, "abscissa units: "+  read_line_trim(file)
+
+			for (i = 0; i != cor_var-1; i+=1)
+				note ycols,"Name Col"+num2str(i)+": "+read_line_trim(file)
+				if(skip_lines(file, 1)==-1) // corresponding variable unit
+					//loaderend(impname,1,file, dfSave)
+					return -1
+				endif
+			endfor
+			includew[31] = 0
 		endif
 	else
 		Debugprintf2("how to find abscissa properties in this file?",0)
@@ -613,30 +630,40 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	if(str2num(get_flags("CB_DivLifeTime")) == 1)
 		ycols/=dwelltime
 	endif
-
-	splitmatrix(ycols, blockid)
-	for(i=0;i<cor_var;i+=1)
-		if(i==0) // detector
-			rename $(blockid+"_spk"+num2str(i)), $(blockid)
-			if(str2num(get_flags("justdetector"))==0)
-				Vamas_casaInfo($(blockid))
+	
+	string ycols_name = nameofwave(ycols)
+	splitmatrix(ycols, ycols_name)
+	if (cmpstr("REGULAR",scan_mode) == 0)
+		for(i=0;i<cor_var;i+=1)
+			if(i==0) // detector
+				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name)
+				if(str2num(get_flags("justdetector"))==0)
+					Vamas_casaInfo($(ycols_name))
+				endif
+			elseif(i==1) // transmission function
+				if(str2num(get_flags("includetransmission")) == 1&& str2num(get_flags("justdetector"))==0)
+					rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_TF")
+				else
+					killwaves $(ycols_name+"_spk"+num2str(i))
+				endif
+			else // additional channels??
+				if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
+					rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_ADC"+num2str(i-2))
+				else
+					killwaves $(ycols_name+"_spk"+num2str(i))
+				endif
 			endif
-		elseif(i==1) // transmission function
-			if(str2num(get_flags("includetransmission")) == 1&& str2num(get_flags("justdetector"))==0)
-				rename $(blockid+"_spk"+num2str(i)), $(blockid+"_TF")
+		endfor
+	else
+		for(i=0;i<cor_var;i+=1)
+			if(i==0) // x-axis
+				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_X")
 			else
-				killwaves $(blockid+"_spk"+num2str(i))
+				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_Y"+num2str(i))
 			endif
-		else // additional channels??
-			if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
-				rename $(blockid+"_spk"+num2str(i)), $(blockid+"_ADC"+num2str(i-2))
-			else
-				killwaves $(blockid+"_spk"+num2str(i))
-			endif
-			
-		endif
-	endfor
-	Debugprintf2("exported: "+blockid,0)
+		endfor	
+	endif
+	Debugprintf2("exported: "+ycols_name,0)
 	return 0
 end
 
