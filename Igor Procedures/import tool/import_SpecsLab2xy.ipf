@@ -129,6 +129,20 @@ static Function SpecslabXY_isDataLine(str)
 end
 
 
+static function SpecslabXY_checksetting(str)
+	string str
+	strswitch(str)
+		case "yes":
+			return 1
+			break
+		case "no":
+			return 0
+			break
+	endswitch	
+	return -1
+end
+
+
 static Function/S SpecslabXY_removeTrailingCR(str)
 		string str
 		
@@ -184,7 +198,8 @@ Function SpecslabXY_load_data([optfile])
 		string str, type ="????", group="", spectrum="",  oldgroup="", tmp=""
 		string method="", lens="", slit="", analyzer="", mode="", curvesPerScan="", valuesPerCurve="",dwellTime="", excEnergy="", passEnergy="", biasVoltage=""
 		string detVoltage="", effWorkfunction="", source="", numberOfScan="", kinEnergy="", remote="", comment="", region="", energy="",headerComment="", remoteInfo=""
-		
+		variable isEKIN = NaN, isCPS = NaN
+
 		NewDataFolder/o/s root:constants47110815
 
 		tmpS = "xw" ; Make /O/D/N=(0) $tmpS ; wave xw = $tmpS
@@ -211,6 +226,8 @@ Function SpecslabXY_load_data([optfile])
 							oldgroup = group
 							tmps=folder+group
 							NewDataFolder/s $tmps
+						elseif(cmpstr(group,"") == 0)
+							setdatafolder folder
 						endif
 						
 						if( cmpstr(region,"") == 0 )// take save default name
@@ -282,12 +299,23 @@ Function SpecslabXY_load_data([optfile])
 							Debugprintf2(method,1)
 							strswitch(mode)
 								case "FixedAnalyzerTransmission":
-									startx = xw[0]-str2num(excEnergy)
-									stepx = xw[1] - xw[0]
-									if(str2num(get_flags("posbinde")) == 0)
-										SetScale/P  x,startx,stepx,"eV", yw
+									if(isEKIN)
+										startx = xw[0]-str2num(excEnergy)
+										stepx = xw[1] - xw[0]
+										if(str2num(get_flags("posbinde")) == 0)
+											SetScale/P  x,startx,stepx,"eV", yw
+										else
+											SetScale/P  x,-startx,-stepx,"eV", yw
+										endif
 									else
-										SetScale/P  x,-startx,-stepx,"eV", yw
+										startx = xw[0]
+										stepx = xw[1] - xw[0]
+										if(str2num(get_flags("posbinde")) == 0)
+											SetScale/P  x,-startx,-stepx,"eV", yw
+										else
+											SetScale/P  x,startx,stepx,"eV", yw
+										endif
+									
 									endif
 									KillWaves xw
 								break
@@ -316,12 +344,22 @@ Function SpecslabXY_load_data([optfile])
 									KillWaves xw
 								break
 								case "Snapshot (FAT)":
-									startx = xw[0]-str2num(excEnergy)
-									stepx = xw[1] - xw[0]
-									if(str2num(get_flags("posbinde")) == 0)
-										SetScale/P  x,startx,stepx,"eV", yw
+									if(isEKIN)
+										startx = xw[0]-str2num(excEnergy)
+										stepx = xw[1] - xw[0]
+										if(str2num(get_flags("posbinde")) == 0)
+											SetScale/P  x,startx,stepx,"eV", yw
+										else
+											SetScale/P  x,-startx,-stepx,"eV", yw
+										endif
 									else
-										SetScale/P  x,-startx,-stepx,"eV", yw
+										startx = xw[0]
+										stepx = xw[1] - xw[0]
+										if(str2num(get_flags("posbinde")) == 0)
+											SetScale/P  x,-startx,-stepx,"eV", yw
+										else
+											SetScale/P  x,startx,stepx,"eV", yw
+										endif
 									endif
 									KillWaves xw
 								break
@@ -391,7 +429,6 @@ Function SpecslabXY_load_data([optfile])
 						Note yw,"RemoteInfo:" + remoteInfo				
 						Note yw, "Comment:" + comment
 					
-						//wavestats/Q  yw
 						Debugprintf2("... exporting spectrum: "+spectrum,0)
 						n_wave  += 1	
 				endif
@@ -470,6 +507,32 @@ Function SpecslabXY_load_data([optfile])
 					case "Comment:":
 						cmtLine = line
 						headerComment = option
+					break
+					case "  Comment Prefix:":
+					break
+					case "  Counts Per Second:":
+						isCPS = SpecslabXY_checksetting(option)
+					break
+					case "  Kinetic Energy Axis:":
+						isEKIN = SpecslabXY_checksetting(option)
+					break
+					case "  Separate Scan Data:":
+					break
+					case "  Separate Channel Data:":
+					break
+					case "  External Channel Data:":
+					break
+					case "  Transmission Function:":
+					break
+					case "  ErrorBar:":
+					break
+					case "Acquisition Date:":
+					break
+					case "Binding Energy:":
+					break
+					case "Cycle:":
+					break
+					case "ColumnLabels:":
 					break
 					default:
 						if( ( cmtLine + 1 ) == line && cmpstr(option,"") != 0 )
