@@ -139,25 +139,28 @@ static function VGScientaSES_add_notes(header, spectra)
 		energyscale=VGScientaSES_parameter(oldnote, "Dimension 1 name=")
 	endif
 
+	if(f_askenergy <= 0 || exenergy == -1)
+		exenergy = str2num(VGScientaSES_parameter(oldnote, "Excitation Energy="))
+		if( exenergy == 0 && f_askenergy == 0)
+			Prompt exenergy, "Eph: "
+			DoPrompt "Enter excitation energy (cancel == Do not ask again!)", exenergy
+			if(V_flag == 1)
+				exenergy = 0
+				//variable /G  $(loader_directory+"f_askenergy") = -1
+			endif
+		endif
+	endif
+
 	strswitch(energyscale)
 		case "Binding Energy [eV]":
-			if(f_askenergy == 0 || exenergy == -1)
-				exenergy = str2num(VGScientaSES_parameter(oldnote, "Excitation Energy="))
-			endif
 			kinstart = exenergy-str2num(VGScientaSES_parameter(oldnote, "High Energy="))
 			kinend = exenergy-str2num(VGScientaSES_parameter(oldnote, "Low Energy="))
 			break
 		case "Kinetic Energy [eV]":
-			if(f_askenergy == 0 || exenergy == -1)
-				exenergy = str2num(VGScientaSES_parameter(oldnote, "Excitation Energy="))
-			endif
 			kinstart = str2num(VGScientaSES_parameter(oldnote, "Low Energy="))
 			kinend = str2num(VGScientaSES_parameter(oldnote, "High Energy="))
 			break
 		case "Kinetic":
-			if(f_askenergy == 0 || exenergy == -1)
-				exenergy = str2num(VGScientaSES_parameter(oldnote, "Excitation Energy="))
-			endif
 			kinstart = str2num(VGScientaSES_parameter(oldnote, "Low Energy="))
 			kinend = str2num(VGScientaSES_parameter(oldnote, "High Energy="))
 			break
