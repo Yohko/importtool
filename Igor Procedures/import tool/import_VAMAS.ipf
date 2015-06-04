@@ -811,21 +811,26 @@ function Vamasrpt_check_file(file)
 	fsetpos file, 0
 	string line = ""
 
+	variable headerpresent = 0
+	
 	FReadLine file, line
 	if(strlen(line) == 0)
-		fsetpos file, 0
-		return -1
+		headerpresent += -1
+	else
+		headerpresent += 1
 	endif
 	line = mycleanupstr(line)
 	if(strsearch(line, ".vms",0) ==-1)
-		fsetpos file, 0
-		return -1
+		headerpresent += -1
+	else
+		headerpresent += 1
 	endif
 
-	FReadLine file, line
+	FReadLine file, line // name of spectra
 	if(strlen(line) == 0)
-		fsetpos file, 0
-		return -1
+		headerpresent += -1
+	else
+		headerpresent += 1
 	endif
 
 	FReadLine file, line
@@ -835,10 +840,37 @@ function Vamasrpt_check_file(file)
 	endif
 	line = mycleanupstr(line)
 	if(strsearch(line, "Characteristic Energy eV",0) ==-1 && strsearch(line, "Acquisition Time s",0) ==-1)
-		fsetpos file, 0
-		return -1
+		headerpresent += -1
+	else
+		headerpresent += 1
 	endif
-
+	if(headerpresent != 4)
+		fsetpos file, 0
+		FReadLine file, line
+		if(strlen(line) == 0)
+			fsetpos file, 0
+			return -1
+		endif
+		// read nametags
+		line = mycleanupstr(line)
+		line = stripstrfirstlastspaces(line)
+		variable components =  itemsinlist(line,"	"), i=0
+		// read first line of numbers
+		line=myreadline(file)
+		line = stripstrfirstlastspaces(line)
+		if(strlen(line)==0 || itemsinlist(line,"	") != components)
+			fsetpos file, 0
+			return -1
+		endif
+		for(i=0;i<itemsinlist(line,"	");i+=1)
+			if(numtype(str2num(StringFromList(i,line,"	")))!=0)
+				fsetpos file, 0
+				return -1	
+			endif
+		endfor
+		fsetpos file, 0
+		return 2 // 2 .. no header
+	endif
 	fsetpos file, 0
 	return 1
 end
@@ -862,10 +894,23 @@ function Vamasrpt_load_data([optfile])
 	endif
 	string header = importloader.header+"\r"
 	variable file = importloader.file
-	header+="Line 1: "+myreadline(file)+"\r"
-	header+="Line 2: "+myreadline(file)+"\r"
-	header+="Line 2: "+myreadline(file)
+
+	variable type = Vamasrpt_check_file(file)
+	switch(type)
+		case 1:
+			header+="Line 1: "+myreadline(file)+"\r"
+			header+="Line 2: "+myreadline(file)+"\r"
+			header+="Line 2: "+myreadline(file)
+			break
+		case 2:
+			break
+		default:
+			loaderend(importloader)
+			break
+	endswitch
+
 	string names=myreadline(file)
+	names = stripstrfirstlastspaces(names)
 	variable components =  itemsinlist(names,"	"), i=0
 	variable counter=1
 	string line="spectra"
@@ -874,6 +919,7 @@ function Vamasrpt_load_data([optfile])
 	do
 		Redimension/N=(counter, -1) cols
 		line=myreadline(file)
+		line = stripstrfirstlastspaces(line)
 		if(strlen(line)==0 || itemsinlist(line,"	") != components)
 			Debugprintf2("Error in reading CasaXPS report file!",0)
 			break
@@ -889,9 +935,20 @@ function Vamasrpt_load_data([optfile])
 	variable ekinstart=0, ekinend=1, ebinstart=0, ebinend=1
 	variable mymax=0, mymin=0
 	
-	Display
+	Display /K=1 // Kills window with no dialog
 	string windowname = S_name
 	string tmps=""
+	variable sub = 0
+	
+	switch(type)
+		case 1:
+			sub = 0
+			break
+		case 2:
+			sub = 1
+			break
+	endswitch			
+
 	for(i=0;i<dimsize(cols,1);i+=1)
 		tmps=cleanname(StringFromList(i,names,"	"))+"_"+num2str(i+1)
 		//Rename loaded wave to cleaned-up filename
@@ -901,25 +958,32 @@ function Vamasrpt_load_data([optfile])
 		for(j=0;j< dimsize(cols,0);j+=1)
 			w[j]=cols[j][i]		
 		endfor	
-		if(i==0)
-//			if (checkEnergyScale(w, 8E-5))
-				ekinstart=w[0]
-				ekinend=w[dimsize(w,0)-1]
-//			endif
-		endif
-		if(i==1)
+		switch(type)
+			case 1:
+				if(i==0)
+					//if (checkEnergyScale(w, 8E-5))
+					ekinstart=w[0]
+					ekinend=w[dimsize(w,0)-1]
+					//endif
+				endif
+				break
+			case 2:
+				break
+		endswitch			
+
+		if(i==(1-sub))
 //			if(checkEnergyScale(w, 8E-5))
 				ebinstart=w[0]
 				ebinend=w[dimsize(w,0)-1]
 //			endif
 		endif
-		if(i==2)
+		if(i==(2-sub))
 			WaveStats/Q w
 			mymax =  V_max
 			mymin = V_min
 		endif
 		
-		if(i>1)
+		if(i>(1-sub))
 		
 			if(str2num(get_flags("posbinde")) == 0)
 				SetScale/I  x,-ebinstart,-ebinend,"eV", w
@@ -952,7 +1016,7 @@ function Vamasrpt_load_data([optfile])
 				residual-=wn
 			endif
 		endif
-		if(i==2)
+		if(i==(2-sub))
 			tmps="residual_0"
 			duplicate w, $tmps
 			tmps="residual_0N"
