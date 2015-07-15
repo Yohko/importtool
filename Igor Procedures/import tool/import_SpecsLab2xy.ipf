@@ -197,8 +197,8 @@ Function SpecslabXY_load_data([optfile])
 		string suffix=".new" // string to append to an already existing folders/waves
 		string str, type ="????", group="", spectrum="",  oldgroup="", tmp=""
 		string method="", lens="", slit="", analyzer="", mode="", curvesPerScan="", valuesPerCurve="",dwellTime="", excEnergy="", passEnergy="", biasVoltage=""
-		string detVoltage="", effWorkfunction="", source="", numberOfScan="", kinEnergy="", remote="", comment="", region="", energy="",headerComment="", remoteInfo=""
-		variable isEKIN = NaN, isCPS = NaN
+		string detVoltage="", effWorkfunction="", source="", numberOfScan="", kinEnergy="", remote="", comment="", region="", energy="",headerComment="", remoteInfo="", commentprefix = ""
+		variable isEKIN = NaN, isCPS = NaN, isTF = NaN
 
 		NewDataFolder/o/s root:constants47110815
 
@@ -302,7 +302,7 @@ Function SpecslabXY_load_data([optfile])
 									if(isEKIN)
 										startx = xw[0]-str2num(excEnergy)
 										stepx = xw[1] - xw[0]
-										if(str2num(get_flags("posbinde")) == 0)
+										if(str2num(get_flags(f_posEbin)) == 0)
 											SetScale/P  x,startx,stepx,"eV", yw
 										else
 											SetScale/P  x,-startx,-stepx,"eV", yw
@@ -310,7 +310,7 @@ Function SpecslabXY_load_data([optfile])
 									else
 										startx = xw[0]
 										stepx = xw[1] - xw[0]
-										if(str2num(get_flags("posbinde")) == 0)
+										if(str2num(get_flags(f_posEbin)) == 0)
 											SetScale/P  x,-startx,-stepx,"eV", yw
 										else
 											SetScale/P  x,startx,stepx,"eV", yw
@@ -347,7 +347,7 @@ Function SpecslabXY_load_data([optfile])
 									if(isEKIN)
 										startx = xw[0]-str2num(excEnergy)
 										stepx = xw[1] - xw[0]
-										if(str2num(get_flags("posbinde")) == 0)
+										if(str2num(get_flags(f_posEbin)) == 0)
 											SetScale/P  x,startx,stepx,"eV", yw
 										else
 											SetScale/P  x,-startx,-stepx,"eV", yw
@@ -355,7 +355,7 @@ Function SpecslabXY_load_data([optfile])
 									else
 										startx = xw[0]
 										stepx = xw[1] - xw[0]
-										if(str2num(get_flags("posbinde")) == 0)
+										if(str2num(get_flags(f_posEbin)) == 0)
 											SetScale/P  x,-startx,-stepx,"eV", yw
 										else
 											SetScale/P  x,startx,stepx,"eV", yw
@@ -370,6 +370,9 @@ Function SpecslabXY_load_data([optfile])
 									KillWaves xw
 								break
 							endswitch
+						else
+						
+						
 						endif
 
 						strswitch(mode)
@@ -402,6 +405,22 @@ Function SpecslabXY_load_data([optfile])
 								Note yw, "y-axis: intensity"
 							break
 						endswitch
+
+						if(isCPS)
+							if(str2num(get_flags(f_divbyNscans)) == 0)
+								yw/=str2num(numberOfScan)
+							endif
+							if(str2num(get_flags(f_divbytime)) == 0)
+								yw/=str2num(dwellTime)
+							endif
+						else
+							if(str2num(get_flags(f_divbyNscans)) == 1)
+								yw/=str2num(numberOfScan)
+							endif
+							if(str2num(get_flags(f_divbytime)) == 1)
+								yw/=str2num(dwellTime)
+							endif						
+						endif
 
 						SetScale d, 0,0,"cps", yw
 						Note yw, header
@@ -509,6 +528,7 @@ Function SpecslabXY_load_data([optfile])
 						headerComment = option
 					break
 					case "  Comment Prefix:":
+						commentprefix= option
 					break
 					case "  Counts Per Second:":
 						isCPS = SpecslabXY_checksetting(option)
@@ -523,6 +543,7 @@ Function SpecslabXY_load_data([optfile])
 					case "  External Channel Data:":
 					break
 					case "  Transmission Function:":
+						isTF = SpecslabXY_checksetting(option)
 					break
 					case "  ErrorBar:":
 					break

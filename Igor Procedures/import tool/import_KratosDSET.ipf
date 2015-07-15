@@ -248,7 +248,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 //	KratosDSET_initaddobject(Dsetobject,10,0,"# ordinate values","","","")//FID_no_abscissa_values
 	KratosDSET_initaddobject(Dsetobject,11,35,"Abscissa values","","","abscval")//FID_abscissa_values
 	KratosDSET_initaddobject(Dsetobject,12,34,"Ordinate values","","","ordval")//FID_ordinate_values
-	//KratosDSET_initaddobject(Dsetobject,13,0,"Sample name","","","")//AID_sample_name
+	KratosDSET_initaddobject(Dsetobject,13,6,"Sample name","","","")//AID_sample_name
 	//KratosDSET_initaddobject(Dsetobject,14,0,"X-coordinate","","","")//FID_xcoord
 	//KratosDSET_initaddobject(Dsetobject,15,0,"Y-coordinate","","","")//FID_ycoord
 	//KratosDSET_initaddobject(Dsetobject,16,0,"Z-coordinate","","","")//FID_zcoord
@@ -1600,7 +1600,7 @@ static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 	if(scaleflag==0) // normal spectrum
 		if(strsearch(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 5)],"Kinetic Energy",0)==0)	
 			tmps=Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 6)]
-			if(str2num(get_flags("posbinde")) == 0)
+			if(str2num(get_flags(f_posEbin)) == 0)
 				SetScale/P  x,-str2num(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 3080)])+Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 4)], tmps, savewave
 			else
 				SetScale/P  x,str2num(Dsetobject.strvalue[KratosDSET_IDtopnt(Dsetobject, 3080)])-Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3)],-Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 4)], tmps, savewave
@@ -1611,11 +1611,11 @@ static function KratosDSET_savewave(wavetosave, namewave, Dsetobject, scaleflag)
 			SetScale/P  x,Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 3)],Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 4)], tmps, savewave
 		endif
 		// normalize countrate
-		if(str2num(get_flags("CB_DivScans"))==1)
+		if(str2num(get_flags(f_divbyNscans))==1)
 			savewave/=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 99)])
 		endif
 		
-		if(str2num(get_flags("CB_DivLifeTime"))==1)
+		if(str2num(get_flags(f_divbytime))==1)
 			savewave/=(Dsetobject.numvalue[KratosDSET_IDtopnt(Dsetobject, 7)])
 		endif
 	elseif(scaleflag==2) // mapping image
@@ -1655,7 +1655,7 @@ static function KratosDSET_saveobject(Dsetobject)
 				KratosDSET_savewave(twave, shortname(Dsetobject.objectname, len)+"_"+num2str(Dsetobject.id)+dsetobject.appendtodetector, Dsetobject, 0)
 			endif
 		else
-			if(str2num(get_flags("justdetector"))==0)
+			if(str2num(get_flags(f_onlyDET))==0)
 				KratosDSET_savewave(twave, shortname(Dsetobject.objectname, len)+"_"+num2str(Dsetobject.id)+"_"+ReplaceString(Gtmpwavename,tmpwave,""), Dsetobject, -1)
 			endif
 			//Debugprintf2("Data wave "+tmpwave+" not known! Just killing it!",0)
@@ -1986,7 +1986,7 @@ function KratosDSET_load_data([optfile])
 
 
 	Dsetobject.appendtodetector = "_detector"
-	if(str2num(get_flags("askforappenddet")))
+	if(str2num(get_flags(f_askforEXT)))
 		tmps = Dsetobject.appendtodetector
 		prompt tmps, "What string to append to detector spectra?"
 		doprompt "Import flags!", tmps

@@ -12,6 +12,23 @@
 constant false				= 0
 constant true				= 1
 strconstant loader_directory = "root:Packages:Import_Tool:flags:"
+strconstant f_includeADC = "f_includeADC" //includeADC
+strconstant f_divbyNscans = "f_divbyNscans" // CB_DivScans
+strconstant f_divbytime = "f_divbytime" // CB_DivLifeTime
+strconstant f_divbygain = "f_divbygain" // DivDetectorGain
+strconstant f_interpolate = "f_interpolate" // Interpolieren
+strconstant f_includeNDET = "f_includeNDET" // ChanneltronEinzeln
+strconstant f_suffix = "f_suffix" // suffix
+strconstant f_posEbin = "f_posEbin" //posbinde
+strconstant f_includeNscans = "f_includeNscans" // singlescans
+strconstant f_importtoroot = "f_importtoroot" // importtoroot
+strconstant f_converttoWN = "f_converttoWN" // converttoWN
+strconstant f_includeTF = "f_includeTF" // includetransmission
+strconstant f_vsEkin = "f_vsEkin" // vskineticenergy
+strconstant f_askforEXT = "f_askforEXT" //askforappenddet
+strconstant f_onlyDET = "f_onlyDET" //justdetector
+strconstant f_divbyTF = "f_divbyTF" // f_DivTF
+strconstant f_askforE = "f_askforE" // f_askenergy
 
 //importflags #################################################
 function init_flags()
@@ -19,56 +36,56 @@ function init_flags()
 	NewDatafolder /O root:Packages:Import_Tool
 	NewDatafolder /O root:Packages:Import_Tool:flags
 	string mypath = "root:Packages:Import_Tool:flags"
-	if(exists(mypath+":includeADC")!=2)
-		variable /G  $(mypath+":includeADC") 				= 1			// Include ADC channels
+	if(exists(mypath+":"+f_includeADC)!=2)
+		variable /G  $(mypath+":"+f_includeADC) 			= 1			// Include ADC channels
 	endif
-	if(exists(mypath+":CB_DivScans")!=2)
-		variable /G  $(mypath+":CB_DivScans") 			= 1			// Devide counts by #Scans
+	if(exists(mypath+":"+f_divbyNscans)!=2)
+		variable /G  $(mypath+":"+f_divbyNscans) 		= 1			// Devide counts by #Scans
 	endif
-	if(exists(mypath+":CB_DivLifeTime")!=2)
-		variable /G  $(mypath+":CB_DivLifeTime") 		= 1			// Devide counts by lifetime (dwelltime)
+	if(exists(mypath+":"+f_divbytime)!=2)
+		variable /G  $(mypath+":"+f_divbytime) 			= 1			// Devide counts by lifetime (dwelltime)
 	endif
-	if(exists(mypath+":DivDetectorGain")!=2)
-		variable /G  $(mypath+":DivDetectorGain") 		= 1			// Devide counts of Detectors by Gain
+	if(exists(mypath+":"+f_divbygain)!=2)
+		variable /G  $(mypath+":"+f_divbygain) 			= 1			// Devide counts of Detectors by Gain
 	endif
-	if(exists(mypath+":Interpolieren")!=2)
-		variable /G  $(mypath+":Interpolieren") 			= 1			// 0 .. like in Origin 1 .. Schmei§er interpolation (omicron method)
+	if(exists(mypath+":"+f_interpolate)!=2)
+		variable /G  $(mypath+":"+f_interpolate) 			= 1			// 0 .. like in Origin 1 .. Schmei§er interpolation (omicron method)
 	endif
-	if(exists(mypath+":ChanneltronEinzeln")!=2)
-		variable /G  $(mypath+":ChanneltronEinzeln") 		= 0			// Export each channel as a single wave --> DLD has up to 1000 channels!!! 
+	if(exists(mypath+":"+f_includeNDET)!=2)
+		variable /G  $(mypath+":"+f_includeNDET) 		= 0			// Export each channel as a single wave --> DLD has up to 1000 channels!!! 
 	endif
-	if(exists(mypath+":suffix")!=2)
-		string /G  $(mypath+":suffix") 						= "_new"	// Attach if the Region... already exists
+	if(exists(mypath+":"+f_suffix)!=2)
+		string /G  $(mypath+":"+f_suffix) 					= "_new"	// Attach if the Region... already exists
 	endif
-	if(exists(mypath+":posbinde")!=2)
-		variable /G  $(mypath+":posbinde") 				= 0 		// Positive (1) or negative (0) binding energy
+	if(exists(mypath+":"+f_posEbin)!=2)
+		variable /G  $(mypath+":"+f_posEbin) 				= 0 		// Positive (1) or negative (0) binding energy
 	endif
-	if(exists(mypath+":singlescans")!=2)
-		variable /G  $(mypath+":singlescans") 				= 0			// Export each scan as a single spectrum
+	if(exists(mypath+":"+f_includeNscans)!=2)
+		variable /G  $(mypath+":"+f_includeNscans) 		= 0			// Export each scan as a single spectrum
 	endif
-	if(exists(mypath+":importtoroot")!=2)
-		variable /G  $(mypath+":importtoroot") 			= 1			// Import into root (1) or into active directory (0)
+	if(exists(mypath+":"+f_importtoroot)!=2)
+		variable /G  $(mypath+":"+f_importtoroot)		= 1			// Import into root (1) or into active directory (0)
 	endif
-	if(exists(mypath+":converttoWN")!=2)
-		variable /G  $(mypath+":converttoWN") 			= 1			// Convert eV to Wavenumber (cm-1)
+	if(exists(mypath+":"+f_converttoWN)!=2)
+		variable /G  $(mypath+":"+f_converttoWN)		= 1			// Convert eV to Wavenumber (cm-1)
 	endif
-	if(exists(mypath+":includetransmission")!=2)
-		variable /G  $(mypath+":includetransmission") 	= 0			// Include transmission function of the detector
+	if(exists(mypath+":"+f_includeTF)!=2)
+		variable /G  $(mypath+":"+f_includeTF) 			= 0			// Include transmission function of the detector
 	endif
-	if(exists(mypath+":vskineticenergy")!=2)
-		variable /G  $(mypath+":vskineticenergy") 			= 0			// Plot against kinetic or binding energy
+	if(exists(mypath+":"+f_vsEkin)!=2)
+		variable /G  $(mypath+":"+f_vsEkin) 				= 0			// Plot against kinetic or binding energy
 	endif
-	if(exists(mypath+":askforappenddet")!=2)
-		variable /G  $(mypath+":askforappenddet") 			= 0			// Ask for a different name to be added to detector
+	if(exists(mypath+":"+f_askforEXT)!=2)
+		variable /G  $(mypath+":"+f_askforEXT)	 		= 0			// Ask for a different name to be added to detector
 	endif
-	if(exists(mypath+":justdetector")!=2)
-		variable /G  $(mypath+":justdetector") 			= 0			// export just the detector (only for Dsets)
+	if(exists(mypath+":"+f_onlyDET)!=2)
+		variable /G  $(mypath+":"+f_onlyDET)				= 0			// export just the detector (only for Dsets)
 	endif
-	if(exists(mypath+":f_DivTF")!=2)
-		variable /G  $(mypath+":f_DivTF") 				= 0			// create a new wave and devide Detector by Transmission function
+	if(exists(mypath+":"+f_divbyTF)!=2)
+		variable /G  $(mypath+":"+f_divbyTF) 				= 0			// create a new wave and devide Detector by Transmission function
 	endif
-	if(exists(mypath+":f_askenergy")!=2)
-		variable /G  $(mypath+":f_askenergy") 			= 0			// ask for the excitation energy
+	if(exists(mypath+":"+f_askforE)!=2)
+		variable /G  $(mypath+":"+f_askforE) 				= 0			// ask for the excitation energy
 	endif
 end
 //ende importflags ##############################################
@@ -105,7 +122,7 @@ function loaderstart(importloader,[optfile])
 	Debugprintf2("##########################",0)
 	Debugprintf2("Start new "+importloader.name+" File Import",0)
 	importloader.dfSave = GetDataFolder(1)
-	if(str2num(get_flags("importtoroot"))==1)
+	if(str2num(get_flags(f_importtoroot))==1)
 		SetDataFolder root:
 	endif
 	fstatus optfile
@@ -128,12 +145,12 @@ function loaderstart(importloader,[optfile])
 	ExperimentName = ReplaceString(".",ExperimentName,"")	
 	ExperimentName = cleanname(ExperimentName)
 	string newexpname = ExperimentName
-	if(str2num(get_flags("importtoroot"))==1)
+	if(str2num(get_flags(f_importtoroot))==1)
 		SetDataFolder root:
 	endif
 	if(DataFolderExists(newexpname))
 		Debugprintf2("Folder exists, adding suffix!",0)
-		newexpname += get_flags("suffix")
+		newexpname += get_flags(f_suffix)
 		newexpname = UniqueName(newexpname, 11, 0)
 	endif
 	NewDataFolder/S $newexpname
@@ -577,7 +594,7 @@ function /S get_flags(type)
 		endif
 	endfor
 	
-	debugprintf2("Unknown Flag: "+type,1)
+	debugprintf2("Unknown Flag: "+type,2)
 	return "-1"
 end
 

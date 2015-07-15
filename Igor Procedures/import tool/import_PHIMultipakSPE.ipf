@@ -450,12 +450,12 @@ Function phimultipak_load_data([optfile])
 				
 		strswitch(phiheader.SpectralRegDef[i].header.yunit)
 			case "c/s":
-				if(str2num(get_flags("CB_DivLifeTime"))!=1)
+				if(str2num(get_flags(f_divbytime))!=1)
 					data *=phiheader.SpectralRegDef[i].dwelltime
 				endif
 				break
 			default:
-				if(str2num(get_flags("CB_DivLifeTime"))==1)
+				if(str2num(get_flags(f_divbytime))==1)
 					data /=phiheader.SpectralRegDef[i].dwelltime
 				endif
 				break
@@ -485,7 +485,7 @@ Function phimultipak_load_data([optfile])
 
 		// set the scale etc.
 		// use point scaling as sometimes "points != (ende-start)/step+1"
-		if(str2num(get_flags("posbinde"))==1)
+		if(str2num(get_flags(f_posEbin))==1)
 			SetScale/P  x,phiheader.SpectralRegDef[i].start1,phiheader.SpectralRegDef[i].step, "eV", data//, TF
 		else
 			SetScale/P  x,-phiheader.SpectralRegDef[i].start1,-phiheader.SpectralRegDef[i].step, "eV", data//, TF

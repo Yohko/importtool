@@ -144,16 +144,16 @@ function Spectra_load_data([optfile])
 					importieren = 1
 					break
 				endif
-				if(str2num(get_flags("CB_DivLifeTime"))==true)
+				if(str2num(get_flags(f_divbytime))==true)
 					val=val/Dwelltime
 				endif
-				if(str2num(get_flags("CB_DivScans"))==true)
+				if(str2num(get_flags(f_divbyNscans))==true)
 					val=val/Scans
 				endif
 				Detector[i] = val
 			 	i +=1
 			while (i != nstep)
-			if(str2num(get_flags("posbinde")) == 0)
+			if(str2num(get_flags(f_posEbin)) == 0)
 				if(ExEnergy != 0)
 					SetScale/I  x,sweepStart-ExEnergy,sweepEnd-ExEnergy,"eV", Detector
 				else
@@ -180,7 +180,7 @@ function Spectra_load_data([optfile])
 			Note Detector,"Excitation energy: " + num2str(ExEnergy)+"eV"
 			Note Detector,"Pass energy: " + num2str(EPass)+"eV"
 			
-			if(str2num(get_flags("includetransmission")) == 1&& str2num(get_flags("justdetector"))==0)
+			if(str2num(get_flags(f_includeTF)) == 1&& str2num(get_flags(f_onlyDET))==0)
 				Spectra_calcTF(ExEnergy, detector)
 			endif
 			
@@ -213,7 +213,7 @@ static function Spectra_calcTF(energy, detector)
 	wave TF = $tmps
 	variable maxx=pnt2x(detector, 0)
 	variable posbind = 1
-	if(str2num(get_flags("posbinde")) == 0)
+	if(str2num(get_flags(f_posEbin)) == 0)
 		posbind = -1
 	else		
 		posbind = 1

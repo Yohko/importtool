@@ -199,14 +199,14 @@ static function SpecsXML_savedetector(myRegionInfo)
 	endfor
 	
 	// save flags in single variables (for speed reasons)	
-	variable f_interpolate = str2num(get_flags("interpolieren"))
-	variable f_DivDetGain = str2num(get_flags("DivDetectorGain"))
-	variable f_CHE = str2num(get_flags("ChanneltronEinzeln"))
-	variable f_DivScans = str2num(get_flags("CB_DivScans"))
-	variable f_DivLifeTime = str2num(get_flags("CB_DivLifeTime"))
-	variable f_singlescans = str2num(get_flags("singlescans"))
-	variable f_DivTF = str2num(get_flags("f_DivTF"))
-	variable f_includeTF = str2num(get_flags("includetransmission"))
+	variable f_interpolate = str2num(get_flags(f_interpolate))
+	variable f_DivDetGain = str2num(get_flags(f_divbygain))
+	variable f_CHE = str2num(get_flags(f_includeNDET))
+	variable f_DivScans = str2num(get_flags(f_divbyNscans))
+	variable f_DivLifeTime = str2num(get_flags(f_divbytime))
+	variable f_singlescans = str2num(get_flags(f_includeNscans))
+	variable f_DivTF = str2num(get_flags(f_divbyTF))
+	variable f_includeTF = str2num(get_flags(f_includeTF))
 
 	// getting max positive detektorshift
 	wavestats /M=1 /Q /C=1 myRegionInfo.Detector.w_shift
@@ -367,8 +367,8 @@ static function SpecsXML_savedetector(myRegionInfo)
 		// Y-wave scaling
 		redimension /N=(dimsize(DetectorCHEY,0)+1) DetectorCHEY
 		DetectorCHEY[dimsize(DetectorCHEY,0)-1] =  2*DetectorCHEY[dimsize(DetectorCHEY,0)-2]-DetectorCHEY[dimsize(DetectorCHEY,0)-3]
-		if(str2num(get_flags("vskineticenergy"))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 &&cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
-			if(str2num(get_flags("posbinde")) == 0)
+		if(str2num(get_flags(f_vsEkin))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 &&cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
+			if(str2num(get_flags(f_posEbin)) == 0)
 				DetectorCHEY -= myRegionInfo.excitation_energy
 			else
 				DetectorCHEY = myRegionInfo.excitation_energy - DetectorCHEY
@@ -385,8 +385,8 @@ static function SpecsXML_savedetector(myRegionInfo)
 		// Y-wave scaling
 		redimension /N=(dimsize(DetectorCHESY,0)+1) DetectorCHESY
 		DetectorCHESY[dimsize(DetectorCHESY,0)-1] =  2*DetectorCHESY[dimsize(DetectorCHESY,0)-2]-DetectorCHESY[dimsize(DetectorCHESY,0)-3]
-		if(str2num(get_flags("vskineticenergy"))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 && cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
-			if(str2num(get_flags("posbinde")) == 0)
+		if(str2num(get_flags(f_vsEkin))==0 && cmpstr(myRegionInfo.scanmode,f_SFAT)!=0 && cmpstr(myRegionInfo.scanmode,f_FAT)!=0 && cmpstr(myRegionInfo.scanmode,f_CFS) != 0)
+			if(str2num(get_flags(f_posEbin)) == 0)
 				DetectorCHESY -= myRegionInfo.excitation_energy
 			else
 				DetectorCHESY = myRegionInfo.excitation_energy - DetectorCHESY
@@ -469,8 +469,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 		SetScale d, 0,0,"cps", savewave
 		strswitch(myRegionInfo.scanmode)
 			case f_FAT:
-				if(str2num(get_flags("vskineticenergy"))==0)
-					if(str2num(get_flags("posbinde")) == 0)
+				if(str2num(get_flags(f_vsEkin))==0)
+					if(str2num(get_flags(f_posEbin)) == 0)
 						SetScale/P  x,myRegionInfo.kinetic_energy-myRegionInfo.excitation_energy,myRegionInfo.scan_delta,"eV",  savewave
 					else
 						SetScale/P  x,-myRegionInfo.kinetic_energy+myRegionInfo.excitation_energy,-myRegionInfo.scan_delta,"eV",  savewave
@@ -504,8 +504,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 				Note  savewave, "y-axis: intensity"
 			break 
 			case f_SFAT:
-				if(str2num(get_flags("vskineticenergy"))==0)
-					if(str2num(get_flags("posbinde")) == 0)
+				if(str2num(get_flags(f_vsEkin))==0)
+					if(str2num(get_flags(f_posEbin)) == 0)
 						SetScale/P  x,myRegionInfo.kinetic_energy-myRegionInfo.excitation_energy,myRegionInfo.scan_delta,"eV",  savewave
 					else
 						SetScale/P  x,-myRegionInfo.kinetic_energy+myRegionInfo.excitation_energy,-myRegionInfo.scan_delta,"eV",  savewave
@@ -560,8 +560,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 			SetScale d, 0,0,"cps", savewave
 			strswitch(myRegionInfo.scanmode)
 				case f_FAT:
-					if(str2num(get_flags("vskineticenergy"))==0)
-						if(str2num(get_flags("posbinde")) == 0)
+					if(str2num(get_flags(f_vsEkin))==0)
+						if(str2num(get_flags(f_posEbin)) == 0)
 							SetScale/P  x,myRegionInfo.YCurve_start-myRegionInfo.excitation_energy,myRegionInfo.YCurve_delta,"eV", savewave
 						else
 							SetScale/P  x,-myRegionInfo.YCurve_start+myRegionInfo.excitation_energy,-myRegionInfo.YCurve_delta,"eV", savewave
@@ -595,8 +595,8 @@ static function SpecsXML_savewave(savewave, myRegionInfo, mode)
 					Note savewave, "y-axis: intensity"
 					break 
 				case f_SFAT:
-					if(str2num(get_flags("vskineticenergy"))==0)
-						if(str2num(get_flags("posbinde")) == 0)
+					if(str2num(get_flags(f_vsEkin))==0)
+						if(str2num(get_flags(f_posEbin)) == 0)
 							SetScale/P  x,myRegionInfo.YCurve_start-myRegionInfo.excitation_energy,myRegionInfo.YCurve_delta,"eV", savewave
 						else
 							SetScale/P  x,-myRegionInfo.YCurve_start+myRegionInfo.excitation_energy,myRegionInfo.YCurve_delta,"eV", savewave
@@ -1010,7 +1010,7 @@ static function SpecsXML_readsq(seq, savewave, savepos, myRegionInfo)
 					tmps2 = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit), "_"+cleanname(myRegionInfo.YCurve_name))
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
-					if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
+					if(str2num(get_flags(f_includeADC))==1 && str2num(get_flags(f_onlyDET))==0)	
 						SpecsXML_savewave($tmps2, myRegionInfo, 2)
 					else
 						killwaves $tmps2
@@ -1031,7 +1031,7 @@ static function SpecsXML_readsq(seq, savewave, savepos, myRegionInfo)
 					tmps2 = SpecsXML_checkdblwavename(shortname(cleanname(myRegionInfo.RegionName),charlimit), "_transm")
 					duplicate doubleseqwave, $tmps2
 					killwaves doubleseqwave
-					if(str2num(get_flags("includetransmission"))==1 && str2num(get_flags("justdetector"))==0)
+					if(str2num(get_flags(f_includeTF))==1 && str2num(get_flags(f_onlyDET))==0)
 						SpecsXML_savewave($tmps2, myRegionInfo, 3)
 					else
 						killwaves $tmps2
@@ -1220,7 +1220,7 @@ static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo
 						string newAktGroupName = myRegionInfo.folder+AktGroupName
 						SetDataFolder $(myRegionInfo.folder)
 						if(DataFolderExists(newAktGroupName))
-							AktGroupName += get_flags("suffix")
+							AktGroupName += get_flags(f_suffix)
 							variable i=0
 							do
 								i+=1
@@ -1609,7 +1609,7 @@ function SpecsXML_load_data([optfile])
 
 	string tmps= ""
 	string appendtodetector = "_detector"
-	if(str2num(get_flags("askforappenddet")))
+	if(str2num(get_flags(f_askforEXT)))
 		tmps = appendtodetector
 		prompt tmps, "What string to append to detector spectra?"
 		doprompt "Import flags!", tmps

@@ -112,10 +112,10 @@ static function VGScientaSES_add_notes(header, spectra)
 	string oldnote = note(spectra)
 
 
-	variable f_DivScans = str2num(get_flags("CB_DivScans"))
-	variable f_DivLifeTime = str2num(get_flags("CB_DivLifeTime"))
-	variable f_singlescans = str2num(get_flags("singlescans"))
-	variable f_askenergy = str2num(get_flags("f_askenergy"))
+	variable f_DivScans = str2num(get_flags(f_divbyNscans))
+	variable f_DivLifeTime = str2num(get_flags(f_divbytime))
+	variable f_singlescans = str2num(get_flags(f_includeNscans))
+	variable f_askenergy = str2num(get_flags(f_askforE))
 
 	note /K spectra, header
 
@@ -146,7 +146,6 @@ static function VGScientaSES_add_notes(header, spectra)
 			DoPrompt "Enter excitation energy (cancel == Do not ask again!)", exenergy
 			if(V_flag == 1)
 				exenergy = 0
-				//variable /G  $(loader_directory+"f_askenergy") = -1
 			endif
 		endif
 	endif
@@ -177,8 +176,8 @@ static function VGScientaSES_add_notes(header, spectra)
 		case "Kinetic Energy [eV]":
 			break
 		case "Binding":
-					if(str2num(get_flags("vskineticenergy"))==0)
-						if(str2num(get_flags("posbinde")) == 0)
+					if(str2num(get_flags(f_vsEkin))==0)
+						if(str2num(get_flags(f_posEbin)) == 0)
 							SetScale/I  x,-exenergy+kinstart,-exenergy+kinend,"eV", spectra
 						else
 							SetScale/I  x,exenergy-kinstart,exenergy-kinend,"eV", spectra
@@ -188,8 +187,8 @@ static function VGScientaSES_add_notes(header, spectra)
 					endif
 			break
 			case "Kinetic":
-					if(str2num(get_flags("vskineticenergy"))==0)
-						if(str2num(get_flags("posbinde")) == 0)
+					if(str2num(get_flags(f_vsEkin))==0)
+						if(str2num(get_flags(f_posEbin)) == 0)
 							SetScale/I  x,-exenergy+kinstart,-exenergy+kinend,"eV", spectra
 						else
 							SetScale/I  x,exenergy-kinstart,exenergy-kinend,"eV", spectra

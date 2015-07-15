@@ -3,7 +3,7 @@
 
 
 Menu "Macros"
-	"Multi file loader v0.1", multiLoader_MakePanel()
+	"Multi file loader", multiLoader_MakePanel()
 end
 
 
@@ -237,33 +237,33 @@ Function multiLoader_MakePanel()
 		// spectra
 		SetDrawEnv textrgb= (65535,0,0),fstyle= 1;DelayUpdate
 		DrawText 10,70+y,"Spectra"
-		CheckBox check0 title="include ADC",pos={10,80+y},variable=$("root:Packages:Import_Tool:flags:includeADC")
-		CheckBox check1 title="single channeltrons",pos={10,100+y},variable=$("root:Packages:Import_Tool:flags:ChanneltronEinzeln")
-		CheckBox check2 title="single scans",pos={10,120+y},variable=$("root:Packages:Import_Tool:flags:singlescans")
-		CheckBox check3 title="just detector",pos={10,140+y},variable=$("root:Packages:Import_Tool:flags:justdetector")
-		CheckBox check4 title="incl. transmission Func.",pos={10,160+y},variable=$("root:Packages:Import_Tool:flags:includetransmission")
+		CheckBox check0 title="include ADC",pos={10,80+y},variable=$("root:Packages:Import_Tool:flags:"+f_includeADC)
+		CheckBox check1 title="single channeltrons",pos={10,100+y},variable=$("root:Packages:Import_Tool:flags:"+f_includeNDET)
+		CheckBox check2 title="single scans",pos={10,120+y},variable=$("root:Packages:Import_Tool:flags:"+f_includeNscans)
+		CheckBox check3 title="just detector",pos={10,140+y},variable=$("root:Packages:Import_Tool:flags:"+f_onlyDET)
+		CheckBox check4 title="incl. transmission Func.",pos={10,160+y},variable=$("root:Packages:Import_Tool:flags:"+f_includeTF)
 		// counts (y-axis)	
 		SetDrawEnv textrgb= (65535,0,0),fstyle= 1;DelayUpdate
 		DrawText 150,70+y,"Y-axis"
-		CheckBox check5 title="div by #scans",pos={150,80+y},variable=$("root:Packages:Import_Tool:flags:CB_DivScans")
-		CheckBox check6 title="div by lifetime",pos={150,100+y},variable=$("root:Packages:Import_Tool:flags:CB_DivLifeTime")
-		CheckBox check7 title="div by DetectorGain",pos={150,120+y},variable=$("root:Packages:Import_Tool:flags:DivDetectorGain")
-		CheckBox check8 title="interpolate counts",pos={150,140+y},variable=$("root:Packages:Import_Tool:flags:Interpolieren")
-		CheckBox check14 title="div by TF",pos={150,160+y},variable=$("root:Packages:Import_Tool:flags:f_DivTF")
+		CheckBox check5 title="div by #scans",pos={150,80+y},variable=$("root:Packages:Import_Tool:flags:"+ f_divbyNscans)
+		CheckBox check6 title="div by lifetime",pos={150,100+y},variable=$("root:Packages:Import_Tool:flags:"+f_divbytime)
+		CheckBox check7 title="div by DetectorGain",pos={150,120+y},variable=$("root:Packages:Import_Tool:flags:"+f_divbygain)
+		CheckBox check8 title="interpolate counts",pos={150,140+y},variable=$("root:Packages:Import_Tool:flags:"+f_interpolate)
+		CheckBox check14 title="div by TF",pos={150,160+y},variable=$("root:Packages:Import_Tool:flags:"+f_divbyTF)
 		y=80
 		// x-axis
 		SetDrawEnv textrgb= (65535,0,0),fstyle= 1;DelayUpdate
 		DrawText 150,160+y,"X-axis"
-		CheckBox check9 title="convert to cm^-1",pos={150,170+y},variable=$("root:Packages:Import_Tool:flags:converttoWN")
-		CheckBox check10 title="vs. Ekin",pos={150,190+y},variable=$("root:Packages:Import_Tool:flags:vskineticenergy")
-		CheckBox check11 title="pos. Ebind",pos={150,210+y},variable=$("root:Packages:Import_Tool:flags:posbinde")
-		CheckBox check_askenergy title="ask for Eph",pos={150,230+y},variable=$("root:Packages:Import_Tool:flags:f_askenergy")
+		CheckBox check9 title="convert to cm^-1",pos={150,170+y},variable=$("root:Packages:Import_Tool:flags:"+f_converttoWN)
+		CheckBox check10 title="vs. Ekin",pos={150,190+y},variable=$("root:Packages:Import_Tool:flags:"+ f_vsEkin)
+		CheckBox check11 title="pos. Ebind",pos={150,210+y},variable=$("root:Packages:Import_Tool:flags:"+f_posEbin)
+		CheckBox check_askenergy title="ask for Eph",pos={150,230+y},variable=$("root:Packages:Import_Tool:flags:"+f_askforE)
 		// storing
 		SetDrawEnv textrgb= (65535,0,0),fstyle= 1;DelayUpdate
 		DrawText 10,160+y,"Storing"
-		CheckBox check12 title="store@root",pos={10,170+y},variable=$("root:Packages:Import_Tool:flags:importtoroot")
-		CheckBox check13 title="ask for append",pos={10,190+y},variable=$("root:Packages:Import_Tool:flags:askforappenddet")
-		SetVariable setvar0  title="suffix",pos={10,210+y},size={115,20},value=$("root:Packages:Import_Tool:flags:suffix")
+		CheckBox check12 title="store@root",pos={10,170+y},variable=$("root:Packages:Import_Tool:flags:"+f_importtoroot)
+		CheckBox check13 title="ask for append",pos={10,190+y},variable=$("root:Packages:Import_Tool:flags:"+f_askforEXT)
+		SetVariable setvar0  title="suffix",pos={10,210+y},size={115,20},value=$("root:Packages:Import_Tool:flags:"+f_suffix)
 
 		SetDrawLayer UserBack
 		// spectra

@@ -573,8 +573,8 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 
 	if ((cmpstr("UPS",tech) == 0) ||  (cmpstr("XPS",tech) == 0)) 
 		if(strsearch(x_name,"Kinetic Energy",0,2)!=-1)
-			if(str2num(get_flags("vskineticenergy"))==0)
-				if(str2num(get_flags("posbinde")) == 0)
+			if(str2num(get_flags(f_vsEkin))==0)
+				if(str2num(get_flags(f_posEbin)) == 0)
 					SetScale/P  x,x_start-excenergy,x_step,"eV", ycols
 				else
 					SetScale/P  x,-x_start+excenergy,-x_step,"eV", ycols
@@ -583,8 +583,8 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 					SetScale/P  x,x_start,x_step,"eV", ycols
 			endif
 		elseif(strsearch(x_name,"Binding Energy",0,2)!=-1)
-			if(str2num(get_flags("vskineticenergy"))==0)
-				if(str2num(get_flags("posbinde")) == 0)
+			if(str2num(get_flags(f_vsEkin))==0)
+				if(str2num(get_flags(f_posEbin)) == 0)
 					SetScale/P  x,-x_start,-x_step,"eV", ycols
 				else
 					SetScale/P  x,x_start,x_step,"eV", ycols
@@ -624,10 +624,10 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 		n = (i+1-mod(i+1,cor_var))/cor_var
 	endfor
 	
-	if(str2num(get_flags("CB_DivScans")) == 1)
+	if(str2num(get_flags(f_divbyNscans)) == 1)
 		ycols/=scancount
 	endif
-	if(str2num(get_flags("CB_DivLifeTime")) == 1)
+	if(str2num(get_flags(f_divbytime)) == 1)
 		ycols/=dwelltime
 	endif
 	
@@ -637,17 +637,17 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 		for(i=0;i<cor_var;i+=1)
 			if(i==0) // detector
 				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name)
-				if(str2num(get_flags("justdetector"))==0)
+				if(str2num(get_flags(f_onlyDET))==0)
 					Vamas_casaInfo($(ycols_name))
 				endif
 			elseif(i==1) // transmission function
-				if(str2num(get_flags("includetransmission")) == 1&& str2num(get_flags("justdetector"))==0)
+				if(str2num(get_flags(f_includeTF)) == 1&& str2num(get_flags(f_onlyDET))==0)
 					rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_TF")
 				else
 					killwaves $(ycols_name+"_spk"+num2str(i))
 				endif
 			else // additional channels??
-				if(str2num(get_flags("includeADC"))==1 && str2num(get_flags("justdetector"))==0)	
+				if(str2num(get_flags(f_includeADC))==1 && str2num(get_flags(f_onlyDET))==0)	
 					rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_ADC"+num2str(i-2))
 				else
 					killwaves $(ycols_name+"_spk"+num2str(i))
@@ -723,12 +723,12 @@ static function Vamas_casaInfo_region(detector, param, n)
 	region_param.endoffset = str2num(stringfromlist(5,param," "))
 	region_param.tag = param[strsearch(param,"(*",0)+2,strsearch(param,"*)",0)-1]
 
-	if(str2num(get_flags("vskineticenergy"))==0)
+	if(str2num(get_flags(f_vsEkin))==0)
 		region_param.energy = str2num(stripstrfirstlastspaces(StringByKey("analysis source characteristic energy", note(detector), ":", "\r")))
 		region_param.startBG = region_param.energy - region_param.startBG
 		region_param.endBG = region_param.energy - region_param.endBG
 		
-		if(str2num(get_flags("posbinde")) == 0)
+		if(str2num(get_flags(f_posEbin)) == 0)
 			region_param.startBG *=-1
 			region_param.endBG *=-1
 		endif	
@@ -783,10 +783,10 @@ static function Vamas_casaInfo_comp(detector, param, n)
 	comp_param.tag=param[strsearch(param,"(*",0)+2,strsearch(param,"*)",0)-1]
 	comp_param.energy = 0
 	variable posbind=1
-	if(str2num(get_flags("vskineticenergy"))==0)
+	if(str2num(get_flags(f_vsEkin))==0)
 		comp_param.energy = str2num(stripstrfirstlastspaces(StringByKey("analysis source characteristic energy", note(detector), ":", "\r")))
 		comp_param.position = comp_param.energy - comp_param.position
-		if(str2num(get_flags("posbinde")) == 0)
+		if(str2num(get_flags(f_posEbin)) == 0)
 			posbind=-1
 		endif	
 	endif
@@ -985,7 +985,7 @@ function Vamasrpt_load_data([optfile])
 		
 		if(i>(1-sub))
 		
-			if(str2num(get_flags("posbinde")) == 0)
+			if(str2num(get_flags(f_posEbin)) == 0)
 				SetScale/I  x,-ebinstart,-ebinend,"eV", w
 			else
 				SetScale/I  x,ebinstart,ebinend,"eV", w
