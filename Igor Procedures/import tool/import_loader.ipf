@@ -485,16 +485,17 @@ function /S get_valid_line(file, comment_char)
 		if((strlen(tmps)!=0) && (strsearch(tmps,comment_char,0)!=0))
 			break
 		endif
-	while (1)
-	
+		fstatus file
+	while (V_logEOF>V_filePOS)  
+
 	do
 		if(strsearch(line," ",0)==0)
 			line=line[1,inf]
 		else
 			break
 		endif
-	while(1)
-	
+	while(strsearch(line," ",0)!=0)
+
 	if (strsearch(line,comment_char,0)!=-1)
 		line = line[0,strsearch(line,comment_char,0)-1]    	
 	endif   
