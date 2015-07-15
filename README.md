@@ -28,9 +28,11 @@ General import tool for IgorPro for importing data files from different hardware
   - Princeton Instruments WinSpec *.spe
   - RIET7 *.dat, *.rit
   - Rigaku *.dat
+  - SamView *.avg
   - Siemens/Bruker Diffrac-AT Raw *.raw
   - Siemens/Bruker Diffrac-AT UXD *.uxd
   - Sietronics Sieray CPI *.cpi
+  - Spec ascan/a2scan *.csv
   - SpecsLab1 *.exp
   - SpecsLab2 *.xml and *.xy
   - Spectra *.#
@@ -42,6 +44,7 @@ General import tool for IgorPro for importing data files from different hardware
   - Veeco *.hdf
   - Veeco Nanoscope III *.#
   - VersaStudio data *.par
+  - VG Scienta SES *.pxt, *.ibw, *.txt
   - WVASE32 *.dat
   - XAS Data Interchange *.xdi
 
