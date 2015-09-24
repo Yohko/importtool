@@ -137,6 +137,9 @@ static function VGScientaSES_add_notes(header, spectra)
 	energyscale = VGScientaSES_parameter(oldnote, "Energy Unit=")
 	if(strlen(VGScientaSES_parameter(oldnote, "Energy Unit=")) == 0)
 		energyscale=VGScientaSES_parameter(oldnote, "Dimension 1 name=")
+		if(strlen(energyscale)==0) // for old SES Version?, assume kintetic energy
+			energyscale = "Kinetic"
+		endif
 	endif
 
 	if(f_askenergy <= 0 || exenergy == -1)
@@ -150,7 +153,7 @@ static function VGScientaSES_add_notes(header, spectra)
 		endif
 	endif
 
-	strswitch(energyscale)
+	strswitch(energyscale) // the scale i which the values are saved in the wavenote
 		case "Binding Energy [eV]":
 			kinstart = exenergy-str2num(VGScientaSES_parameter(oldnote, "High Energy="))
 			kinend = exenergy-str2num(VGScientaSES_parameter(oldnote, "Low Energy="))
@@ -164,13 +167,15 @@ static function VGScientaSES_add_notes(header, spectra)
 			kinend = str2num(VGScientaSES_parameter(oldnote, "High Energy="))
 			break
 		case "Binding":
+			kinstart = exenergy-str2num(VGScientaSES_parameter(oldnote, "High Energy="))
+			kinend = exenergy-str2num(VGScientaSES_parameter(oldnote, "Low Energy="))		
 			break
 		default:
 			Debugprintf2("Unknown Energy Unit!",0)
 			break
 	endswitch
 
-	strswitch(VGScientaSES_parameter(oldnote, "Energy Scale="))
+	strswitch(VGScientaSES_parameter(oldnote, "Energy Scale=")) // the scale in which the values are saved in the wave
 		case "Binding Energy [eV]":
 			break
 		case "Kinetic Energy [eV]":
@@ -311,7 +316,10 @@ static function /wave VGScientaSES_txtdata(file, SES_header)
 	variable file
 	struct VGScientaSES_header	&SES_header
 	variable points = (SES_header.highenergy-SES_header.lowenergy)/SES_header.energystep +1
-	make /O/D/N = (SES_header.Dimension1size, SES_header.Dimension2size-1) $SES_header.RegionName /wave=datay
+	if(SES_header.Dimension2size == 0)
+		SES_header.Dimension2size = 2
+	endif
+	make /O/D/N = (SES_header.Dimension1size, SES_header.Dimension2size-1) $SES_header.RegionName /wave=datay // -1, because x-values have their own wave
 	make /O/D/N = (SES_header.Dimension1size) $(SES_header.RegionName+"_X") /wave=datax
 	variable i=0, j=0
 	string line
