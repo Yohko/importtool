@@ -154,7 +154,7 @@ function loaderstart(importloader,[optfile])
 		newexpname = UniqueName(newexpname, 11, 0)
 	endif
 	NewDataFolder/S $newexpname
-	Debugprintf2(".. exporting to: "+GetDataFolder(1),0)
+	Debugprintf2(".. importing to: "+GetDataFolder(1),0)
 
 	fstatus importloader.file
 	importloader.header = "Fileinfo: " + S_path + S_filename
