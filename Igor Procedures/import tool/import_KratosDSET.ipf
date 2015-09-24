@@ -235,7 +235,16 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 //the following populates the list of DSET objects with ID etc. 
 //for commented out objects the datatype is unknown (never had them in my files until now)
 //KratosDSET_initaddobject(Dsetobject,/ID/,/datatype/,/"name for note"/,/"unit"/, /"Flags to string"/,/"name of wave"/)
-
+	//	Datatypes:
+	//	0:
+	// 	1:	Signed one-byte integer.
+	//	2:	Signed 16-bit word; two bytes.
+	//	3:	Signed 32-bit word; four bytes.
+	//	4:	32-bit IEEE floating point; four bytes.
+	//	5:	64-bit IEEE floating poin; eight bytes.
+	//	34: array of f =4:	32-bit IEEE floating point; four bytes.
+	//	35: array of f =5:	64-bit IEEE floating poin; eight bytes.
+	
 	KratosDSET_initaddobject(Dsetobject,1,3,"Technique","", "0=AES;1=ISS;2=SIMS;3=XPS;4=SEM;5=SNMS;6=RGA;8=UPS","")//AID_technique
 	KratosDSET_initaddobject(Dsetobject,2,3,"Scan type","","0=Spectrum;1=Irregular;2=Mapping;3=Linescan;4=profile scan;5=Snapshot","")//AID_scan_type
 	KratosDSET_initaddobject(Dsetobject,3,5,"Spectrum scan start","eV","","")//AID_spectrum_start
@@ -908,7 +917,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,2072,0,"Arrow start offset from data bin","","","")//PID_arrow_start
 	//KratosDSET_initaddobject(Dsetobject,2073,0,"Arrow end offset from data bin","","","")//PID_arrow_end
 	//KratosDSET_initaddobject(Dsetobject,2074,0,"Axis range","","","")//PID_axis_range
-	//KratosDSET_initaddobject(Dsetobject,2075,0,"Object List containing annotation","","","")//PID_annotation_list
+	KratosDSET_initaddobject(Dsetobject,2075,3,"Object List containing annotation","","","")//PID_annotation_list // not in KAL file
 	//KratosDSET_initaddobject(Dsetobject,2076,0,"Data edit x value","","","")//PID_data_edit_x
 	//KratosDSET_initaddobject(Dsetobject,2077,0,"Data edit y value","","","")//PID_data_edit_y
 	//KratosDSET_initaddobject(Dsetobject,2078,0,"Dataset comment","","","")//PID_dataset_comment
