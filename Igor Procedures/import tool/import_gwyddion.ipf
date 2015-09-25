@@ -28,25 +28,27 @@ static function gwy_getchannelnumber(file, str)
 	return round(str2num(number))
 end
 
-static function gwy_findparam(name,file)
+static function gwy_findparam(name,file) // need to speed up this function
 	string name
 	variable file
 	Fstatus file
 	variable fpos = V_filePos
 	variable size = V_logEOF
-	variable i
+	variable i = 0
 	string tmps=""
+	variable len = strlen(name)
+	
 	for (i=fpos;i<size-strlen(name);i+=1)
 		FsetPos file, i
-		tmps=mybinread(file,strlen(name))
+		tmps = PadString(tmps, len, 0x20)
+		FBinread/B=3 file, tmps		
 		if (strsearch(tmps,name,0)==0)
-			Fstatus file
-			Debugprintf2("Found param: "+name+"; Position: "+num2str(V_filePos),1)
+//			Fstatus file
+//			Debugprintf2("Found param: "+name+"; Position: "+num2str(V_filePos),1)
 			return true
 		endif
 	endfor
 	Debugprintf2("Param not found: "+name,1)
-
 	return -1
 end
 
@@ -182,7 +184,7 @@ static function gwy_importGWYP(file, header)
 				note image, "GWY channel: "+num2str(channelnumber)
 				FBinread/B=3/F=5 file, image
 
-				Debugprintf2("... exported image: ch"+num2str(channelnumber),0)
+				Debugprintf2("... importing image: ch"+num2str(channelnumber),0)
 
 				imagelist = AddListItem(num2str(channelnumber)+"="+tmps,imagelist, ";", 0)
 			endif
@@ -245,7 +247,7 @@ function gwy_load_data([optfile])
 	variable file = importloader.file
 
 	string identifier = mybinread(file, 4)
-	
+
 	if (strsearch(identifier, "GWYO", 0) == 0)
 			Debugprintf2("Found a Gwyddion 1.x GWY0 file, not supported yet!",2)
 	elseif (strsearch(identifier, "GWYP", 0) == 0)
@@ -254,7 +256,7 @@ function gwy_load_data([optfile])
 	elseif (strsearch(identifier, "GWYQ", 0) == 0)
 			Debugprintf2("Found a Gwyddion GWYQ file, not supported yet!",2)
 	endif
-	
+
 	importloader.success = 1
 	loaderend(importloader)
 end
