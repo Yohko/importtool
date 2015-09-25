@@ -10,6 +10,7 @@ General import tool for IgorPro for importing data files from different hardware
   - Canberra AccuSpec MCA *.mca
   - Canberra CNF *.cnf
   - ChiPlot *.chi
+  - Createc *.dat
   - Crystallographic Binary Files *.cbf
   - DBWS *.dwb, *.rit, *.neu
   - EC-Lab raw *.mpr
