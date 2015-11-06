@@ -306,7 +306,7 @@ static function createc_readimagedata(file, headerstruct)
 		SetScale/I  x,0,xsize, "m", image
 		SetScale/I  y,0,ysize, "m", image
 		image *=zscale
-		SetScale d,0,0,unit image		
+		SetScale d,0,0,unit image
 		// add notes
 		tmps = headerstruct.header
 		note image, tmps

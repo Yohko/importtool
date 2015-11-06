@@ -5,12 +5,13 @@
 static strconstant Gtmpwavename = "tmpwave_"
 static strconstant directory = "root:Packages:KratosDSET"
 
+static constant magic_number = 56833 // even Kratos calls it Magic Number
+
 // These are my guesses and may not be correct
 static strconstant offsetsname1_flags = "0;1;2;3;8;16;32;144;160"
-static strconstant offsetsname1_value = "AES;ISS;SIMS;XPS;???;Position;???;???;Delay"
+static strconstant offsetsname1_value = "DATASET;ISS;SIMS;XPS;UPS;Sample_Position;Counter;???;Delay"
 static strconstant offsetsname2_flags = "4;6;8;69;73;37;133;4096;4098;4160"
-static strconstant offsetsname2_value = "List;Detector;Irregular;Spectrum;Split Object;???;?? Auto Z?;???;???;???"
-
+static strconstant offsetsname2_value = "List;change_done;Irregular;Spectrum;Split_Spectrum;Mapping;?? Auto Z;set_file;change_todo;Record_Spectrum"
 
 // #### flags
 static strconstant f_technique_names							= "AES;ISS;SIMS;XPS;SEM;SNMS;?;?;?"
@@ -175,7 +176,7 @@ static function KratosDSET_checkID(file, Dsetobject, ID)
 		variable num100 = (type-mod(type,100))/100 ; type -= 100*num100
 		variable num10 = (type-mod(type,10))/10 ; type -= 10*num10
 		variable num1 = (type-mod(type,1))/1
-		Debugprintf2("Reading "+Dsetobject.name+" ...",1)
+		Debugprintf2("Reading "+Dsetobject.name[pnt]+" ...",1)
 		if( num100 == 0 && num10 == 0)
 			if(num1<6 && num1 != 0)
 				Fbinread /B=2/F=(num1) file, tmp ; Dsetobject.numvalue[pnt] = tmp
@@ -304,7 +305,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,58,0,"Filament","","","")//AID_filament
 	KratosDSET_initaddobject(Dsetobject,59,3,"Loop index","","","")//AID_current_counter
 	//KratosDSET_initaddobject(Dsetobject,60,0,"Etch table","","","")//FID_etch_table
-	//KratosDSET_initaddobject(Dsetobject,61,3,"Loop index limit","","","")//AID_counter_limit
+	KratosDSET_initaddobject(Dsetobject,61,3,"Loop index limit","","","")//AID_counter_limit
 	//KratosDSET_initaddobject(Dsetobject,62,0,"Map geometry","","","")//FID_map_geometry
 	KratosDSET_initaddobject(Dsetobject,63,5,"Pre-etch delay","","","")//FID_pre_etch_delay
 	KratosDSET_initaddobject(Dsetobject,64,5,"Post etch delay","","","")//FID_post_etch_delay
@@ -1677,6 +1678,7 @@ end
 static function KratosDSET_getmarkers(file, markercount, nextlist, blockend,Dsetobject)
 	variable file; variable &markercount // counter for the markers, for -1 the end of the object block is reached
 	wave nextlist; variable blockend; struct KratosDsetobject &Dsetobject
+	// one NULL was already read before calling this routine, so we only have to check the max 4 next bytes
 	// 3 x NULL --> beginning of new object
 	// 2 x NULL --> end of object
 	Fstatus file
@@ -1781,6 +1783,7 @@ static function KratosDSET_read_object_list_s(file, Dsetobjectlist)
 		tmp = WhichListItem(num2str(Dsetobjectlist.object_offsets[i][2]), offsetsname1_flags)
 		if(tmp!=-1)
 			Dsetobjectlist.object_name[i][1]=StringFromList(tmp,offsetsname1_value)
+			Debugprintf2("1: "+StringFromList(tmp,offsetsname1_value)+", "+num2str(Dsetobjectlist.object_offsets[i][2]),1)
 		else
 			Fstatus file
 			Debugprintf2("Unknown offsetparam #1 "+num2str(Dsetobjectlist.object_offsets[i][2])+" at position "+num2str(V_filePOS)+". Please check with kal and add to script! (ID: "+num2str(i+1)+")",1)
@@ -1789,11 +1792,14 @@ static function KratosDSET_read_object_list_s(file, Dsetobjectlist)
 		tmp = WhichListItem(num2str(Dsetobjectlist.object_offsets[i][3]), offsetsname2_flags)
 		if(tmp!=-1)
 			Dsetobjectlist.object_name[i][2]=StringFromList(tmp,offsetsname2_value)
+			Debugprintf2("2: "+StringFromList(tmp,offsetsname2_value)+", "+num2str(Dsetobjectlist.object_offsets[i][3]),1)
 		else
 			Fstatus file
 			Debugprintf2("Unknown offsetparam #2 "+num2str(Dsetobjectlist.object_offsets[i][2])+" at position "+num2str(V_filePOS)+". Please check with kal and add to script! (ID: "+num2str(i+1)+")",1)
 			Dsetobjectlist.object_name[i][2]="UNKNOWN"
 		endif
+		Debugprintf2("Object Flags: "+Dsetobjectlist.object_name[i][1]+" ("+num2str(Dsetobjectlist.object_offsets[i][2])+"), "+Dsetobjectlist.object_name[i][2]+" ("+num2str(Dsetobjectlist.object_offsets[i][3])+")",1)
+		
 		// now the name of the Block
 		tmps=""
 		for(j=0;j<4*4;j+=1)
@@ -1821,7 +1827,7 @@ static function KratosDSET_readblock(file, Dsetobject, Dsetobjectlist)
 	variable offlast=V_filePOS//variable offlast=offsets[currentobject][0]
 	if(Dsetobjectlist.object_offsets[Dsetobjectlist.currentobject][0]!=offlast)
 		if(Dsetobjectlist.object_offsets[Dsetobjectlist.currentobject][1]!=offlast)
-			print "Error in object offsets!!!!"
+			Debugprintf2("Error in object offsets!!!!",0)
 			return -1
 		endif
 	endif
@@ -1900,17 +1906,17 @@ end
 static function KratosDSET_read_header(file, Dsetobjectlist)
 	variable file; struct KratosDsetobjectlist &Dsetobjectlist
 
-	variable tmp, majorrelease, magicnumber, offsetdynamic0, offsetdynamic1, offsetdynamic0len, offsetcomments
+	variable tmp, majorrelease, magicnumber, commentend, offsetdynamic1, offsetdynamic0len, offsetcomments
 	string tmps = ""
 	// reading header
 	Fbinread /U/B=2/F=3 file, magicnumber 					// 1st line - magic number (56833)
 	Fbinread /U/B=2/F=3 file, majorrelease 					// 2nd line - major release number (2) -  possible the major release number of the Vision software
 	Fbinread /U/B=2/F=3 file, offsetcomments					// 3rd line - random number; comments ???
-	Fbinread /U/B=2/F=3 file, offsetdynamic0					// 4th line - offset to a dynamic offset for offsetblocks
+	Fbinread /U/B=2/F=3 file, commentend						// 4th line - offset to a dynamic offset for offsetblocks
 	Fbinread /U/B=2/F=3 file, Dsetobjectlist.startofobjectlist	// 5th line - offset to a first object list block (1036)
 	Fbinread /U/B=2/F=3 file, Dsetobjectlist.maxobjects		// 6th line - number of actual number of blocks (max offsets; how many offsets (objectblocks) do we actually have)
 
-	if(majorrelease!=2 || magicnumber!=56833 || Dsetobjectlist.maxobjects==0)
+	if(majorrelease!=2 || magicnumber!=magic_number || Dsetobjectlist.maxobjects==0)
 		//Debugprintf2("Major release 2 expected; got "+num2str(majorrelease),0)
 		//Debugprintf2("Wrong magic number!!",0)
 		Debugprintf2("No objects to read or wrong header!",0)
@@ -1919,13 +1925,16 @@ static function KratosDSET_read_header(file, Dsetobjectlist)
 
 	//comments to folllow??? // using offset2 which seems to give evidence of comment chars
 	for(tmp=0;tmp<(offsetcomments-(Dsetobjectlist.maxobjects));tmp+=1)
-		Debugprintf2("Comment?: "+mybinreadBE(file,1)+"#",1)
+		variable tmp2=0
+		Fbinread /U/B=2/F=1 file, tmp2
+		Debugprintf2("Number?: "+num2str(tmp2)+"#",1)
+		//Debugprintf2("Comment?: "+mybinreadBE(file,1)+"#",0)
 	endfor
 	// here comes the real comment (does it always start at 360 ???)
-	print "Comment: "+ KratosDSET_readcomment(file, offsetdynamic0)
+	Debugprintf2("Comment: #"+ KratosDSET_readcomment(file, commentend)+"#",0)
 	
 	// jump to the very first offsetblock
-	Fsetpos file, offsetdynamic0
+	Fsetpos file, commentend
 	Fbinread /U/B=2/F=3 file, offsetdynamic1		// two times the offset where Vision will add new offsets??? + offset4(12)???
 	Fbinread /U/B=2/F=3 file, tmp
 
@@ -1935,8 +1944,8 @@ static function KratosDSET_read_header(file, Dsetobjectlist)
 		sprintf tmps, "%08.0f", offsetdynamic1 ; Debugprintf2("Check what this offset could be (+12?):  "+tmps,0) // does it somehow correspond to the fileend --> where to add the next offsetsblock???? (12 --> length of 1024 block --> 3*4 bytes --> double offset and length)
 	endif
 	Fbinread /U/B=2/F=3 file, offsetdynamic0len // offset0+offset4 ==offset = 1024+12==1036
-	if(offsetdynamic0+offsetdynamic0len!=Dsetobjectlist.startofobjectlist)
-		Debugprintf2("Something is different here: "+num2str(offsetdynamic0)+" + "+num2str(offsetdynamic0len)+" <> "+num2str(Dsetobjectlist.startofobjectlist),0)
+	if(commentend+offsetdynamic0len!=Dsetobjectlist.startofobjectlist)
+		Debugprintf2("Something is different here: "+num2str(commentend)+" + "+num2str(offsetdynamic0len)+" <> "+num2str(Dsetobjectlist.startofobjectlist),0)
 	endif
 
 	//print "Take a deeper look!!! This is not yet finsished!!!!" // did I include this somewhere else already????
@@ -1956,7 +1965,7 @@ function KratosDSET_check_file(file)
 	Fbinread /U/B=2/F=3 file, offsetdynamic0					// 4th line - offset to a dynamic offset for offsetblocks
 	Fbinread /U/B=2/F=3 file, startofobjectlist					// 5th line - offset to a first object list block (1036)
 	Fbinread /U/B=2/F=3 file, maxobjects						// 6th line - number of actual number of blocks (max offsets; how many offsets (objectblocks) do we actually have)
-	if(majorrelease!=2 || magicnumber!=56833 || startofobjectlist!=1036)//Dsetobjectlist.maxobjects==0)
+	if(majorrelease!=2 || magicnumber!=magic_number || startofobjectlist!=1036)//Dsetobjectlist.maxobjects==0)
 		fsetpos file, 0
 		return -1
 	endif

@@ -176,7 +176,7 @@ function multiLoader_loadbutton(ba) : ButtonControl
 					FUNCREF multiLoader_protoload_data_info f = $(stringfromlist(i,funclistinfo,";"))
 					importloader.category = "misc"
 					f(importloader)
-					if(strsearch(importloader.name, S_Value,0)!=-1)
+					if(strsearch(importloader.name, S_Value,0)== 0 && strlen(importloader.name) == strlen(S_Value))
 						multiLoader_loader(stringfromlist(i,funclist,";")+";"+stringfromlist(i,funclistinfo,";"))
 						//FUNCREF protoload_data ff = $(stringfromlist(i,funclist,";"))
 						//ff()
@@ -231,7 +231,7 @@ Function multiLoader_MakePanel()
 
 		Button button_about,pos={210,10},size={80,20},title="About ...",fSize=14, proc=multiLoader_info
 
-		SetDrawEnv textrgb= (26205,52428,1),fstyle= 21,fsize= 14;DelayUpdate
+		SetDrawEnv textrgb= (26205,52428,1),fstyle= 5,fsize= 14;DelayUpdate
 		DrawText 110,80,"Settings"
 		variable y = 35
 		// spectra
