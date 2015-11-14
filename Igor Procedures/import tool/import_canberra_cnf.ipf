@@ -36,7 +36,7 @@ static function CanberraCnf_readX(offset, file, ycols, n_channels)
 	for (i = 0; i != 3; i+=1)
 	endfor
 	if (coef2 != 0) // quadr term
-		string tmps=getnameforwave(file)+"_X"//"raw_data_X"
+		string tmps=getnameforwave(file)+"_X"
 		Make /O/R/N=(n_channels)  $tmps /wave=Xcols
 		// Comparing results with FitzPeaks and and Cambio 4.0
 		// the first channel should have number 1 (not 0).
@@ -57,19 +57,19 @@ end
 static function  CanberraCnf_convert_time(file)
 	variable file
 	Variable lowWord, highWord
-	FBinRead /B=3/F=3/U file, lowWord	// Assume data is little-endian
+
+#if (IgorVersion() >= 7) 
+	// 64bit support
+	fbinread /B=3/F=6/U file, lowword
+#else
+	FBinRead /B=3/F=3/U file, lowWord	
 	FBinRead /B=3/F=3/U file, highWord
 	if(highWord == 0)
-		//printf "		Integral Count: %5.0f\r" IntegralCount	
-		//IntegralCountWave[l-1] = IntegralCount	
 	else
 		lowWord = highWord * (2.^32) + lowWord
-		//printf "		Integral Count: %5.0f\r" IntegralCount2
-		//IntegralCountWave[l-1] = IntegralCount2
 	endif
-	//Variable result = lowWord + 2^32*highWord
-	return lowWord//result* 1.0e-7
-//    return (~d) * 1.0e-7;
+#endif
+	return lowWord
 end
 
 
