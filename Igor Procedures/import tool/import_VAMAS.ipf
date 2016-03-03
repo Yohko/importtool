@@ -19,6 +19,20 @@ static strconstant techs = "AES diff;AES dir;EDX;ELS;FABMS;FABMS energy spec;ISS
 static strconstant scans = "REGULAR;IRREGULAR;MAPPING"
 
 
+static structure Vamas_param
+	variable first_start_x
+	variable first_start_y
+	variable first_end_x
+	variable first_end_y
+	variable last_end_x
+	variable last_end_y
+	variable discrete_xdim
+	variable discrete_ydim
+	variable FOV_x
+	variable FOV_y
+endstructure
+
+
 static structure Vamas_CasaXPS_region
 	string name
 	variable RSF
@@ -108,14 +122,24 @@ function Vamas_load_data([optfile])
 	endif
 	string headercomment = importloader.header+"\r"
 	variable file = importloader.file
-	
+
+
+	// load complete file into a text wave for faster processing
+	struct loader_file filewave
+	if(loader_initfile(file, filewave)==-1)
+		loaderend(importloader)
+		return -1	
+	endif
+
+
+	struct Vamas_param param
 	variable i=0, optf=0
 	string tmps=""
 	// sometimes there are empty lines at the beginning
 	// need to find the magic line
 	string key="", val=""
 	do 
-		if (getkeyval(file, key, val)==-1)
+		if (Vamas_getkeyval(filewave, key, val)==-1)
 			Debugprintf2("Unexpected end of VMS-file (header).",0)
 			loaderend(importloader)
 			return -1
@@ -131,23 +155,22 @@ function Vamas_load_data([optfile])
 		endif
 		key=""
 		val=""
-		Fstatus file
-		if(V_logEOF<=V_filePOS)
+		if(filewave.line>=dimsize(filewave.file,0))
 			Debugprintf2("Unexpected end of VMS-file (header).",0)
 			loaderend(importloader)
 			return -1
 		endif
-	while (V_logEOF>V_filePOS)  	
+	while(filewave.line<dimsize(filewave.file,0))
 
-	headercomment += "institution identifier: " + read_line_trim(file) + "\r"
-	headercomment += "institution model identifier" + read_line_trim(file) + "\r"
-	headercomment += "operator identifier: " + read_line_trim(file) + "\r"
-	headercomment += "experiment identifier: " + read_line_trim(file) + "\r"
+	headercomment += "institution identifier: " + loader_readline_str(filewave) + "\r"
+	headercomment += "institution model identifier" + loader_readline_str(filewave) + "\r"
+	headercomment += "operator identifier: " + loader_readline_str(filewave) + "\r"
+	headercomment += "experiment identifier: " + loader_readline_str(filewave) + "\r"
 
-    // skip comment lines, n is number of lines //todo read comments 
-	variable n = read_line_int(file)
+    // comment lines, n is number of lines
+	variable n = loader_readline_num(filewave)
 	for (i = 0; i <n; i+=1) 
-		FReadLine file, tmps
+		tmps = filewave.file[filewave.line]; filewave.line +=1
 		if(strlen(tmps) == 0)
 			Debugprintf2("Unexpected end of VMS-file.",0)
 			return -1
@@ -156,13 +179,13 @@ function Vamas_load_data([optfile])
 		headercomment += "header comment #"+num2str(i+1)+": "+tmps+"\r"
 	endfor
 	
-	string exp_mode = read_line_trim(file)
+	string exp_mode = loader_readline_str(filewave)
 	// make sure exp_mode has a valid value
 	if(FindListItem(exp_mode, exps, ";")==-1)
 		Debugprintf2("exp_mode has an invalid value: "+exp_mode,0)
 	endif
 
-	string scan_mode = read_line_trim(file)
+	string scan_mode = loader_readline_str(filewave)
 	// make sure scan_mode has a valid value
 	if(FindListItem(scan_mode, scans, ";")==-1)
 		Debugprintf2("Scan mode has an invalid value: "+scan_mode,0)
@@ -171,21 +194,22 @@ function Vamas_load_data([optfile])
 	// some exp_mode specific file-scope meta-info
 	string numspecregions = ""
 	if ((cmpstr("MAP",exp_mode) == 0) || (cmpstr("MAPD",exp_mode) == 0) || (cmpstr("NORM",exp_mode) == 0) || (cmpstr("SDP",exp_mode) == 0) )
-		headercomment += "number of spectral regions: " + read_line_trim(file) +"\r"
+		headercomment += "number of spectral regions: " + loader_readline_str(filewave) + "\r"
     	endif
 
 	if ((cmpstr("MAP",exp_mode) == 0) || (cmpstr("MAPD",exp_mode) == 0))
-		headercomment += "number of analysis positions: " + read_line_trim(file) + "\r"
-		headercomment += "number of discrete x coordinates available in full map: " + read_line_trim(file) + "\r"
-		headercomment += "number of discrete y coordinates available in full map: " + read_line_trim(file) + "\r"
+		headercomment += "number of analysis positions: " + loader_readline_str(filewave) + "\r"
+		param.discrete_xdim = loader_readline_num(filewave)
+		param.discrete_ydim = loader_readline_num(filewave)
+		headercomment += "number of discrete x coordinates available in full map: " + num2str(param.discrete_xdim) + "\r"
+		headercomment += "number of discrete y coordinates available in full map: " + num2str(param.discrete_ydim) + "\r"
 	endif
 
 	// experimental variables
-	variable exp_var_cnt = read_line_int(file)
-	//variable i=0
+	variable exp_var_cnt = loader_readline_num(filewave)
 	for (i = 1; i <= exp_var_cnt; i+=1)
-		headercomment += "experimental variable label " + num2str(i) + ": " + read_line_trim(file) + "\r"
-		headercomment += "experimental variable unit " + num2str(i) + ": "+ read_line_trim(file) + "\r"
+		headercomment += "experimental variable label " + num2str(i) + ": " + loader_readline_str(filewave) + "\r"
+		headercomment += "experimental variable unit " + num2str(i) + ": "+ loader_readline_str(filewave) + "\r"
 	endfor
 	headercomment=mycleanupstr(headercomment)
 	// fill `include' table
@@ -195,18 +219,16 @@ function Vamas_load_data([optfile])
 	// Software which could read the old file format will therefore remain compatible with the new version, but
 	// this VAMASParser will not be able to read the old file format, and must simply throw an exception if the
 	// value is not 0.
-	n = read_line_int(file) // # of entries in inclusion or exclusion list
+	n = loader_readline_num(filewave) // # of entries in inclusion or exclusion list
 	optf=n
 	if(n!=0)
-		Fstatus file
-		Debugprintf2("Error reading VAMAS file; expected '0', read '" + num2str(n) + "' at position " + num2str(V_filePOS),0)
+		Debugprintf2("Error reading VAMAS file; expected '0', read '" + num2str(n) + "' at position " + num2str(filewave.line),0)
 		Debugprintf2("Somehow a continuous mode which is not supported yet or very old VAMAS standard!",0)
 		//loaderend(impname,1,file, dfSave)
 		//return -1
 	endif
-	
-	
-	
+
+
 	variable d= (n > 0 ? 0 : 1)
 
 	Make /O/R/N=(40) includew
@@ -224,21 +246,21 @@ function Vamas_load_data([optfile])
 
 	variable idx=0
 	for (i=0;i<n;i+=1)
-		idx = read_line_int(file) - 1
+		idx = loader_readline_num(filewave)
 		inclusionlist[idx]=d
 	endfor
 	
 	// # of manually entered items in block
 	// list any manually entered items
-	n = read_line_int(file)
-	if(skip_lines(file, n)==-1)
+	n = loader_readline_num(filewave)
+	if(Vamas_skip_lines(filewave, n)==-1)
 		loaderend(importloader)
 		return -1
 	endif
 	// list any future experiment upgrade entries
-	variable exp_fue = read_line_int(file)
-	variable blk_fue = read_line_int(file) //new
-	if(skip_lines(file, exp_fue)==-1)
+	variable exp_fue = loader_readline_num(filewave)
+	variable blk_fue = loader_readline_num(filewave)
+	if(Vamas_skip_lines(filewave, exp_fue)==-1)
 		loaderend(importloader)
 		return -1
 	endif
@@ -252,7 +274,7 @@ function Vamas_load_data([optfile])
 	variable j=0
 	variable cor_var=0
 	// handle the blocks
-	variable blk_cnt = read_line_int(file)
+	variable blk_cnt = loader_readline_num(filewave)
 	
 	for (i = 0; i < blk_cnt; i+=1)
 	
@@ -261,8 +283,7 @@ function Vamas_load_data([optfile])
 				includew[j]=inclusionlist[j]
 			endfor
 		endif
-	
-		if(Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment,i, cor_var)==-1)
+		if(Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment,i, cor_var, param)==-1)
 			loaderend(importloader)
 			return -1
 		endif
@@ -276,8 +297,8 @@ end
 
 
 // read one block from file
-static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment, count, cor_var)//,impname, dfSave)
-	variable file
+static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment, count, cor_var, param)//,impname, dfSave)
+	struct loader_file &filewave
 	wave includew
 	string exp_mode
 	variable exp_var_cnt
@@ -285,54 +306,52 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	variable blk_fue
 	string headercomment
 	variable count
-	variable &cor_var //= 0 // # of corresponding variables
-	variable x_start=0.0, x_step=0.0, i=0, n=0
+	variable &cor_var // # of corresponding variables
+	struct Vamas_param &param
+	variable x_start=0.0, x_step=0.0, i=0, j=0, n=0
 	string x_name = "", tmps=""
 	variable excenergy = 0
 	variable dwelltime = 1
 	variable scancount = 1
 
-//	variable cor_var = 0 // # of corresponding variables
-
-	string blockid = read_line_trim(file)
-	string sampleid = read_line_trim(file)
+	string blockid = loader_readline_str(filewave)
+	string sampleid = loader_readline_str(filewave)
 
 	blockid = cleanname(blockid)
 	Make /O/R/N=(10)  $(cleanname(sampleid[0,10])+"_"+num2str(count)+"_"+blockid[0,10]) /wave=ycols
 	Note ycols, headercomment
 	Note ycols, "block id: "+ blockid
 	Note ycols, "sample identifier: "+ sampleid
-
 	if (includew[0]==1)
-		Note ycols, "year: " + read_line_trim(file)
+		Note ycols, "year: " + loader_readline_str(filewave)
 	endif
 	if (includew[1]==1)
-		note ycols, "month: " + read_line_trim(file)
+		note ycols, "month: " + loader_readline_str(filewave)
 	endif
 	if (includew[2]==1)
-		note ycols, "day: " + read_line_trim(file)
+		note ycols, "day: " + loader_readline_str(filewave)
 	endif
 	if (includew[3]==1)
-		note ycols, "hour: " + read_line_trim(file)
+		note ycols, "hour: " + loader_readline_str(filewave)
 	endif
 	if (includew[4]==1)
-		note ycols, "minute: " +  read_line_trim(file)
+		note ycols, "minute: " +  loader_readline_str(filewave)
 	endif
 	if (includew[5]==1)
-		note ycols, "second: " + read_line_trim(file)
+		note ycols, "second: " + loader_readline_str(filewave)
 	endif
 	if (includew[6]==1)
-		note ycols, "no. of hours in advanced GMT: " + read_line_trim(file)
+		note ycols, "no. of hours in advanced GMT: " + loader_readline_str(filewave)
 	endif
 	variable cmt_lines=0
 	if (includew[7]==1) // skip comments on this block
-		cmt_lines = read_line_int(file)
+		cmt_lines = loader_readline_num(filewave)
 		if(numtype(cmt_lines)!=0)
 			Debugprintf2("Error opening Vamas file (cmt_lines)!",0)
 			return -1
 		endif
 		for (i = 0; i <cmt_lines; i+=1) 
-			FReadLine file, tmps
+			tmps = filewave.file[filewave.line]; filewave.line +=1
 			if(strlen(tmps) == 0)
 				Debugprintf2("Unexpected end of VMS-file.",0)
 				return -1
@@ -340,15 +359,10 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 			tmps=mycleanupstr(tmps)
 			note ycols, "spectra comment #"+num2str(i+1)+": "+stripstrfirstlastspaces(tmps)
 		endfor
-//		if(Vamas_skip_lines(file, cmt_lines)==-1)
-//			//loaderend(impname,1,file, dfSave)
-//			return -1
-//		endif
 	endif
-
 	string tech=""
 	if (includew[8]==1)
-		tech = read_line_trim(file)
+		tech = loader_readline_str(filewave)
 		note ycols, "tech: " + tech
 		if(FindListItem(tech, techs, ";")==-1)
 			Debugprintf2("Tech. has an invalid value: "+tech,0)
@@ -357,130 +371,136 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 
 	if (includew[9]==1)
 		if ((cmpstr("MAP",exp_mode) == 0) || (cmpstr("MAPDP",exp_mode) == 0))
-			note ycols, "x coordinate" + read_line_trim(file)
-			note ycols, "y coordinate" + read_line_trim(file)
+			note ycols, "x coordinate" + loader_readline_str(filewave)
+			note ycols, "y coordinate" + loader_readline_str(filewave)
 		endif
 	endif
 
 	if (includew[10]==1)
 		for (i = 0; i < exp_var_cnt; i+=1)
-			note ycols, "experimental variable value " + num2str(i+1)+": "+  read_line_trim(file)
+			note ycols, "experimental variable value " + num2str(i+1)+": "+  loader_readline_str(filewave)
 		endfor
 	endif
 
 	if (includew[11]==1)
-		note ycols, "analysis source label: "+  read_line_trim(file)
+		note ycols, "analysis source label: "+  loader_readline_str(filewave)
 	endif
 	
 	if (includew[12]==1)
 		if ((cmpstr("MAPDP",exp_mode) == 0) || (cmpstr("MAPSVDP",exp_mode) == 0) || (cmpstr("SDP",exp_mode) ==0) || (cmpstr("SDPSV",exp_mode )== 0) || (cmpstr("SNMS energy spec",tech) == 0) || (cmpstr("FABMS",tech) == 0) || (cmpstr("FABMS energy spec",tech) == 0) || (cmpstr("ISS",tech) == 0) || (cmpstr("SIMS",tech) == 0) || (cmpstr("SIMS energy spec",tech) == 0) || (cmpstr("SNMS",tech) == 0))
-			note ycols, "sputtering ion or atom atomic number: "+ read_line_trim(file)
-			note ycols, "number of atoms in sputtering ion or atom particle: "+ read_line_trim(file)
-			note ycols, "sputtering ion or atom charge sign and number: "+ read_line_trim(file)
+			note ycols, "sputtering ion or atom atomic number: "+ loader_readline_str(filewave)
+			note ycols, "number of atoms in sputtering ion or atom particle: "+ loader_readline_str(filewave)
+			note ycols, "sputtering ion or atom charge sign and number: "+ loader_readline_str(filewave)
 		endif
 	endif
 	if (includew[13]==1)
-		excenergy =  read_line_int(file)
+		excenergy =  loader_readline_num(filewave)
 		note ycols, "analysis source characteristic energy: " + num2str(excenergy)
 	endif
 	if (includew[14]==1)
-		note ycols, "analysis source strength: "+ read_line_trim(file)
+		note ycols, "analysis source strength: "+ loader_readline_str(filewave)
 	endif
 
 	if (includew[15]==1)
-		note ycols, "analysis source beam width x: "+ read_line_trim(file)
-		note ycols, "analysis source beam width y: "+ read_line_trim(file)
+		note ycols, "analysis source beam width x: "+ loader_readline_str(filewave)
+		note ycols, "analysis source beam width y: "+ loader_readline_str(filewave)
 	endif
 
 	if (includew[16]==1)
 		if ((cmpstr("MAP",exp_mode) ==0) || (cmpstr("MAPDP",exp_mode) ==0) || (cmpstr("MAPSV",exp_mode) ==0)  || (cmpstr("MAPSVDP",exp_mode) ==0) || (cmpstr("SEM",exp_mode) ==0))
-			note ycols, "field of view x: "+  read_line_trim(file)
-			note ycols, "field of view y: "+  read_line_trim(file)
+			param.FOV_x = loader_readline_num(filewave)
+			param.FOV_y = loader_readline_num(filewave)
+			note ycols, "field of view x: " + num2str(param.FOV_x)
+			note ycols, "field of view y: " + num2str(param.FOV_y)
 		endif
 	endif
 
 	if (includew[17]==1)
 		if ((cmpstr("SEM",exp_mode) ==0) || (cmpstr("MAPSV",exp_mode) ==0) || (cmpstr("MAPSVDP",exp_mode) ==0))
-			Debugprintf2("unsupported MAPPING mode",0)
-			return -1
-			note ycols, "First Line Scan Start X-Coordinate: "+  read_line_trim(file)
-			note ycols, "First Line Scan Start Y-Coordinate: "+  read_line_trim(file)
-			note ycols, "First Line Scan Finish X-Coordinate: "+  read_line_trim(file)
-			note ycols, "First Line Scan Finish Y-Coordinate: "+  read_line_trim(file)
-			note ycols, "Last Line Scan Finish X-Coordinate: "+  read_line_trim(file)
-			note ycols, "Last Line Scan Finish Y-Coordinate: "+  read_line_trim(file)
+			param.first_start_x = loader_readline_num(filewave)
+			param.first_start_y = loader_readline_num(filewave)
+			param.first_end_x = loader_readline_num(filewave)
+			param.first_end_y =loader_readline_num(filewave)
+			param.last_end_x = loader_readline_num(filewave)
+			param.last_end_y= loader_readline_num(filewave)
+			note ycols, "First Line Scan Start X-Coordinate: "+  num2str(param.first_start_x)
+			note ycols, "First Line Scan Start Y-Coordinate: "+  num2str(param.first_start_y)
+			note ycols, "First Line Scan Finish X-Coordinate: "+  num2str(param.first_end_x)
+			note ycols, "First Line Scan Finish Y-Coordinate: "+  num2str(param.first_end_y)
+			note ycols, "Last Line Scan Finish X-Coordinate: "+  num2str(param.last_end_x)
+			note ycols, "Last Line Scan Finish Y-Coordinate: "+  num2str(param.last_end_y)
 		endif
 	endif
 
 	if (includew[18]==1)
-		note ycols, "analysis source polar angle of incidence: "+  read_line_trim(file)
+		note ycols, "analysis source polar angle of incidence: "+  loader_readline_str(filewave)
 	endif
 	if (includew[19]==1)
-		note ycols, "analysis source azimuth: "+  read_line_trim(file)
+		note ycols, "analysis source azimuth: "+  loader_readline_str(filewave)
 	endif
 	if (includew[20]==1)
-		note ycols, "analyser mode: "+  read_line_trim(file)
+		note ycols, "analyser mode: "+  loader_readline_str(filewave)
 	endif
 	if (includew[21]==1)
-		note ycols, "analyser pass energy or retard ratio or mass resolution: " + read_line_trim(file)
+		note ycols, "analyser pass energy or retard ratio or mass resolution: " + loader_readline_str(filewave)
 	endif
 
 	if (includew[22]==1)
 		if (cmpstr("AES diff",tech)==0)
-			note ycols, "differential width: "+  read_line_trim(file)
+			note ycols, "differential width: "+  loader_readline_str(filewave)
 		endif
 	endif
 
 	if (includew[23]==1)
-		note ycols, "magnification of analyser transfer lens: "+  read_line_trim(file)
+		note ycols, "magnification of analyser transfer lens: "+  loader_readline_str(filewave)
 	endif
 	// QAZ semantics of next element depends on technique
 	if (includew[24]==1)
-		note ycols, "analyser work function or acceptance energy of atom or ion: "+  read_line_trim(file)
+		note ycols, "analyser work function or acceptance energy of atom or ion: "+  loader_readline_str(filewave)
 	endif
 	if (includew[25]==1)
-		note ycols, "target bias: "+  read_line_trim(file)
+		note ycols, "target bias: "+  loader_readline_str(filewave)
 	endif
 
 	if (includew[26]==1)
-		note ycols, "analysis width x: "+ read_line_trim(file)
-		note ycols, "analysis width y: "+  read_line_trim(file)
+		note ycols, "analysis width x: "+ loader_readline_str(filewave)
+		note ycols, "analysis width y: "+  loader_readline_str(filewave)
 	endif
 
 	if (includew[27]==1)
-		note ycols, "analyser axis take off polar angle: "+  read_line_trim(file)
-		note ycols, "analyser axis take off azimuth: "+  read_line_trim(file)
+		note ycols, "analyser axis take off polar angle: "+  loader_readline_str(filewave)
+		note ycols, "analyser axis take off azimuth: "+  loader_readline_str(filewave)
 	endif
 
 	if (includew[28]==1)
-		note ycols, "species label: "+  read_line_trim(file)
+		note ycols, "species label: "+  loader_readline_str(filewave)
 	endif
 
 	if (includew[29]==1)
-		note ycols, "transition or charge state label: "+  read_line_trim(file)
-		note ycols, "charge of detected particle: "+  read_line_trim(file)
+		note ycols, "transition or charge state label: "+  loader_readline_str(filewave)
+		note ycols, "charge of detected particle: "+  loader_readline_str(filewave)
 	endif
 
 	if (includew[30]==1)
 		if (cmpstr("REGULAR",scan_mode) == 0)
-			x_name =  read_line_trim(file)
+			x_name =  loader_readline_str(filewave)
 			note ycols, "abscissa label: "+ x_name
-			note ycols, "abscissa units: "+  read_line_trim(file)
-			x_start = read_line_int(file)
-			x_step = read_line_int(file)
+			note ycols, "abscissa units: "+  loader_readline_str(filewave)
+			x_start = loader_readline_num(filewave)
+			x_step = loader_readline_num(filewave)
 		else
-			cor_var = read_line_int(file)
+			cor_var = loader_readline_num(filewave)
 			if(numtype(cor_var)!=0)
 				Debugprintf2("Error opening Vamas file (cor_var)!",0)
 				return -1
 			endif
-			x_name =  read_line_trim(file)
+			x_name =  loader_readline_str(filewave)
 			note ycols, "abscissa label: "+ x_name
-			note ycols, "abscissa units: "+  read_line_trim(file)
+			note ycols, "abscissa units: "+  loader_readline_str(filewave)
 
 			for (i = 0; i != cor_var-1; i+=1)
-				note ycols,"Name Col"+num2str(i)+": "+read_line_trim(file)
-				if(skip_lines(file, 1)==-1) // corresponding variable unit
+				note ycols,"Name Col"+num2str(i)+": "+loader_readline_str(filewave)
+				if(Vamas_skip_lines(filewave, 1)==-1) // corresponding variable unit
 					//loaderend(impname,1,file, dfSave)
 					return -1
 				endif
@@ -494,7 +514,7 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 
 	
 	if (includew[31]==1)
-		cor_var = read_line_int(file)
+		cor_var = loader_readline_num(filewave)
 		if(numtype(cor_var)!=0)
 			Debugprintf2("Error opening Vamas file (cor_var)!",0)
 			return -1
@@ -503,8 +523,8 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 		// columns initialization
 		Redimension/N=(-1,cor_var) ycols
 		for (i = 0; i != cor_var; i+=1)
-			note ycols,"Name Col"+num2str(i)+": "+read_line_trim(file)
-			if(skip_lines(file, 1)==-1) // corresponding variable unit
+			note ycols,"Name Col"+num2str(i)+": "+loader_readline_str(filewave)
+			if(Vamas_skip_lines(filewave, 1)==-1) // corresponding variable unit
 				//loaderend(impname,1,file, dfSave)
 				return -1
 			endif
@@ -512,157 +532,173 @@ static function Vamas_read_block(file, includew,exp_mode,exp_var_cnt, scan_mode,
 	endif
 
 	if (includew[32]==1)
-		note ycols, "signal mode: "+  read_line_trim(file)
+		note ycols, "signal mode: "+  loader_readline_str(filewave)
 	endif
 	if (includew[33]==1)
-		dwelltime =  read_line_int(file)
+		dwelltime =  loader_readline_num(filewave)
 		note ycols, "signal collection time: "+  num2str(dwelltime)
 	endif
 	if (includew[34]==1)
-		scancount =  read_line_int(file)
+		scancount =  loader_readline_num(filewave)
 		note ycols, "# of scans to compile this blk: "+  num2str(scancount)
 	endif
 	if (includew[35]==1)
-		note ycols, "signal time correction: "+  read_line_trim(file)
+		note ycols, "signal time correction: "+  loader_readline_str(filewave)
 	endif
 	if (includew[36]==1)
 		if (( (cmpstr("AES diff",tech) == 0) ||  (cmpstr("AES dir",tech) == 0) ||  (cmpstr("EDX",tech) == 0) ||  (cmpstr("ELS",tech) == 0) ||  (cmpstr("UPS",tech) == 0) ||  (cmpstr("XPS",tech) == 0) ||  (cmpstr("XRF",tech) == 0)) && ( (cmpstr("MAPDP",exp_mode) == 0) ||  (cmpstr("MAPSVDP",exp_mode) == 0) ||  (cmpstr("SDP",exp_mode) == 0) ||  (cmpstr("SDPSV",exp_mode) == 0))) 
-			note ycols, "Sputtering Source Energy: "+read_line_trim(file)
-			note ycols, "Sputtering Source BeamCurrent: "+read_line_trim(file)
-			note ycols, "Sputtering Source WidthX: "+read_line_trim(file)
-			note ycols, "Sputtering Source WidthY: "+read_line_trim(file)
-			note ycols, "Sputtering Source PolarAngle Of Incidence: "+read_line_trim(file)
-			note ycols, "Sputtering Source Azimuth: "+read_line_trim(file)
-			note ycols, "Sputtering Mode: "+read_line_trim(file)
-			//if(Vamas_skip_lines(file, 7)==-1)
-				//loaderend(impname,1,file, dfSave)
-			//	return -1
-			//endif
+			note ycols, "Sputtering Source Energy: "+loader_readline_str(filewave)
+			note ycols, "Sputtering Source BeamCurrent: "+loader_readline_str(filewave)
+			note ycols, "Sputtering Source WidthX: "+loader_readline_str(filewave)
+			note ycols, "Sputtering Source WidthY: "+loader_readline_str(filewave)
+			note ycols, "Sputtering Source PolarAngle Of Incidence: "+loader_readline_str(filewave)
+			note ycols, "Sputtering Source Azimuth: "+loader_readline_str(filewave)
+			note ycols, "Sputtering Mode: "+loader_readline_str(filewave)
 		endif
 	endif
 
 	if (includew[37]==1)
-		note ycols, "sample normal polar angle of tilt: "+  read_line_trim(file)
-		note ycols, "sample normal polar tilt azimuth: "+  read_line_trim(file)
+		note ycols, "sample normal polar angle of tilt: "+  loader_readline_str(filewave)
+		note ycols, "sample normal polar tilt azimuth: "+  loader_readline_str(filewave)
 	endif
 
 	if (includew[38]==1)
-		note ycols, "sample rotate angle: "+  read_line_trim(file)
+		note ycols, "sample rotate angle: "+  loader_readline_str(filewave)
 	endif
-	
 	if (includew[39]==1)
-		n = read_line_int(file) // # of additional numeric parameters
+		n = loader_readline_num(filewave) // # of additional numeric parameters
 		for (i = 0; i < n; i+=1)
 			// 3 items in every loop: param_label, param_unit, param_value
-			string param_label =  read_line_trim(file)
-			string param_unit =  read_line_trim(file)
-			note ycols, param_label +": " + read_line_trim(file) + param_unit
+			string param_label =  loader_readline_str(filewave)
+			string param_unit =  loader_readline_str(filewave)
+			string param_value =  loader_readline_str(filewave)
+			note ycols, param_label +": " + param_value  + param_unit
 		endfor
 	endif
-
-	if(skip_lines(file, blk_fue)==-1)
+	if(Vamas_skip_lines(filewave, blk_fue)==-1)
 		return -1
 	endif
-	variable cur_blk_steps = read_line_int(file)
-
-	if(skip_lines(file, 2 * cor_var)==-1) // min & max ordinate
-	//if(Vamas_skip_lines(file, 2 * inclusionlist[40])==-1) // min & max ordinate
-		//loaderend(impname,1,file, dfSave)
+	variable cur_blk_steps = loader_readline_num(filewave)
+	if(Vamas_skip_lines(filewave, 2 * cor_var)==-1) // min & max ordinate
 		return -1
 	endif
-
-	if ((cmpstr("UPS",tech) == 0) ||  (cmpstr("XPS",tech) == 0)) 
-		if(strsearch(x_name,"Kinetic Energy",0,2)!=-1)
-			if(str2num(get_flags(f_vsEkin))==0)
-				if(str2num(get_flags(f_posEbin)) == 0)
-					SetScale/P  x,x_start-excenergy,x_step,"eV", ycols
-				else
-					SetScale/P  x,-x_start+excenergy,-x_step,"eV", ycols
-				endif
-			else
-					SetScale/P  x,x_start,x_step,"eV", ycols
-			endif
-		elseif(strsearch(x_name,"Binding Energy",0,2)!=-1)
-			if(str2num(get_flags(f_vsEkin))==0)
-				if(str2num(get_flags(f_posEbin)) == 0)
-					SetScale/P  x,-x_start,-x_step,"eV", ycols
-				else
-					SetScale/P  x,x_start,x_step,"eV", ycols
-				endif		
-			else
-					SetScale/P  x,excenergy-x_start,x_step,"eV", ycols
-			endif
-		//elseif(strsearch(x_name,"time of day",0,2)!=-1)
-		else
-			SetScale/P  x,x_start,x_step,x_name, ycols
-		endif
-	else
-		SetScale/P  x,x_start,x_step,x_name, ycols
-	endif
-
-	Redimension/N=(cur_blk_steps/cor_var,cor_var) ycols
-	variable col = 0
-	n=0
 	variable tmpd=0
-	for (i = 0; i < cur_blk_steps; i+=1)
-		tmpd=read_line_int(file)
-		if(numtype(tmpd)==2)
-			// some VMS files have empty lines here, CasaXPS still loads these files properly
-			Debugprintf2("Nummeric error in countlist, trying to skip line!",2)
-			i-=1
-		endif
-		ycols[n][col]=tmpd
+
+	variable xdim=0,ydim=0
+
+	//<expression> ? <TRUE> : <FALSE>
+	xdim = (param.first_end_x>=param.last_end_x) ? param.first_end_x : param.last_end_x
+	ydim = (param.first_end_y>=param.last_end_y) ? param.first_end_x : param.last_end_x
+	xdim -=(param.first_start_x-1)
+	ydim -=(param.first_start_y-1)
+
+	string ycols_name = nameofwave(ycols)
+	strswitch(scan_mode)
+		case "MAPPING":
+			Redimension/N=(xdim,ydim) ycols
+			for(j=0;j<ydim;j+=1)
+				for(i=0;i<xdim;i+=1)
+					tmpd=loader_readline_num(filewave)
+					ycols[i][j]=tmpd
+				endfor
+			endfor
+			SetScale/I  x,0,param.FOV_x,"µm", ycols
+			SetScale/I  y,0,param.FOV_y,"µm", ycols
+			break
+		default: // regular and irregular
+			if ((cmpstr("UPS",tech) == 0) ||  (cmpstr("XPS",tech) == 0)) 
+				if(strsearch(x_name,"Kinetic Energy",0,2)!=-1)
+					if(str2num(get_flags(f_vsEkin))==0)
+						if(str2num(get_flags(f_posEbin)) == 0)
+							SetScale/P  x,x_start-excenergy,x_step,"eV", ycols
+						else
+							SetScale/P  x,-x_start+excenergy,-x_step,"eV", ycols
+						endif
+					else
+							SetScale/P  x,x_start,x_step,"eV", ycols
+					endif
+				elseif(strsearch(x_name,"Binding Energy",0,2)!=-1)
+					if(str2num(get_flags(f_vsEkin))==0)
+						if(str2num(get_flags(f_posEbin)) == 0)
+							SetScale/P  x,-x_start,-x_step,"eV", ycols
+						else
+							SetScale/P  x,x_start,x_step,"eV", ycols
+						endif		
+					else
+							SetScale/P  x,excenergy-x_start,x_step,"eV", ycols
+					endif
+				//elseif(strsearch(x_name,"time of day",0,2)!=-1)
+				else
+					SetScale/P  x,x_start,x_step,x_name, ycols
+				endif
+			else
+				SetScale/P  x,x_start,x_step,x_name, ycols
+			endif
+
+			Redimension/N=(cur_blk_steps/cor_var,cor_var) ycols
+			variable col = 0
+			n=0
+			for (i = 0; i < cur_blk_steps; i+=1)
+				tmpd=loader_readline_num(filewave)
+				if(numtype(tmpd)==2)
+					// some VMS files have empty lines here, CasaXPS still loads these files properly
+					Debugprintf2("Nummeric error in countlist, trying to skip line!",2)
+					i-=1
+				endif
+				ycols[n][col]=tmpd
 		
-		Fstatus file
-		if(V_logEOF<=V_filePOS)
-			Debugprintf2("Unexpected end of VMS-file (reading data).",0)
-			return -1
-		endif
+				if(filewave.line>=dimsize(filewave.file,0))
+					Debugprintf2("Unexpected end of VMS-file (reading data).",0)
+					return -1
+				endif
 
 		
-		col = Mod(col+1,cor_var)
-		n = (i+1-mod(i+1,cor_var))/cor_var
-	endfor
+				col = Mod(col+1,cor_var)
+				n = (i+1-mod(i+1,cor_var))/cor_var
+			endfor
 	
-	if(str2num(get_flags(f_divbyNscans)) == 1)
-		ycols/=scancount
-	endif
-	if(str2num(get_flags(f_divbytime)) == 1)
-		ycols/=dwelltime
-	endif
-	
-	string ycols_name = nameofwave(ycols)
-	splitmatrix(ycols, ycols_name)
-	if (cmpstr("REGULAR",scan_mode) == 0)
-		for(i=0;i<cor_var;i+=1)
-			if(i==0) // detector
-				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name)
-				if(str2num(get_flags(f_onlyDET))==0)
-					Vamas_casaInfo($(ycols_name))
-				endif
-			elseif(i==1) // transmission function
-				if(str2num(get_flags(f_includeTF)) == 1&& str2num(get_flags(f_onlyDET))==0)
-					rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_TF")
-				else
-					killwaves $(ycols_name+"_spk"+num2str(i))
-				endif
-			else // additional channels??
-				if(str2num(get_flags(f_includeADC))==1 && str2num(get_flags(f_onlyDET))==0)	
-					rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_ADC"+num2str(i-2))
-				else
-					killwaves $(ycols_name+"_spk"+num2str(i))
-				endif
+			if(str2num(get_flags(f_divbyNscans)) == 1)
+				ycols/=scancount
 			endif
-		endfor
-	else
-		for(i=0;i<cor_var;i+=1)
-			if(i==0) // x-axis
-				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_X")
+			if(str2num(get_flags(f_divbytime)) == 1)
+				ycols/=dwelltime
+			endif
+	
+			splitmatrix(ycols, ycols_name)
+			if (cmpstr("REGULAR",scan_mode) == 0)
+				for(i=0;i<cor_var;i+=1)
+					if(i==0) // detector
+						rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name)
+						if(str2num(get_flags(f_onlyDET))==0)
+							Vamas_casaInfo($(ycols_name))
+						endif
+					elseif(i==1) // transmission function
+						if(str2num(get_flags(f_includeTF)) == 1&& str2num(get_flags(f_onlyDET))==0)
+							rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_TF")
+						else
+							killwaves $(ycols_name+"_spk"+num2str(i))
+						endif
+					else // additional channels??
+						if(str2num(get_flags(f_includeADC))==1 && str2num(get_flags(f_onlyDET))==0)	
+							rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_ADC"+num2str(i-2))
+						else
+							killwaves $(ycols_name+"_spk"+num2str(i))
+						endif
+					endif
+				endfor
 			else
-				rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_Y"+num2str(i))
+				for(i=0;i<cor_var;i+=1)
+					if(i==0) // x-axis
+						rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_X")
+					else
+						rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_Y"+num2str(i))
+					endif
+				endfor	
 			endif
-		endfor	
-	endif
+
+			break
+	endswitch
+
 	Debugprintf2("exported: "+ycols_name,0)
 	return 0
 end
@@ -1145,5 +1181,51 @@ static function Vamas_BG_Tougaard(back, B, C, D, T0)
 	
 	
 	
+	return 0
+end
+
+
+function Vamas_getkeyval(filewave, key, val)
+	struct loader_file &filewave
+	string &key
+	string &val
+	string tmps
+	
+//	tmps = loader_readline_str(filewave)
+	tmps = filewave.file[filewave.line]
+	filewave.line +=1
+	If (strlen(tmps)==0)
+		return -1
+	endif
+	tmps = mycleanupstr(tmps)
+	tmps=stripstrfirstlastspaces(tmps)
+	if(strsearch(tmps,"=",0)!=-1)
+		key = stripstrfirstlastspaces(tmps[0,strsearch(tmps,"=",0)-1])
+		val=stripstrfirstlastspaces(tmps[strsearch(tmps,"=",0)+1,inf])
+	elseif(strlen(tmps)==1 && strsearch(tmps,"{",0)==0)
+		key = "{"
+		val=""
+	elseif(strlen(tmps)==1 && strsearch(tmps,"}",0)==0)
+		key = "}"
+		val=""
+	elseif(strlen(tmps)>1) //single keyword
+		key =stripstrfirstlastspaces(tmps)
+		val =""
+	endif
+end
+
+
+function Vamas_skip_lines(filewave, count)
+	struct loader_file &filewave
+	variable count
+	string tmps
+	variable i=0
+	for (i = 0; i < count; i+=1) 
+		tmps = loader_readline_str(filewave)
+		if(strlen(tmps) == 0)
+			Debugprintf2("Unexpected end of file.",0)
+			return -1
+		endif
+	endfor
 	return 0
 end

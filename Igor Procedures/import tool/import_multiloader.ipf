@@ -193,7 +193,7 @@ function multiLoader_info(ba) : ButtonControl
 	STRUCT WMButtonAction &ba
 	switch( ba.eventCode )
 		case 2: // mouse up
-			Debugprintf2("(C) 2012-2015 Matthias Richter\r\rhttps://github.com/Yohko/importtool",2)
+			Debugprintf2("(C) 2012-2016 Matthias Richter\r\rhttps://github.com/Yohko/importtool",2)
 			break
 	endswitch
 	return 0

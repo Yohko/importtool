@@ -611,3 +611,44 @@ function /S loader_addtowavename(sn, sna)
 	endif
 	return srn
 end
+
+
+structure loader_file
+	wave /T file
+	variable line
+endstructure
+
+
+function /S loader_readline_str(file)
+	struct loader_file &file
+	string str = " "
+	str = mycleanupstr(file.file[file.line])
+	file.line +=1
+	return str
+end
+
+
+function loader_readline_num(file)
+	struct loader_file &file
+	variable num
+	num = str2num(mycleanupstr(file.file[file.line]))
+	file.line +=1
+	return num
+end
+
+
+function loader_initfile(file, filestruct)
+	variable file
+	struct loader_file &filestruct
+	// load complete file into a text wave for faster processing
+	fstatus file
+	LoadWave/FREE/Q/J/V={"", "", 0, 0}/K=2/A=$("filetmp") (S_path+S_fileName)
+	if(V_flag !=1)
+		return -1
+	endif
+	filestruct.line = 0
+	Make /FREE/O/T/N=(0) filewave; wave /T filestruct.file = filewave
+	duplicate /FREE/T $(StringFromList(0, S_waveNames)), filestruct.file
+	killwaves $(GetDataFolder(1)+StringFromList(0, S_waveNames))	
+	return 1
+end
