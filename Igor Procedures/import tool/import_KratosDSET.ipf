@@ -14,7 +14,7 @@ static strconstant offsetsname2_flags = "4;6;8;69;73;37;133;4096;4098;4160"
 static strconstant offsetsname2_value = "List;change_done;Irregular;Spectrum;Split_Spectrum;Mapping;?? Auto Z;set_file;change_todo;Record_Spectrum"
 
 // #### flags
-static strconstant f_technique_names							= "AES;ISS;SIMS;XPS;SEM;SNMS;?;?;?"
+static strconstant f_technique_names								= "AES;ISS;SIMS;XPS;SEM;SNMS;?;?;?"
 static strconstant f_fat_resolution_names						= "Pass energy 5;Pass energy 10;Pass energy 20;Pass energy 40;Pass energy 80;Pass energy 160;Pass energy 320"
 static strconstant f_fat_resolution_values						= "5;10;20;40;80;160;320"
 static strconstant f_fixed_retard_ratio_names					= "Retard ratio 20/14;Retard ratio 10/11;Retard ratio 5/6;Retard ratio 2/3"
@@ -28,7 +28,7 @@ static strconstant f_mhsa_lens_mode_names						= "Field of View 1: Survey;Field 
 static strconstant f_fibre_optic_RS232_names					= "Fibre Optic 1;Fibre Optic 2;Fibre Optic 3;Fibre Optic 4"
 static strconstant f_xray_manual_psu_options_names			= "Mg;Al;Mono (Al);Ti;Ag;UV"
 static strconstant f_xray_manual_psu_source_names			= "Source 1;Source 2;Source 3;Source 4;Source 5"
-static strconstant f_hardware_config_option_names				= ""//
+static strconstant f_hardware_config_option_names			= ""//
 //"ESCA Interface Card (IF1);ESCA Interface Card (IF3);ESCA Vision Interface Card;ESCA Xray Gun;ESCA Analyser;ESCA Ion Gun;ESCA Manipulator;VME BVME363 CPU68010;VME BVME370 CPU68030;VME BVME410 Ethernet;VME Kratos 3 Channel Timer Counter;VME Kratos 6 Channel Fibre-Optic Timer Counter;VME Kratos RS232 Fibre-Optic;VME Synoptics Frame-Store;
 //VME Synoptics Slow-Scan Generator;VME Kratos Video Multiplexor;VME Imaging Technology Frame-Store;VME Kratos Slow-Scan Generator;VME Kratos Analog Signal Multiplexor;VME Kratos Parallel HT-Rack Interface;VME Kratos Fibre-Optic HT-Rack Interface;VME Kratos Fibre-Optic PSU Interface;VME Kratos Stepper Motor Interface;HT-Rack FAT Control Board;
 //HT-Rack FRR Control Board;HT-Rack FAT/FRR Control Board;HT-Rack Lens Single PSU;HT-Rack Lens Double PSU;HT-Rack Mirror HSA Detector/Lens PSU;HT-Rack Analyser PSU;HT-Rack DAC I/O (AES Imaging);HT-Rack XPS Imaging Board MK1;HT-Rack XPS/AES Imaging Board MK2,;HT-Rack Manual Channeltron PSU;HT-Rack Channeltron PSU;HT-Rack Charge Neutraliser;
@@ -37,7 +37,7 @@ static strconstant f_hardware_config_option_names				= ""//
 static strconstant f_vme_baud_rate_names 						= "4800;9600;19200;38400"
 static strconstant f_host_serial_port_names					= "COM1;COM2"
 static strconstant f_vme_ethernet_hostname_names				= "sa_inst_0;sa_inst_1;sa_inst_2;sa_inst_3;sa_inst_4;sa_inst_5;sa_inst_6;sa_inst_7;os9"
-static strconstant f_config_option_state_names					= "Disabled;Enabled"
+static strconstant f_config_option_state_names				= "Disabled;Enabled"
 static strconstant f_host_slave_config_names					= "Serial Port;Ethernet;Snapper8 Framestore;Passwords;User Logins;Parallel Port;Imagenation Framestore"
 static strconstant f_k4_vacuum_config_names					= "Auxiliary Chamber Fitted;Turbo Isolate Value (V1) Fitted;Sample Magazine Fitted;Ion Gauge Fitted To STC;Manipulator Fitted;MHSA Entrance Aperture Motor"
 static strconstant f_lens_psu_polarity_names					= "Positive;Negative;Switchable"
@@ -72,7 +72,7 @@ static strconstant f_neutraliser_state_names					= "Switch Off;Switch On;On For 
 static strconstant f_hardware_control_names					= "Turn Off;Turn On;On For Acquisition;Manual Settings"
 static strconstant f_energy_reference_names					= "Mg;Al;K.E.;Ag;He I;He II;Zr;Ti;Al (Mono)"
 static strconstant f_energy_reference_values					= "1253.60;1486.61;0;2984.20;21.21;40.80;2042.40;4510;1486.69"
-static strconstant f_anode_names 								= "Magnesium;Aluminium;None"
+static strconstant f_anode_names 									= "Magnesium;Aluminium;None"
 static strconstant f_stage_axes_names 							= "X Axis;Y Axis;Z Axis;Rotation X;Rotation Y;Rotation Z;Gripper;Elevator"
 static strconstant f_aperture_sizes_names 						= "3x12 mm;10 mm;2 mm;1 mm;400 µm;150 µm"
 static strconstant f_iris_positions_names 						= "3x12 mm;2 mm;1 mm;400 µm;150 µm;10 mm;10 mm;10 mm;Sp. Shield;3x12 mm"
@@ -101,7 +101,7 @@ static strconstant f_esca_k1_lens_modes_names					= "Small;Macro"
 //static strconstant f_nicpu_xray_psu_anode_materials_names		= "Mg;Al;Mono (Al);M.F. Mono;Ag;Zr;Ti;Mono (Ag)"
 //static strconstant f_nicpu_xray_psu_filaments_names			= "Mono 1;Mono 2;Mono 3;Dual 1;Dual 2"
 static strconstant f_nicpu_ion_gun_type_names					= "Minibeam 1;Minibeam 2;Minibeam 3;Minibeam 4;Minibeam 5"
-static strconstant f_nicpu_ion_gun_filament_names				= "Filament 1;Filament 2"
+static strconstant f_nicpu_ion_gun_filament_names			= "Filament 1;Filament 2"
 static strconstant f_nicpu_vacuum_config_names				= ""//
 //"MHSA Entrance Aperture Motor;CCG/Ion Gauge Fitted To SEC/STC;Manipulator Fitted;V8 and V9 Fitted;Sputter Shield Control;SAC MAGLEV TMP Fitted;UPS Fitted;NOVA MAGLEV Differential Pump;Ultra External Sample Exchange;NOVA MAGLEV;Ultra Dual Probe Fitted;Ultra Aux Chamber Fitted with STC Ion Gun;Ultra Fast Entry Lock Fitted;Ultra Fast Entry Lock Fitted with MAGLEV TMP;
 //Ultra Fast Entry Lock Fitted with TIC Cart Readback;SAC Ion Gun Fitted;NOVA Differential Pump"
@@ -176,7 +176,9 @@ static function KratosDSET_checkID(file, Dsetobject, ID)
 		variable num100 = (type-mod(type,100))/100 ; type -= 100*num100
 		variable num10 = (type-mod(type,10))/10 ; type -= 10*num10
 		variable num1 = (type-mod(type,1))/1
-		Debugprintf2("Reading "+Dsetobject.name[pnt]+" ...",1)
+		fstatus file
+		string tmps = ""
+		sprintf tmps, "%10.0f", (V_filePOS-4) ; Debugprintf2("Reading \""+Dsetobject.name[pnt]+"\" (ID:"+num2str(ID)+") at positition "+tmps+"...",1)
 		if( num100 == 0 && num10 == 0)
 			if(num1<6 && num1 != 0)
 				Fbinread /B=2/F=(num1) file, tmp ; Dsetobject.numvalue[pnt] = tmp
@@ -197,12 +199,12 @@ static function KratosDSET_checkID(file, Dsetobject, ID)
 		Dsetobject.lastID = num2str(Dsetobject.IDlist[pnt])
 		// in case we should read some flags
 		if(strlen(Dsetobject.flags[pnt]) !=0 )
-			string tmps = StringByKey(num2str(Dsetobject.numvalue[pnt]),Dsetobject.flags[pnt], "=", ";")
-			 if(strlen(tmps)!=0)
+			tmps = StringByKey(num2str(Dsetobject.numvalue[pnt]),Dsetobject.flags[pnt], "=", ";")
+			if(strlen(tmps)!=0)
 				Dsetobject.strvalue[pnt] = tmps
 			else
 				Fstatus file
-				Debugprintf2("Error in Flags, ID: "+num2str(Dsetobject.IDlist[pnt])+" ; Flag = "+num2str(Dsetobject.numvalue[pnt]),0)
+				sprintf tmps, "%10.0f", (V_filePOS-4) ; Debugprintf2("Error in Flags at position "+tmps+", ID: "+num2str(Dsetobject.IDlist[pnt])+" ; Flag = "+num2str(Dsetobject.numvalue[pnt]),0)
 				//Debugprintf2("Unknown ID "+num2str(ID)+" at position "+num2str(V_filePOS)+". Please check with kal and add to script! (ID: "+num2str(currentobject+1)+")",0)
 			endif
 		endif
@@ -237,12 +239,15 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 //for commented out objects the datatype is unknown (never had them in my files until now)
 //KratosDSET_initaddobject(Dsetobject,/ID/,/datatype/,/"name for note"/,/"unit"/, /"Flags to string"/,/"name of wave"/)
 	//	Datatypes:
-	//	0:
-	// 	1:	Signed one-byte integer.
+	//	0: no value
+	// 1:	Signed one-byte integer.
 	//	2:	Signed 16-bit word; two bytes.
 	//	3:	Signed 32-bit word; four bytes.
 	//	4:	32-bit IEEE floating point; four bytes.
-	//	5:	64-bit IEEE floating poin; eight bytes.
+	//	5:	64-bit IEEE floating point; eight bytes.
+	
+	// 6: string
+
 	//	34: array of f =4:	32-bit IEEE floating point; four bytes.
 	//	35: array of f =5:	64-bit IEEE floating poin; eight bytes.
 	
@@ -461,30 +466,30 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,214,0,"Separation ratio","","","")//FID_separation_ratio
 	//KratosDSET_initaddobject(Dsetobject,215,0,"# detectors","","","")//FID_no_of_detectors
 	KratosDSET_initaddobject(Dsetobject,221,0,"Background to a spectrum","","","BG")//FID_spectrum_background
-	//KratosDSET_initaddobject(Dsetobject,222,0,"Component Max Height","","","")//FID_comp_height
-	//KratosDSET_initaddobject(Dsetobject,223,0,"Component Width","","","")//FID_comp_width
-	//KratosDSET_initaddobject(Dsetobject,224,0,"Component start","","","")//FID_comp_start
-	//KratosDSET_initaddobject(Dsetobject,225,0,"Component constraint on Max Height","","","")//FID_constr_lower_height
-	//KratosDSET_initaddobject(Dsetobject,226,0,"Component constraint on Max Height","","","")//FID_constr_upper_height
-	//KratosDSET_initaddobject(Dsetobject,227,0,"Component constraint on start","","","")//FID_constr_lower_start
-	//KratosDSET_initaddobject(Dsetobject,228,0,"Component constraint on start","","","")//FID_constr_upper_start
-	//KratosDSET_initaddobject(Dsetobject,229,0,"Component constraint on width","","","")//FID_constr_lower_width
-	//KratosDSET_initaddobject(Dsetobject,230,0,"Component constraint on width","","","")//FID_constr_upper_width
-	//KratosDSET_initaddobject(Dsetobject,231,0,"Line shape model","","","")//FID_comp_model
-	//KratosDSET_initaddobject(Dsetobject,232,0,"Component list","","","")//FID_component_list
-	//KratosDSET_initaddobject(Dsetobject,233,0,"Synthetic spectrum","","","")//FID_envelope
-	//KratosDSET_initaddobject(Dsetobject,234,0,"Component half width in units of width","","","")//FID_comp_half_width
-	//KratosDSET_initaddobject(Dsetobject,235,0,"Component group index","","","")//FID_comp_group_index
-	//KratosDSET_initaddobject(Dsetobject,236,0,"Component Group","","","")//FID_component_group
-	//KratosDSET_initaddobject(Dsetobject,237,0,"Component Group parameter flags","","","")//FID_group_param_flags
+	KratosDSET_initaddobject(Dsetobject,222,5,"Component Max Height","","","")//FID_comp_height
+	KratosDSET_initaddobject(Dsetobject,223,5,"Component Width","","","")//FID_comp_width
+	KratosDSET_initaddobject(Dsetobject,224,5,"Component start","","","")//FID_comp_start
+	KratosDSET_initaddobject(Dsetobject,225,5,"Component constraint on Max Height","","","")//FID_constr_lower_height
+	KratosDSET_initaddobject(Dsetobject,226,5,"Component constraint on Max Height","","","")//FID_constr_upper_height
+	KratosDSET_initaddobject(Dsetobject,227,5,"Component constraint on start","","","")//FID_constr_lower_start
+	KratosDSET_initaddobject(Dsetobject,228,5,"Component constraint on start","","","")//FID_constr_upper_start
+	KratosDSET_initaddobject(Dsetobject,229,5,"Component constraint on width","","","")//FID_constr_lower_width
+	KratosDSET_initaddobject(Dsetobject,230,5,"Component constraint on width","","","")//FID_constr_upper_width
+	KratosDSET_initaddobject(Dsetobject,231,3,"Line shape model","","","")//FID_comp_model
+	KratosDSET_initaddobject(Dsetobject,232,5,"Component list","","","")//FID_component_list
+	KratosDSET_initaddobject(Dsetobject,233,0,"Synthetic spectrum","","","")//FID_envelope
+	KratosDSET_initaddobject(Dsetobject,234,5,"Component half width in units of width","","","")//FID_comp_half_width
+	KratosDSET_initaddobject(Dsetobject,235,3,"Component group index","","","")//FID_comp_group_index
+	KratosDSET_initaddobject(Dsetobject,236,3,"Component Group","","","")//FID_component_group
+	KratosDSET_initaddobject(Dsetobject,237,33,"Component Group parameter flags","","","")//FID_group_param_flags
 	KratosDSET_initaddobject(Dsetobject,238,33,"Dataset Browser Filter","","","DSF")//FID_dataset_filter
-	//KratosDSET_initaddobject(Dsetobject,239,0,"Name of the Synthetic Component","","","")//FID_comp_name
+	KratosDSET_initaddobject(Dsetobject,239,6,"Name of the Synthetic Component","","","")//FID_comp_name
 	//KratosDSET_initaddobject(Dsetobject,240,0,"Name of the Group of Components","","","")//FID_comp_group_name
 	KratosDSET_initaddobject(Dsetobject,241,5,"Sensitivity Factor","","","")//FID_sensitivity_factor
 	KratosDSET_initaddobject(Dsetobject,242,5,"Atomic Mass for quantification","","","")//FID_atomic_mass
 	KratosDSET_initaddobject(Dsetobject,243,35,"Quantification start coordinates","","","RegStart")//FID_region_start
 	KratosDSET_initaddobject(Dsetobject,244,35,"Quantification end coordinates","","","RegEnd")//FID_region_end
-	//KratosDSET_initaddobject(Dsetobject,245,0,"Name of the Model line shape","","","")//FID_comp_model_name
+	KratosDSET_initaddobject(Dsetobject,245,6,"Name of the Model line shape","","","")//FID_comp_model_name
 	//KratosDSET_initaddobject(Dsetobject,246,0,"Library Object Envelope","","","")//FID_library_envelope
 	KratosDSET_initaddobject(Dsetobject,247,0,"Library General Information","","","")//FID_library_info
 	KratosDSET_initaddobject(Dsetobject,248,6,"Name of Element","","","")//FID_element_name
@@ -913,22 +918,22 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,2067,0,"Data bin associated with annotation","","","")//PID_annotation_bin
 	//KratosDSET_initaddobject(Dsetobject,2068,0,"Annotation x offset from data index","","","")//PID_annotation_x_offset
 	//KratosDSET_initaddobject(Dsetobject,2069,0,"Annotation y offset from data index","","","")//PID_annotation_y_offset
-	//KratosDSET_initaddobject(Dsetobject,2070,0,"Annotation text string","","","")//PID_annotation_string
-	//KratosDSET_initaddobject(Dsetobject,2071,0,"Annotation type","","","")//PID_annotation_type
-	//KratosDSET_initaddobject(Dsetobject,2072,0,"Arrow start offset from data bin","","","")//PID_arrow_start
-	//KratosDSET_initaddobject(Dsetobject,2073,0,"Arrow end offset from data bin","","","")//PID_arrow_end
+	KratosDSET_initaddobject(Dsetobject,2070,6,"Annotation text string","","","")//PID_annotation_string
+	KratosDSET_initaddobject(Dsetobject,2071,3,"Annotation type","","","")//PID_annotation_type
+	KratosDSET_initaddobject(Dsetobject,2072,35,"Arrow start offset from data bin","","","")//PID_arrow_start
+	KratosDSET_initaddobject(Dsetobject,2073,35,"Arrow end offset from data bin","","","")//PID_arrow_end
 	//KratosDSET_initaddobject(Dsetobject,2074,0,"Axis range","","","")//PID_axis_range
 	KratosDSET_initaddobject(Dsetobject,2075,3,"Object List containing annotation","","","")//PID_annotation_list // not in KAL file
 	//KratosDSET_initaddobject(Dsetobject,2076,0,"Data edit x value","","","")//PID_data_edit_x
 	//KratosDSET_initaddobject(Dsetobject,2077,0,"Data edit y value","","","")//PID_data_edit_y
 	//KratosDSET_initaddobject(Dsetobject,2078,0,"Dataset comment","","","")//PID_dataset_comment
-	//KratosDSET_initaddobject(Dsetobject,2079,0,"Discrete detector flag","","","")//AID_discrete_detector
+	KratosDSET_initaddobject(Dsetobject,3000,3,"Discrete detector flag","","","")//AID_discrete_detector
 	KratosDSET_initaddobject(Dsetobject,3001,5,"start x coord","","","")//AID_coord_start_x
 	KratosDSET_initaddobject(Dsetobject,3002,5,"start y coord","","","")//AID_coord_start_y
 	KratosDSET_initaddobject(Dsetobject,3003,5,"step size x coord","","","")//AID_coord_step_size_x
 	KratosDSET_initaddobject(Dsetobject,3004,5,"step size y coord","","","")//AID_coord_step_size_y
-	KratosDSET_initaddobject(Dsetobject,3005,5,"Full Scale Deflection X","","","")//AID_coord_fsd_x
-	KratosDSET_initaddobject(Dsetobject,3006,5,"Full Scale Deflection Y","","","")//AID_coord_fsd_y
+	KratosDSET_initaddobject(Dsetobject,3005,5,"Full Scale Deflection X","mm","","")//AID_coord_fsd_x
+	KratosDSET_initaddobject(Dsetobject,3006,5,"Full Scale Deflection Y","mm","","")//AID_coord_fsd_y
 	KratosDSET_initaddobject(Dsetobject,3009,3,"Real time display data index","","","")//AID_acquired_rtd_raw_index
 	KratosDSET_initaddobject(Dsetobject,3010,3,"Table Of State Change Objects","","","")//AID_state_change_table
 	KratosDSET_initaddobject(Dsetobject,3011,3,"Energy/line scan # steps","","","")//AID_scan_n_steps
@@ -965,7 +970,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3047,3,"Analyser Pass Energy","","0=5 eV;1=10 eV;2=20 eV;3=40 eV;4=80 eV;5=160 eV;6=320 eV","")//AID_pass_energy
 	//KratosDSET_initaddobject(Dsetobject,3048,0,"Analyser retard_ratio","","","")//AID_retard_ratio
 	KratosDSET_initaddobject(Dsetobject,3049,3,"HSA Lens Mode","","0=Hybrid;1=Magenetic;2=Slot-M;3=Electrostatic;4=AES;5=UPS;6=ISS;7=Low Mag;8=Medium Mag;9=High Mag;10=SA XPS","")//AID_hsa_lens_mode
-	KratosDSET_initaddobject(Dsetobject,3050,3,"MHSA Lens Mode","","0=F_MHSA_LOW_MAGN;1=F_MHSA_MEDIUM_MAGN","")//AID_mhsa_lens_mode
+	KratosDSET_initaddobject(Dsetobject,3050,3,"MHSA Lens Mode","","0=F_MHSA_LOW_MAGN;1=F_MHSA_MEDIUM_MAGN;2=F_MHSA_HIGH_MAGN","")//AID_mhsa_lens_mode
 	//KratosDSET_initaddobject(Dsetobject,3051,0,"Xray Gun current","","","")//AID_manual_xray_gun_current
 	//KratosDSET_initaddobject(Dsetobject,3052,0,"Xray Gun voltage","","","")//AID_manual_xray_gun_voltage
 	//KratosDSET_initaddobject(Dsetobject,3053,0,"Xray Gun Anode","","","")//AID_manual_xray_gun_anode
@@ -983,9 +988,9 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3065,5,"Charge Neutraliser Charge Balance","","","")//AID_neutraliser_charge_balance
 	KratosDSET_initaddobject(Dsetobject,3066,5,"Charge Neutraliser Filament Current","","","")//AID_neutraliser_filament_current
 	KratosDSET_initaddobject(Dsetobject,3067,5,"Charge Neutraliser Filament Bias","","","")//AID_neutraliser_filament_bias
-	//KratosDSET_initaddobject(Dsetobject,3068,0,"Magnet Lens Trim Coil","","","")//AID_neutraliser_trim_coil
+	KratosDSET_initaddobject(Dsetobject,3068,5,"Magnet Lens Trim Coil","","","")//AID_neutraliser_trim_coil
 	//KratosDSET_initaddobject(Dsetobject,3069,0,"Magnet Lens Deguass","","","")//AID_neutraliser_deguass
-	KratosDSET_initaddobject(Dsetobject,3070,3,"Neutraliser Switch State","","3=F_NEUTRALISER_MANUAL_SETTINGS","")//AID_neutraliser_state
+	KratosDSET_initaddobject(Dsetobject,3070,3,"Neutraliser Switch State","","1=F_NEUTRALISER_LEAVE_ON;3=F_NEUTRALISER_MANUAL_SETTINGS","")//AID_neutraliser_state
 	KratosDSET_initaddobject(Dsetobject,3071,3,"Hardware Control State","","","")//AID_hardware_control
 	//KratosDSET_initaddobject(Dsetobject,3072,0,"Analyser Energy","","","")//AID_analyser_energy
 	KratosDSET_initaddobject(Dsetobject,3073,3,"Tuning Mode Flag","","","")//AID_tune_mode_active
@@ -1000,15 +1005,16 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//static strconstant f_energy_reference_names					= "Mg;Al;K.E.;Ag;He I;He II;Zr;Ti;Al (Mono)"
 	//offset: 47000
 	//static strconstant f_energy_reference_values					= "1253.60;1486.61;0;2984.20;21.21;40.80;2042.40;4510;1486.69"
-	//	66 66 66 66 66 96 93 40	-->	1253.6
-	//	3D 0A D7 A3 70 3A 97 40	-->	1486.61
-	//	00 00 00 00 00 00 00 00	-->	0.0
-	//	66 66 66 66 66 50 A7 40	-->	2984.2
-	//	F6 28 5C 8F C2 35 35 40	-->	21.21
-	//	66 66 66 66 66 66 44 40	-->	40.80
-	//	9A 99 99 99 99 E9 9F 40	-->	2042.4
-	//	00 00 00 00 00 9E B1 40	-->	4510.0
-	//	F6 28 5C 8F C2 3A 97 40	-->	1486.69
+	// in dump_dataset.exe
+	//	66 66 66 66 66 96 93 40	-->	1253.6	(offset 46956)
+	//	3D 0A D7 A3 70 3A 97 40	-->	1486.61	(offset 46984)
+	//	00 00 00 00 00 00 00 00	-->	0.0	(offset 46992)
+	//	66 66 66 66 66 50 A7 40	-->	2984.2	(offset 47000)
+	//	F6 28 5C 8F C2 35 35 40	-->	21.21	(offset 47008)
+	//	66 66 66 66 66 66 44 40	-->	40.80	(offset 47016)
+	//	9A 99 99 99 99 E9 9F 40	-->	2042.4	(offset 47024)
+	//	00 00 00 00 00 9E B1 40	-->	4510.0	(offset 47032)
+	//	F6 28 5C 8F C2 3A 97 40	-->	1486.69	(offset 47040)
 	KratosDSET_initaddobject(Dsetobject,3081,3,"OBJECT identification tag","","","")//AID_object_tag
 	KratosDSET_initaddobject(Dsetobject,3082,3,"Map acquire sequence","","3=F_DO_1ST_LINE_OF_ALL_MAPS_BEFORE_2ND_LINE_OF_1ST_MAP","")//AID_acquire_sequence
 	KratosDSET_initaddobject(Dsetobject,3083,3,"# lines of map completed","","","")//AID_map_lines_completed
@@ -1032,7 +1038,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3101,3,"Selected Area Aperture","","0=F_APERTURE_3by12","")//AID_selected_area_aperture
 	KratosDSET_initaddobject(Dsetobject,3102,3,"Active Analyser Type","","0=HEMISPHERICAL;1=MIRROR HEMISPHERICAL","")//AID_active_analyser_type
 	KratosDSET_initaddobject(Dsetobject,3103,3,"Manually Acquired Data Saved","","","")//AID_iman_current_image_flag
-	//KratosDSET_initaddobject(Dsetobject,3104,0,"Detector used to set analyser energy map/linescan","","","")//AID_key_detector_number
+	KratosDSET_initaddobject(Dsetobject,3104,3,"Detector used to set analyser energy map/linescan","","","")//AID_key_detector_number
 	KratosDSET_initaddobject(Dsetobject,3105,5,"Analyser Energy for required energy at key detector","","","")//AID_anaylser_energy
 	KratosDSET_initaddobject(Dsetobject,3106,5,"Stigmatic Image Shift X","","","")//AID_stigmatic_image_shift_x
 	KratosDSET_initaddobject(Dsetobject,3107,5,"Stigmatic Image Shift Y","","","")//AID_stigmatic_image_shift_y
@@ -1070,14 +1076,14 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3139,0,"SEM Raster X offset","","","")//AID_sem_raster_x_offset
 	//KratosDSET_initaddobject(Dsetobject,3140,0,"SEM Raster Y offset","","","")//AID_sem_raster_y_offset
 	//KratosDSET_initaddobject(Dsetobject,3141,0,"Start Spellman E.Gun Extractor Current Readback","","","")//AID_ss_egun_extractor_current
-	//KratosDSET_initaddobject(Dsetobject,3142,0,"Start Spellman X.Gun active anode","","","")//AID_ss_xgun_active_anode
-	//KratosDSET_initaddobject(Dsetobject,3143,0,"Start Spellman X.Gun emission","","","")//AID_ss_xgun_emission_current
-	//KratosDSET_initaddobject(Dsetobject,3144,0,"Start Spellman X.Gun Anode HT","","","")//AID_ss_xgun_anode_voltage
+	KratosDSET_initaddobject(Dsetobject,3142,3,"Start Spellman X.Gun active anode","","2=F_SS_ANODE_STD_MONO","")//AID_ss_xgun_active_anode
+	KratosDSET_initaddobject(Dsetobject,3143,5,"Start Spellman X.Gun emission","A","","")//AID_ss_xgun_emission_current
+	KratosDSET_initaddobject(Dsetobject,3144,5,"Start Spellman X.Gun Anode HT","V","","")//AID_ss_xgun_anode_voltage
 	//KratosDSET_initaddobject(Dsetobject,3145,0,"Start Spellman U.V. Strike HT","","","")//AID_ss_uv_strike_ht
 	//KratosDSET_initaddobject(Dsetobject,3146,0,"Start Spellman U.V. Discharge Current","","","")//AID_ss_uv_discharge_current
 	//KratosDSET_initaddobject(Dsetobject,3147,0,"Start Spellman X.Gun Mono Bias","","","")//AID_ss_xgun_mono_bias
 	//KratosDSET_initaddobject(Dsetobject,3148,0,"Start Spellman X.Gun filament Limit","","","")//AID_ss_xgun_filament_limit
-	//KratosDSET_initaddobject(Dsetobject,3149,0,"Start Spellman X.Gun Energy Reference","","","")//AID_ss_xgun_energy_ref
+	KratosDSET_initaddobject(Dsetobject,3149,3,"Start Spellman X.Gun Energy Reference","","1=F_REFER_TO_XRAY_AL","")//AID_ss_xgun_energy_ref
 	//KratosDSET_initaddobject(Dsetobject,3150,0,"X.Gun filament Degas first time","","","")//AID_ss_xgun_degas_first_time
 	//KratosDSET_initaddobject(Dsetobject,3151,0,"X.Gun filament Degas second time","","","")//AID_ss_xgun_degas_second_time
 	//KratosDSET_initaddobject(Dsetobject,3152,0,"X.Gun filament Degas first current","","","")//AID_ss_xgun_degas_first_current
@@ -1108,7 +1114,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3177,0,"Sample Position Number","","","")//AID_sample_bar_position
 	//KratosDSET_initaddobject(Dsetobject,3178,0,"Sample name","","","")//AID_sample_bar_sample_name
 	KratosDSET_initaddobject(Dsetobject,3179,5,"Sample Bias","","","")//AID_sample_bias
-	//KratosDSET_initaddobject(Dsetobject,3180,0,"Start Spellman X.Gun Source","","","")//AID_ss_xgun_active_source
+	KratosDSET_initaddobject(Dsetobject,3180,3,"Start Spellman X.Gun Source","","2=F_SS_XRAY_PSU_SOURCE_3","")//AID_ss_xgun_active_source
 	//KratosDSET_initaddobject(Dsetobject,3181,0,"Region Comment","","","")//AID_region_comment
 	//KratosDSET_initaddobject(Dsetobject,3182,0,"Magnet Scale Factor","","","")//AID_magnet_scale_factor
 	//KratosDSET_initaddobject(Dsetobject,3183,0,"Magnet Scale Factor Enabled","","","")//AID_magnet_scale_factor_enabled
@@ -1118,18 +1124,18 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3187,0,"ESCAK1 Aperture","","","")//AID_escak1_analyser_aperture
 	KratosDSET_initaddobject(Dsetobject,3188,5,"Stage Gripper","","","")//AID_stage_gripper
 	KratosDSET_initaddobject(Dsetobject,3189,5,"Stage Elevator","","","")//AID_stage_elevator
-	KratosDSET_initaddobject(Dsetobject,3190,3,"NICPU X-ray Gun Filament","","0=F_NICPU_XRAY_PSU_FILAMENT_MONO_1","")//AID_nicpu_xgun_active_filament
-	KratosDSET_initaddobject(Dsetobject,3191,3,"NICPU X-ray Gun Active Anode Material","","2=F_NICPU_XRAY_ANODE_STD_MONO","")//AID_nicpu_xgun_active_anode_material
-	KratosDSET_initaddobject(Dsetobject,3192,5,"NICPU X-ray Gun Emission Current","","","")//AID_nicpu_xgun_emission_current
-	KratosDSET_initaddobject(Dsetobject,3193,5,"NICPU X-ray Gun Anode HT Voltage","","","")//AID_nicpu_xgun_ht_voltage
-	KratosDSET_initaddobject(Dsetobject,3194,5,"NICPU X-ray Gun Focus Voltage","","","")//AID_nicpu_xgun_focus_voltage
+	KratosDSET_initaddobject(Dsetobject,3190,3,"NICPU X-ray Gun Filament","","0=F_NICPU_XRAY_PSU_FILAMENT_MONO_1;1=F_NICPU_XRAY_PSU_FILAMENT_MONO_2;3=F_NICPU_XRAY_PSU_FILAMENT_DUAL_1","")//AID_nicpu_xgun_active_filament
+	KratosDSET_initaddobject(Dsetobject,3191,3,"NICPU X-ray Gun Active Anode Material","","0=F_NICPU_XRAY_ANODE_MAGNESIUM;2=F_NICPU_XRAY_ANODE_STD_MONO;7=F_NICPU_XRAY_ANODE_AG_MONO","")//AID_nicpu_xgun_active_anode_material
+	KratosDSET_initaddobject(Dsetobject,3192,5,"NICPU X-ray Gun Emission Current","A","","")//AID_nicpu_xgun_emission_current
+	KratosDSET_initaddobject(Dsetobject,3193,5,"NICPU X-ray Gun Anode HT Voltage","V","","")//AID_nicpu_xgun_ht_voltage
+	KratosDSET_initaddobject(Dsetobject,3194,5,"NICPU X-ray Gun Focus Voltage","V","","")//AID_nicpu_xgun_focus_voltage
 	//KratosDSET_initaddobject(Dsetobject,3195,0,"NICPU X-ray Gun Filament Current Limit","","","")//AID_nicpu_xgun_filament_current_limit
 	//KratosDSET_initaddobject(Dsetobject,3196,0,"NICPU X-ray gun filament degas first time","","","")//AID_nicpu_xgun_degas_first_time
 	//KratosDSET_initaddobject(Dsetobject,3197,0,"NICPU X-ray gun filament degas second time","","","")//AID_nicpu_xgun_degas_second_time
 	//KratosDSET_initaddobject(Dsetobject,3198,0,"NICPU X-ray gun filament degas first current","","","")//AID_nicpu_xgun_degas_first_current
 	//KratosDSET_initaddobject(Dsetobject,3199,0,"NICPU X-ray gun filament degas second current","","","")//AID_nicpu_xgun_degas_second_current
-	//KratosDSET_initaddobject(Dsetobject,3200,0,"Magnet Lens Trim Coil 2","","","")//AID_neutraliser_trim_coil_2
-	//KratosDSET_initaddobject(Dsetobject,3201,0,"Magnet Lens Trim Coil 3","","","")//AID_neutraliser_trim_coil_3
+	KratosDSET_initaddobject(Dsetobject,3201,5,"Magnet Lens Trim Coil 2","","","")//AID_neutraliser_trim_coil_2
+	KratosDSET_initaddobject(Dsetobject,3202,5,"Magnet Lens Trim Coil 3","","","")//AID_neutraliser_trim_coil_3
 	KratosDSET_initaddobject(Dsetobject,3203,5,"NICPU Ion Gun PSU beam_ht","V","","")//AID_nicpu_igun_beam_ht
 	//KratosDSET_initaddobject(Dsetobject,3204,0,"NICPU Ion Gun PSU LMIG Beam HT","","","")//AID_nicpu_igun_LMIG_beam_ht
 	KratosDSET_initaddobject(Dsetobject,3205,5,"NICPU Ion Gun PSU Float Voltage","V","","")//AID_nicpu_igun_float_voltage
@@ -1151,7 +1157,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3221,5,"NICPU Ion Gun PSU Raster Scale X","V","","")//AID_nicpu_igun_raster_scale_x_voltage
 	KratosDSET_initaddobject(Dsetobject,3222,5,"NICPU Ion Gun PSU Raster Scale Y","V","","")//AID_nicpu_igun_raster_scale_x_voltage
 	//KratosDSET_initaddobject(Dsetobject,3223,0,"NICPU Analyser Number Detectors","","","")//AID_nicpu_analyser_number_detectors
-	KratosDSET_initaddobject(Dsetobject,3224,3,"NICPU X.Gun Energy Reference","","","")//AID_nicpu_xgun_energy_ref
+	KratosDSET_initaddobject(Dsetobject,3224,3,"NICPU X.Gun Energy Reference","","8=F_REFER_TO_XRAY_MONO_AL","")//AID_nicpu_xgun_energy_ref
 	//KratosDSET_initaddobject(Dsetobject,3225,0,"NICPU Imager integration time","","","")//AID_image_integration_time
 	KratosDSET_initaddobject(Dsetobject,3226,5,"NICPU Ion Gun filament Degas first time","","","")//AID_nicpu_igun_degas_first_time
 	KratosDSET_initaddobject(Dsetobject,3227,5,"NICPU Ion Gun filament Degas second time","","","")//AID_nicpu_igun_degas_second_time
@@ -1173,7 +1179,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3244,3,"Origin of platen","","","")//AID_platen_level
 	KratosDSET_initaddobject(Dsetobject,3245,3,"Type of platen","","","")//AID_platen_type
 	//KratosDSET_initaddobject(Dsetobject,3246,0,"NICPU X-ray Gun Water Flow Rate Limit","","","")//AID_nicpu_xgun_water_flow_rate_limit
-	KratosDSET_initaddobject(Dsetobject,3247,5,"NICPU X-ray Gun Suppressor or Bias Voltage","","","")//AID_nicpu_xgun_suppressor_bias_voltage
+	KratosDSET_initaddobject(Dsetobject,3247,5,"NICPU X-ray Gun Suppressor or Bias Voltage","V","","")//AID_nicpu_xgun_suppressor_bias_voltage
 	//KratosDSET_initaddobject(Dsetobject,3248,0,"NOVA sputter shield control bit (0 for no, 1 for yes)","","","")//AID_enable_sputter_shield
 	KratosDSET_initaddobject(Dsetobject,3249,5,"Position of image centre wrt sample holder centre z","","","")//AID_image_centre_wrt_sample_holder_z
 	KratosDSET_initaddobject(Dsetobject,3250,3,"Auto Z coordinate","","","")//AID_auto_z_this_coordinate
@@ -1261,13 +1267,13 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3326,0,"# detectors","","","")//CID_n_detectors
 	//KratosDSET_initaddobject(Dsetobject,3327,0,"Detectors separation ratio","","","")//CID_detector_separation_ratio
 	//KratosDSET_initaddobject(Dsetobject,3328,0,"Detectors channeltron voltages","","","")//CID_detector_channeltron_voltages
-	//KratosDSET_initaddobject(Dsetobject,3329,0,"Configuration Option Toggle State","","","")//CID_config_option_state
-	//KratosDSET_initaddobject(Dsetobject,3330,0,"Configuration VME baud rate","","","")//CID_vme_baud_rate
-	//KratosDSET_initaddobject(Dsetobject,3331,0,"Configuration Host Serial Port","","","")//CID_host_serial_port
-	//KratosDSET_initaddobject(Dsetobject,3332,0,"Configuration VME hostname","","","")//CID_vme_ethernet_hostname
-	//KratosDSET_initaddobject(Dsetobject,3333,0,"Configuration Host/Slave Comms","","","")//CID_config_host_slave
-	//KratosDSET_initaddobject(Dsetobject,3334,0,"Configuration Option Name","","","")//CID_option_name
-	//KratosDSET_initaddobject(Dsetobject,3335,0,"Configuration Instrument","","","")//CID_config_instrument
+	KratosDSET_initaddobject(Dsetobject,5500,3,"Configuration Option Toggle State","","0=F_CONFIG_OPTION_DISABLED;1=F_CONFIG_OPTION_ENABLED","")//CID_config_option_state
+	KratosDSET_initaddobject(Dsetobject,5501,3,"Configuration VME baud rate","","3=F_VME_38400_BAUD","")//CID_vme_baud_rate
+	KratosDSET_initaddobject(Dsetobject,5502,3,"Configuration Host Serial Port","","0=F_HOST_SERIAL_PORT_A","")//CID_host_serial_port
+	//KratosDSET_initaddobject(Dsetobject,5503,0,"Configuration VME hostname","","","")//CID_vme_ethernet_hostname
+	KratosDSET_initaddobject(Dsetobject,5504,3,"Configuration Host/Slave Comms","","","")//CID_config_host_slave
+	KratosDSET_initaddobject(Dsetobject,5505,6,"Configuration Option Name","","","")//CID_option_name
+	KratosDSET_initaddobject(Dsetobject,5506,3,"Configuration Instrument","","","")//CID_config_instrument
 	//KratosDSET_initaddobject(Dsetobject,3336,0,"K4 Vacuum Options","","","")//CID_k4_config_options
 	//KratosDSET_initaddobject(Dsetobject,3337,0,"K4 Vacuum Fibre OpticSerial Port","","","")//CID_k4_serial_port
 	//KratosDSET_initaddobject(Dsetobject,3338,0,"Lens Single PSU Options","","","")//CID_lens_single_psu_array
@@ -1276,9 +1282,9 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3341,0,"Lens PSU polarity","","","")//CID_lens_psu_polarity
 	//KratosDSET_initaddobject(Dsetobject,3342,0,"Lens PSU range limit","","","")//CID_lens_psu_range_limit
 	//KratosDSET_initaddobject(Dsetobject,3343,0,"Lens Magnification Options","","","")//CID_lens_magnifications
-	//KratosDSET_initaddobject(Dsetobject,3344,0,"No. Fibre-Optic Timer/Counters","","","")//CID_No_optical_timer_counters
-	//KratosDSET_initaddobject(Dsetobject,3345,0,"FAT Pass Energy Options","","","")//CID_fat_pass_energy_options
-	//KratosDSET_initaddobject(Dsetobject,3346,0,"Exact Pass Energy","","","")//CID_exact_pass_energy
+	KratosDSET_initaddobject(Dsetobject,5516,3,"No. Fibre-Optic Timer/Counters","","","")//CID_No_optical_timer_counters
+	KratosDSET_initaddobject(Dsetobject,5517,3,"FAT Pass Energy Options","","","")//CID_fat_pass_energy_options
+	KratosDSET_initaddobject(Dsetobject,5518,5,"Exact Pass Energy","","","")//CID_exact_pass_energy
 	//KratosDSET_initaddobject(Dsetobject,3347,0,"Pass Energy 25meV Offset","","","")//CID_pass_energy_25_offset
 	//KratosDSET_initaddobject(Dsetobject,3348,0,"Pass Energy 25meV Gain","","","")//CID_pass_energy_25_gain
 	//KratosDSET_initaddobject(Dsetobject,3349,0,"Pass Energy 50meV Offset","","","")//CID_pass_energy_50_offset
@@ -1293,7 +1299,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3358,0,"Retard Ratio 50meV Gain","","","")//CID_retard_ratio_50_gain
 	//KratosDSET_initaddobject(Dsetobject,3359,0,"Retard Ratio 100meV Offset","","","")//CID_retard_ratio_100_offset
 	//KratosDSET_initaddobject(Dsetobject,3360,0,"Retard Ratio 100meV Gain","","","")//CID_retard_ratio_100_gain
-	//KratosDSET_initaddobject(Dsetobject,3361,0,"Work function","","","")//CID_work_function
+	KratosDSET_initaddobject(Dsetobject,5533,5,"Work function","eV","","")//CID_work_function
 	//KratosDSET_initaddobject(Dsetobject,3362,0,"HSA decrease Slew-rate","","","")//CID_hsa_decrease_slew_rate
 	//KratosDSET_initaddobject(Dsetobject,3363,0,"HSA increase Slew-rate","","","")//CID_hsa_increase_slew_rate
 	//KratosDSET_initaddobject(Dsetobject,3364,0,"HSA channel Settle-Time","","","")//CID_hsa_channel_settle_time
@@ -1311,14 +1317,14 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3376,0,"Channeltron Settle-Time",NaN,"s","","","")//CID_channeltron_settle_time
 	//KratosDSET_initaddobject(Dsetobject,3377,0,"Channeltron Standby Voltage","","","")//CID_channeltron_standby_voltage
 	//KratosDSET_initaddobject(Dsetobject,3378,0,"Channeltron Dead-Time","","","")//CID_channeltron_dead_time
-	//KratosDSET_initaddobject(Dsetobject,3379,0,"ESCA decrease Slew-rate","","","")//CID_esca_decrease_slew_rate
-	//KratosDSET_initaddobject(Dsetobject,3380,0,"ESCA increase Slew-rate","","","")//CID_esca_increase_slew_rate
-	//KratosDSET_initaddobject(Dsetobject,3381,0,"ESCA channel Settle-Time","","","")//CID_esca_channel_settle_time
-	//KratosDSET_initaddobject(Dsetobject,3382,0,"ESCA Standby Energy","","","")//CID_esca_standby_energy
-	//KratosDSET_initaddobject(Dsetobject,3383,0,"ESCA Scan DAC Gain","","","")//CID_esca_scan_dac_gain
-	//KratosDSET_initaddobject(Dsetobject,3384,0,"ESCA Scan DAC Offset","","","")//CID_esca_scan_dac_offset
-	//KratosDSET_initaddobject(Dsetobject,3385,0,"ESCA Xray Anode Option","","","")//CID_esca_xray_anode
-	//KratosDSET_initaddobject(Dsetobject,3386,0,"ESCA Manipulator Option","","","")//CID_esca_manipulator_option
+	KratosDSET_initaddobject(Dsetobject,5562,5,"ESCA decrease Slew-rate","","","")//CID_esca_decrease_slew_rate
+	KratosDSET_initaddobject(Dsetobject,5563,5,"ESCA increase Slew-rate","","","")//CID_esca_increase_slew_rate
+	KratosDSET_initaddobject(Dsetobject,5564,5,"ESCA channel Settle-Time","s","","")//CID_esca_channel_settle_time
+	KratosDSET_initaddobject(Dsetobject,5565,5,"ESCA Standby Energy","eV","","")//CID_esca_standby_energy
+	KratosDSET_initaddobject(Dsetobject,5566,5,"ESCA Scan DAC Gain","","","")//CID_esca_scan_dac_gain
+	KratosDSET_initaddobject(Dsetobject,5567,5,"ESCA Scan DAC Offset","","","")//CID_esca_scan_dac_offset
+	KratosDSET_initaddobject(Dsetobject,5568,3,"ESCA Xray Anode Option","","0=F_ESCA_SINGLE_MG_ANODE","")//CID_esca_xray_anode
+	KratosDSET_initaddobject(Dsetobject,5569,3,"ESCA Manipulator Option","","1=F_ESCA_10_POSITION_PROBE","")//CID_esca_manipulator_option
 	//KratosDSET_initaddobject(Dsetobject,3387,0,"HSA Lens Magnification Options","","","")//CID_hsa_lens_magnifications
 	//KratosDSET_initaddobject(Dsetobject,3388,0,"HSA Lens Magnification Options","","","")//CID_hsa_lens_magn_option
 	//KratosDSET_initaddobject(Dsetobject,3389,0,"MHSA Lens Magnification Options","","","")//CID_mhsa_lens_magnifications
@@ -1335,7 +1341,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3400,0,"Channel-Plate PSU Values","","","")//CID_channelplate_psu_value
 	//KratosDSET_initaddobject(Dsetobject,3401,0,"Channel-Plate PSU Standby","","","")//CID_channelplate_standby
 	//KratosDSET_initaddobject(Dsetobject,3402,0,"Channel-Plate PSU Settle-Time","","","")//CID_channelplate_settle_time
-	//KratosDSET_initaddobject(Dsetobject,3403,0,"ESCA Xray PSU Settle-Time","","","")//CID_esca_xray_settle_time	
+	KratosDSET_initaddobject(Dsetobject,5586,5,"ESCA Xray PSU Settle-Time","s","","")//CID_esca_xray_settle_time	
 	KratosDSET_initaddobject(Dsetobject,5587,0,"Transmission Function Object (ke,t)","","","TFO")//CID_transmission_function
 	//KratosDSET_initaddobject(Dsetobject,5588,0,"Number of Limit Switches","","","")//CID_motor_no_limit_switches
 	//KratosDSET_initaddobject(Dsetobject,5589,0,"Number of Calibration Switches","","","")//CID_motor_no_calib_switches
@@ -1393,8 +1399,8 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,5641,0,"VME motor control card number","","","")//CID_vme_motor_controller
 	//KratosDSET_initaddobject(Dsetobject,5642,0,"ESCA Scan DAC Gain","","","")//CID_esca_res_dac_gain
 	//KratosDSET_initaddobject(Dsetobject,5643,0,"ESCA Scan DAC Offset","","","")//CID_esca_res_dac_offset
-	//KratosDSET_initaddobject(Dsetobject,5644,0,"ESCA Resolution Option","","","")//CID_esca_resolution_option
-	//KratosDSET_initaddobject(Dsetobject,5645,0,"ESCA Calibrate Analyser","","","")//CID_esca_calibrate_analyser
+	KratosDSET_initaddobject(Dsetobject,5644,3,"ESCA Resolution Option","","0=F_ESCA_ONE_RESOLUTION","")//CID_esca_resolution_option
+	KratosDSET_initaddobject(Dsetobject,5645,3,"ESCA Calibrate Analyser","","0=F_ESCA_CALIBRATE_NEVER","")//CID_esca_calibrate_analyser
 	//KratosDSET_initaddobject(Dsetobject,5646,0,"XSAM Carousel Option","","","")//CID_xsam_carousel_option
 	//KratosDSET_initaddobject(Dsetobject,5647,0,"Energy offset for mirror analyser","","","")//CID_mhsa_image_energy_offset
 	//KratosDSET_initaddobject(Dsetobject,5648,0,"XSAM Carousel sample information","","","")//CID_xsam_carousel_sample_info
@@ -1404,8 +1410,8 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,5652,0,"Stage Sequence enabled","","","")//CID_stage_sequence_enabled
 	//KratosDSET_initaddobject(Dsetobject,5653,0,"Motor Valve Interlock Flag","","","")//CID_motor_valve_interlock
 	//KratosDSET_initaddobject(Dsetobject,5654,0,"Motor Valve Distance","","","")//CID_motor_valve_distance
-	//KratosDSET_initaddobject(Dsetobject,5655,0,"ESCA Xray Max Accel HT","","","")//CID_esca_xray_maxHT_code
-	//KratosDSET_initaddobject(Dsetobject,5656,0,"Engineer Mode Password","","","")//CID_engineer_mode_password
+	KratosDSET_initaddobject(Dsetobject,5655,3,"ESCA Xray Max Accel HT","","0=F_ESCA_JP_XRAY_ACCELHT_2","")//CID_esca_xray_maxHT_code
+	KratosDSET_initaddobject(Dsetobject,5656,6,"Engineer Mode Password","","","")//CID_engineer_mode_password
 	//KratosDSET_initaddobject(Dsetobject,5657,0,"Engineer Mode Password Length","","","")//CID_engineer_mode_password_length
 	//KratosDSET_initaddobject(Dsetobject,5658,0,"Sample Bias","","","")//CID_sample_bias
 	//KratosDSET_initaddobject(Dsetobject,5659,0,"Sample bias Switch Fitted","","","")//CID_sample_bias_switch_fitted
@@ -1415,16 +1421,16 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,5663,0,"Camera options","","","")//CID_camera_options
 	//KratosDSET_initaddobject(Dsetobject,5664,0,"Rotation axis for v1","","","")//CID_rotation_axis_v1
 	//KratosDSET_initaddobject(Dsetobject,5665,0,"Rotation axis for v2","","","")//CID_rotation_axis_v2
-	//KratosDSET_initaddobject(Dsetobject,5666,0,"Registered Users","","","")//CID_user_list
-	//KratosDSET_initaddobject(Dsetobject,5667,0,"User Name","","","")//CID_user_name
-	//KratosDSET_initaddobject(Dsetobject,5668,0,"User Password","","","")//CID_user_password
-	//KratosDSET_initaddobject(Dsetobject,5669,0,"STD Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_std
-	//KratosDSET_initaddobject(Dsetobject,5670,0,"1000um Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_1000um
-	//KratosDSET_initaddobject(Dsetobject,5671,0,"200um Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_200um
-	//KratosDSET_initaddobject(Dsetobject,5672,0,"100um Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_100um
-	//KratosDSET_initaddobject(Dsetobject,5673,0,"Polarity of Hardware Bit 15 SML_OR_MCR","","","")//CID_escak1_control_15
-	//KratosDSET_initaddobject(Dsetobject,5674,0,"Polarity of Hardware Bit 16 MIRR_ERR","","","")//CID_escak1_control_16
-	//KratosDSET_initaddobject(Dsetobject,5675,0,"Polarity of Hardware Bit 19 HV_OFF","","","")//CID_escak1_control_19
+	KratosDSET_initaddobject(Dsetobject,5666,3,"Registered Users","","","")//CID_user_list
+	KratosDSET_initaddobject(Dsetobject,5667,6,"User Name","","","")//CID_user_name
+	KratosDSET_initaddobject(Dsetobject,5668,6,"User Password","","","")//CID_user_password
+	KratosDSET_initaddobject(Dsetobject,5669,6,"STD Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_std
+	KratosDSET_initaddobject(Dsetobject,5670,6,"1000um Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_1000um
+	KratosDSET_initaddobject(Dsetobject,5671,6,"200um Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_200um
+	KratosDSET_initaddobject(Dsetobject,5672,6,"100um Aperture Name for ESCA K1","","","")//CID_escak1_aperture_name_100um
+	KratosDSET_initaddobject(Dsetobject,5673,3,"Polarity of Hardware Bit 15 SML_OR_MCR","","","")//CID_escak1_control_15
+	KratosDSET_initaddobject(Dsetobject,5674,3,"Polarity of Hardware Bit 16 MIRR_ERR","","","")//CID_escak1_control_16
+	KratosDSET_initaddobject(Dsetobject,5675,3,"Polarity of Hardware Bit 19 HV_OFF","","","")//CID_escak1_control_19
 	//KratosDSET_initaddobject(Dsetobject,5676,0,"Delay Line Detector Imaging","","","")//CID_nicpu_detector_imaging
 	//KratosDSET_initaddobject(Dsetobject,5677,0,"NICPU Motor Control Unit Option","","","")//CID_nicpu_motor_control_option
 	//KratosDSET_initaddobject(Dsetobject,5678,0,"NICPU Analyser FRR Option","","","")//CID_nicpu_analyser_frr
@@ -1488,7 +1494,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,5736,0,"NICPU VM1 PLD Number","","","")//CID_nicpu_pld_option
 	//KratosDSET_initaddobject(Dsetobject,5737,0,"DLD (NICPU) active","","","")//CID_DLD_signal_conditioning_PCB
 	//KratosDSET_initaddobject(Dsetobject,5738,0,"Image stitching","","","")//CID_image_stitching
-	//KratosDSET_initaddobject(Dsetobject,5739,0,"VME IP address or hostname","","","")//CID_vme_ethernet_address
+	KratosDSET_initaddobject(Dsetobject,5745,6,"VME IP address or hostname","","","")//CID_vme_ethernet_address
 	//KratosDSET_initaddobject(Dsetobject,5740,0,"Fine Image Rotation Enabled","","","")//CID_fine_rotation
 	//KratosDSET_initaddobject(Dsetobject,5741,0,"Fine Image Rotation Angle","","","")//CID_fine_rotation_angle
 	//KratosDSET_initaddobject(Dsetobject,5742,0,"Camera FSDs Y","","","")//CID_camera_fsd_y
@@ -1810,7 +1816,7 @@ static function KratosDSET_read_object_list_s(file, Dsetobjectlist)
 		Fbinread /U/B=2/F=3 file, tmp; Dsetobjectlist.object_offsets[i][1]=tmp		// and again
 		if(Dsetobjectlist.object_offsets[i][0]!=Dsetobjectlist.object_offsets[i][1])
 			Fstatus file
-			sprintf tmps, "Position %08.0f ( %08.0f and %08.0f )", V_filePOS, (Dsetobjectlist.object_offsets[i][0]), (Dsetobjectlist.object_offsets[i][1]) ; Debugprintf2("Object "+num2str(i+1)+" is split into two parts: "+Dsetobjectlist.object_name[i][0],0)
+			sprintf tmps, "Position %08.0f ( %08.0f and %08.0f )", V_filePOS, (Dsetobjectlist.object_offsets[i][0]), (Dsetobjectlist.object_offsets[i][1]) ; Debugprintf2("Object "+num2str(i+1)+" is split into two parts: "+Dsetobjectlist.object_name[i][0],1)
 		endif
 		Debugprintf2(num2str(i+1)+"; "+num2str(Dsetobjectlist.object_offsets[i][0])+" ; "+num2str(Dsetobjectlist.object_offsets[i][1])+" ; "+num2str(Dsetobjectlist.object_offsets[i][2])+" ; "+num2str(Dsetobjectlist.object_offsets[i][3])+" ; "+Dsetobjectlist.object_name[i],1)
 		fstatus file
@@ -1866,6 +1872,9 @@ static function KratosDSET_readblock(file, Dsetobject, Dsetobjectlist)
 		endif
 		Fstatus file
 		if(offlast+blocklength<=V_filePOS  && markercount <0)
+			if(markercount < -1)
+				Debugprintf2("Possible error in markercount: "+num2str(markercount),0)
+			endif
 			// reached end of block
 			break
 		endif
@@ -2037,7 +2046,7 @@ function KratosDSET_load_data([optfile])
 		endif
 		// in some cases an object is split into two parts
 		if(Dsetobjectlist.object_offsets[Dsetobjectlist.currentobject][0]!=Dsetobjectlist.object_offsets[Dsetobjectlist.currentobject][1])
-			Debugprintf2("Reading second part of Object with ID: "+num2str(Dsetobjectlist.currentobject+1),0)
+			Debugprintf2("Reading second part of Object with ID: "+num2str(Dsetobjectlist.currentobject+1),1)
 			Fsetpos file, Dsetobjectlist.object_offsets[Dsetobjectlist.currentobject][1]
 			if(KratosDSET_readblock(file, Dsetobject, Dsetobjectlist)==-1)
 				break
