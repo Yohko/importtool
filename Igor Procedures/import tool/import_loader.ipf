@@ -642,7 +642,7 @@ function loader_initfile(file, filestruct)
 	struct loader_file &filestruct
 	// load complete file into a text wave for faster processing
 	fstatus file
-	LoadWave/FREE/Q/J/V={"", "", 0, 0}/K=2/A=$("filetmp") (S_path+S_fileName)
+	LoadWave/Q/J/V={"", "", 0, 0}/K=2/A=$("filetmp") (S_path+S_fileName)
 	if(V_flag !=1)
 		return -1
 	endif
