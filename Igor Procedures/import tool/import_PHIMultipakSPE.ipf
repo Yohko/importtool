@@ -14,7 +14,7 @@ static structure phiheader
 	variable NoSpatialArea
 	struct SpatialAreaDef  SpatialAreaDef[100]
 	struct SpatialAreaDesc SpatialAreaDesc[100]
-	struct SpatialHRPhotoCor SpatialHRPhotoCor[100]	
+	struct SpatialHRPhotoCor SpatialHRPhotoCor[100]
 endstructure
 
 
@@ -343,7 +343,8 @@ Function phimultipak_load_data([optfile])
 				break
 			case "SpectralRegDef":
 				keyval.val = splitintolist(keyval.val, " ")
-				if(str2num(stringfromlist(0,keyval.val,"_")) == str2num(stringfromlist(1,keyval.val,"_")) && ItemsInList(keyval.val,"_")==13)
+				//if(str2num(stringfromlist(0,keyval.val,"_")) == str2num(stringfromlist(1,keyval.val,"_")) && ItemsInList(keyval.val,"_")==13)
+				if(ItemsInList(keyval.val,"_")==13)
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num1= str2num(stringfromlist(0,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].num2 = str2num(stringfromlist(1,keyval.val,"_"))
 					phiheader.SpectralRegDef[str2num(stringfromlist(0,keyval.val,"_"))-1].name = stringfromlist(2,keyval.val,"_")
@@ -365,10 +366,13 @@ Function phimultipak_load_data([optfile])
 				phiheader.NoSpatialArea = str2num(keyval.val)
 				break
 			case "SpatialAreaDef":
+				header += "\rSpatialAreaDef: "+keyval.val
 				break
 			case "SpatialAreaDesc":
+				header += "\rSpatialAreaDesc: "+keyval.val
 				break
 			case "SpatialHRPhotoCor":
+				header += "\rSpatialHRPhotoCor: "+keyval.val
 				break
 			case "LensConstant":
 				header += "\rLensConstant: "+keyval.val
@@ -379,6 +383,264 @@ Function phimultipak_load_data([optfile])
 				break
 			case "SOFH":
 				Debugprintf2("start of header",1)
+				break
+			case "AnalyserRetardGain":
+				header += "\rAnalyserRetardGain: "+keyval.val
+				break
+			case "ScanDeflectionSpan":
+				header += "\rScanDeflectionSpan: "+keyval.val
+				break
+			case "ScanDeflectionOffset":
+				header += "\rScanDeflectionOffset: "+keyval.val
+				break
+			case "SCAMultiplierVoltage":
+				header += "\rSCAMultiplierVoltage: "+keyval.val
+				break
+			case "NarrowAcceptanceAngle":
+				header += "\rNarrowAcceptanceAngle: "+keyval.val
+				break
+			case "PeakToNoiseRatioState":
+				header += "\rPeakToNoiseRatioState: "+keyval.val
+				break
+			case "DelayBeforeAcquire":
+				header += "\rDelayBeforeAcquire: "+keyval.val
+				break
+			case "C60IonGun":
+				header += "\rC60IonGun: "+keyval.val
+				break
+			case "BiasBoxMode":
+				header += "\rBiasBoxMode: "+keyval.val
+				break
+			case "SemFieldOfView":
+				header += "\rSemFieldOfView: "+keyval.val
+				break
+			case "ImageSizeXY":
+				header += "\rImageSizeXY: "+keyval.val
+				break
+			case "IonGunMode":
+				header += "\rIonGunMode: "+keyval.val
+				break
+			case "SputterRate":
+				header += "\rSputterRate: "+keyval.val
+				break
+			case "FloatVolt":
+				header += "\rFloatVolt: "+keyval.val
+				break
+			case "FloatEnable":
+				header += "\rFloatEnable: "+keyval.val
+				break
+			case "GridVolt":
+				header += "\rGridVolt: "+keyval.val
+				break
+			case "CondensorVolt":
+				header += "\rCondensorVolt: "+keyval.val
+				break
+			case "ObjectiveVolt":
+				header += "\rObjectiveVolt: "+keyval.val
+				break
+			case "BendVolt":
+				header += "\rBendVolt: "+keyval.val
+				break
+			case "SputterRasterOffset":
+				header += "\rSputterRasterOffset: "+keyval.val
+				break
+			case "TargetSputterTime":
+				header += "\rTargetSputterTime: "+keyval.val
+				break
+			case "SputterEmission":
+				header += "\rSputterEmission: "+keyval.val
+				break
+			case "DeflectionBias":
+				header += "\rDeflectionBias: "+keyval.val
+				break
+			case "XpsScanMode":
+				header += "\rXpsScanMode: "+keyval.val
+				break
+			case "SurvNumCycles":
+				header += "\rSurvNumCycles: "+keyval.val
+				break
+			case "SurvTimePerStep":
+				header += "\rSurvTimePerStep: "+keyval.val
+				break
+			case "PhotoZoomMode":
+				header += "\rPhotoZoomMode: "+keyval.val
+				break
+			case "PhotoSizeInPixel":
+				header += "\rPhotoSizeInPixel: "+keyval.val
+				break
+			case "PhotoOffsetInPixel":
+				header += "\rPhotoOffsetInPixel: "+keyval.val
+				break
+			case "PhotoSizeInMm":
+				header += "\rPhotoSizeInMm: "+keyval.val
+				break
+			case "PhotoOffsetInMm":
+				header += "\rPhotoOffsetInMm: "+keyval.val
+				break
+			case "NoSpectralRegFull":
+				header += "\rNoSpectralRegFull: "+keyval.val
+				break
+			case "SpectralRegDefFull":
+				header += "\rSpectralRegDefFull: "+keyval.val
+				break
+			case "SpectralRegDef2Full":
+				header += "\rSpectralRegDef2Full: "+keyval.val
+				break
+			case "SpectralRegBackgroundFull":
+				header += "\rSpectralRegBackgroundFull: "+keyval.val
+				break
+			case "SpectralRegHeroFull":
+				header += "\rSpectralRegHeroFull: "+keyval.val
+				break
+			case "SpectralRegIRFull":
+				header += "\rSpectralRegIRFull: "+keyval.val
+				break
+			case "SpectralRegDef2":
+				header += "\rSpectralRegDef2: "+keyval.val
+				break
+			case "SpectralRegBackground":
+				header += "\rSpectralRegBackground: "+keyval.val
+				break
+			case "SpectralRegHero":
+				header += "\rSpectralRegHero: "+keyval.val
+				break
+			case "SpectralRegIR":
+				header += "\rSpectralRegIR: "+keyval.val
+				break
+			case "XrayAnodePosition":
+				header += "\rXrayAnodePosition: "+keyval.val
+				break
+			case "XRayBeamVoltage":
+				header += "\rXRayBeamVoltage: "+keyval.val
+				break
+			case "XRayCondenserLensVoltage":
+				header += "\rXRayCondenserLensVoltage: "+keyval.val
+				break
+			case "XRayObjectiveCoilCurrent":
+				header += "\rXRayObjectiveCoilCurrent: "+keyval.val
+				break
+			case "XRayBlankingVoltage":
+				header += "\rXRayBlankingVoltage: "+keyval.val
+				break
+			case "XRayFilamentCurrent":
+				header += "\rXRayFilamentCurrent: "+keyval.val
+				break
+			case "XRayStigmator":
+				header += "\rXRayStigmator: "+keyval.val
+				break
+			case "XRayHighPower":
+				header += "\rXRayHighPower: "+keyval.val
+				break
+			case "EgunNeutMode":
+				header += "\rEgunNeutMode: "+keyval.val
+				break
+			case "EgunNeutExtractor":
+				header += "\rEgunNeutExtractor: "+keyval.val
+				break
+			case "EgunNeutXSteering":
+				header += "\rEgunNeutXSteering: "+keyval.val
+				break
+			case "EgunNeutYSteering":
+				header += "\rEgunNeutYSteering: "+keyval.val
+				break
+			case "EgunNeutFilament":
+				header += "\rEgunNeutFilament: "+keyval.val
+				break
+			case "EgunNeutPulseLength":
+				header += "\rEgunNeutPulseLength: "+keyval.val
+				break
+			case "SxiPersistence":
+				header += "\rSxiPersistence: "+keyval.val
+				break
+			case "SxiSecPerDisplay":
+				header += "\rSxiSecPerDisplay: "+keyval.val
+				break
+			case "SxiAutoContrast":
+				header += "\rSxiAutoContrast: "+keyval.val
+				break
+			case "SxiAutoContrastLow":
+				header += "\rSxiAutoContrastLow: "+keyval.val
+				break
+			case "SxiAutoContrastHigh":
+				header += "\rSxiAutoContrastHigh: "+keyval.val
+				break
+			case "SxiBindingEnergy":
+				header += "\rSxiBindingEnergy: "+keyval.val
+				break
+			case "SxiPassEnergy":
+				header += "\rSxiPassEnergy: "+keyval.val
+				break
+			case "SxiLens2":
+				header += "\rSxiLens2: "+keyval.val
+				break
+			case "SxiLens3":
+				header += "\rSxiLens3: "+keyval.val
+				break
+			case "SxiLensBias":
+				header += "\rSxiLensBias: "+keyval.val
+				break
+			case "SxiShutterBias":
+				header += "\rSxiShutterBias: "+keyval.val
+				break
+			case "SxiShutterBiasVoltage":
+				header += "\rSxiShutterBiasVoltage: "+keyval.val
+				break
+			case "SxiDisplayMode":
+				header += "\rSxiDisplayMode: "+keyval.val
+				break
+			case "Detector Acq Time":
+				header += "\rDetector Acq Time: "+keyval.val
+				break
+			case "Number Of Channels":
+				header += "\rNumber Of Channels: "+keyval.val
+				break
+			case "Channel Info":
+				header += "\rChannel Info: "+keyval.val
+				break
+			case "StageCurrentRotationSpeed":
+				header += "\rStageCurrentRotationSpeed: "+keyval.val
+				break
+			case "DefectPosID":
+				header += "\rDefectPosID: "+keyval.val
+				break
+			case "DefectPosComment":
+				header += "\rDefectPosComment: "+keyval.val
+				break
+			case "DefectPosU":
+				header += "\rDefectPosU: "+keyval.val
+				break
+			case "DefectPosV":
+				header += "\rDefectPosV: "+keyval.val
+				break
+			case "DefectPosX":
+				header += "\rDefectPosX: "+keyval.val
+				break
+			case "DefectPosY":
+				header += "\rDefectPosY: "+keyval.val
+				break
+			case "DefectPosZ":
+				header += "\rDefectPosZ: "+keyval.val
+				break
+			case "DefectPosTilt":
+				header += "\rDefectPosTilt: "+keyval.val
+				break
+			case "DefectPosRotation":
+				header += "\rDefectPosRotation: "+keyval.val
+				break
+			case "DefectPosAligment":
+				header += "\rDefectPosAligment: "+keyval.val
+				break
+			case "DefectPosReferenceImage":
+				header += "\rDefectPosReferenceImage: "+keyval.val
+				break
+			case "Deconvolution":
+				header += "\rDeconvolution: "+keyval.val
+				break
+			case "DeconvolutionPassEnergy":
+				header += "\rDeconvolutionPassEnergy: "+keyval.val
+				break
+			case "XRaySetting":
+				header += "\rXRaySetting: "+keyval.val
 				break
 			default:
 				Debugprintf2("Unknown key: "+keyval.key,0)

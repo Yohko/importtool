@@ -335,7 +335,7 @@ function WinspecSpe_load_data([optfile])
 
 	if(headstart.file_header_ver >=3)
 		//print headstart.xml_offset
-		debugprintf2("XML footer not supported yet (64bit offset)",0)
+		debugprintf2("XML footer not supported yet (64bit offset), need IgorPro7",0)
 	endif
 
 	note w,header

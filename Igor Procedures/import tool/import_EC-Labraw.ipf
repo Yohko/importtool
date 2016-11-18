@@ -237,6 +237,12 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 		case 101:
 			type.type=4; type.name="-Im(Zce)/Ohm"; type.wave_name = "-Im(Zce)"
 			break
+		case 125:
+			type.type=5; type.name="Capacitance charge/µF"; type.wave_name = "Capacitancecharge"
+			break		
+		case 126:
+			type.type=5; type.name="Capacitance discharge/µF"; type.wave_name = "Capacitancedischarge"
+			break
 		case 131:
 			type.type=2; type.name="??"; type.wave_name = "??"; type.mask = 1 // 0x0001
 			if(type.readflags2==1)
@@ -428,6 +434,12 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 		case 436:
 			type.type=4; type.name="Ece dc/V"; type.wave_name = "Ece dc"
 			break
+		case 467:
+			type.type=5; type.name="Q charge/discharge/mA.h"; type.wave_name = "Qchargedis"
+			break	
+		case 468:
+			type.type=4; type.name="half cycle"; type.wave_name = "halfcycle"
+			break	
 		default:
 				Debugprintf2("Unknown ColID: "+num2str(ID),0)
 				return -1
@@ -548,6 +560,7 @@ static function BIOLOGICmpr_read_datamodule(file, mprhdr)
 	// check for consistency
 	fstatus file
 	if(V_filePOS != (oldpos+mprhdr.length))
+	print n_data_points
 		Debugprintf2("Something is wrong!",0)
 		sprintf tmps,"%08.0f != %08.0f \r", V_filePOS, (oldpos+mprhdr.length)
 		Debugprintf2(tmps,0)
@@ -566,35 +579,35 @@ static function BIOLOGICmpr_read_setmodule(file, mprhdr)
 	fbinread /B=3/U/f=1 file, tmpd// ; print "??: ",tmpd //  edits??	
 	fbinread /B=3/U/f=3 file, tmpd// ; print "??: ",tmpd 
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd
-	print "Comments : "+mybinread(file,tmpd)  // max 255
+	//print "Comments : "+mybinread(file,tmpd)  // max 255
 	mybinread(file, 255-tmpd) // skip next chars
-	fbinread /B=3/U/f=4 file, tmpd ; print "Mass of active Material (mg): ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "at x=: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Molecular weight of active material (at x=0): ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Atomic weight of intercaleted ion: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Aquisition started at: xo= ",tmpd
-	fbinread /B=3/U/f=2 file, tmpd ; print "Number of e- transfered per intercaletd ion: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Mass of active Material (mg): ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "at x=: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Molecular weight of active material (at x=0): ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Atomic weight of intercaleted ion: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Aquisition started at: xo= ",tmpd
+	fbinread /B=3/U/f=2 file, tmpd// ; print "Number of e- transfered per intercaletd ion: ",tmpd
 	fbinread /B=3/U/f=1 file, tmpd// ; print "??: ",tmpd //??
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd 
-	print "Electrode material : "+mybinread(file,tmpd) // max 80 
+	//print "Electrode material : "+mybinread(file,tmpd) // max 80 
 	mybinread(file, 80-tmpd) // skip next chars
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd 
-	print "Initial state : "+mybinread(file,tmpd) // max 80 
+	//print "Initial state : "+mybinread(file,tmpd) // max 80 
 	mybinread(file, 80-tmpd) // skip next chars
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd
-	print "Electrolyte : "+mybinread(file,tmpd) // max 80
+	//print "Electrolyte : "+mybinread(file,tmpd) // max 80
 	mybinread(file, 80-tmpd) // skip next chars
-	fbinread /B=3/U/f=4 file, tmpd ; print "Electrode surface area: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Electrode surface area: ",tmpd
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of char: ", tmpd
-	print "Ref. Electrode: "+mybinread(file, tmpd)
+	//print "Ref. Electrode: "+mybinread(file, tmpd)
 	mybinread(file, 50-tmpd) //skip rest of chars
-	fbinread /B=3/U/f=4 file, tmpd ; print "Voltage shift vs. NHE: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Characteristic mass: ",tmpd
-	fbinread /B=3/U/f=1 file, tmpd ; print "Flag - Unit (Electrode surface area):", tmpd // Unit (Electrode surface area): 0=m^2; 1=dm^2; 2=cm^2; 3=mm^2; 4=µm^2; 5=nm^2
-	fbinread /B=3/U/f=1 file, tmpd ; print "Flag - Unit (Characteristic mass):",tmpd // Unit (Characteristic mass): 0=Kg; 1=g; 2=mg; 3=µg
-	fbinread /B=3/U/f=1 file, tmpd ; print "Flag - ???: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Equivalent Weight: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Density: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Voltage shift vs. NHE: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Characteristic mass: ",tmpd
+	fbinread /B=3/U/f=1 file, tmpd// ; print "Flag - Unit (Electrode surface area):", tmpd // Unit (Electrode surface area): 0=m^2; 1=dm^2; 2=cm^2; 3=mm^2; 4=µm^2; 5=nm^2
+	fbinread /B=3/U/f=1 file, tmpd// ; print "Flag - Unit (Characteristic mass):",tmpd // Unit (Characteristic mass): 0=Kg; 1=g; 2=mg; 3=µg
+	fbinread /B=3/U/f=1 file, tmpd// ; print "Flag - ???: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Equivalent Weight: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Density: ",tmpd
 
 	fstatus file
 	mybinread(file, (mprhdr.length-(V_filePOS-oldpos)))
@@ -613,10 +626,10 @@ static function BIOLOGICmpr_read_logmodule(file, mprhdr)
 	fbinread /B=3/U/f=1 file, tmpd//; print "??", tmpd
 	fbinread /B=3/U/f=2 file, tmpd//; print "??", tmpd2
 	fbinread /B=3/U/f=3 file, tmpd//; print "??", tmpd
-	fbinread /B=3/U/f=1 file, tmpd; print "Run on channel : ", tmpd
+	fbinread /B=3/U/f=1 file, tmpd//; print "Run on channel : ", tmpd
 	mybinread(file, 16)
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "User : "+mybinread(file, tmpd)
+	//print "User : "+mybinread(file, tmpd)
 	mybinread(file, 32-tmpd)
 	mybinread(file, 258)
 	
@@ -628,61 +641,61 @@ static function BIOLOGICmpr_read_logmodule(file, mprhdr)
 	while(tmpd!=0 && V_logEOF>V_filePOS)	
 
 	fbinread /B=3/U/f=1 file, tmpd// ; print "??: ", tmpd //??
-	fbinread /B=3/U/f=5 file, tmpd; print "Acquisition started on : ", Secs2Date(tmpd*24*60*60-126316800,-2,"/"), " ", secs2Time(tmpd*24*60*60-126316800,3) // base = 1899, 12, 30, not 1/1/1904 //126316800
+	fbinread /B=3/U/f=5 file, tmpd//; print "Acquisition started on : ", Secs2Date(tmpd*24*60*60-126316800,-2,"/"), " ", secs2Time(tmpd*24*60*60-126316800,3) // base = 1899, 12, 30, not 1/1/1904 //126316800
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd 
-	print "Saved on : "+mybinread(file, tmpd) // max 255
+	//print "Saved on : "+mybinread(file, tmpd) // max 255
 	mybinread(file, 255-tmpd)
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "Host : "+mybinread(file, tmpd)
+	//print "Host : "+mybinread(file, tmpd)
 	mybinread(file, 50-tmpd) // skip rest of string
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "Adress : "+mybinread(file, tmpd)
+	//print "Adress : "+mybinread(file, tmpd)
 	mybinread(file, 50-tmpd) // skip rest of string
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "EC-Lab for windows (software) : v"+mybinread(file, tmpd)
+	//print "EC-Lab for windows (software) : v"+mybinread(file, tmpd)
 	mybinread(file, 6-tmpd) // skip rest of string
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "Internet server (firmware) : v"+mybinread(file, tmpd)
+	//print "Internet server (firmware) : v"+mybinread(file, tmpd)
 	mybinread(file, 6-tmpd) // skip rest of string
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "Command interpretor (firmware) v: "+mybinread(file, tmpd)
+	//print "Command interpretor (firmware) v: "+mybinread(file, tmpd)
 	mybinread(file, 9-tmpd) // skip rest of string
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string: ", tmpd
-	print "Device SN : "+mybinread(file, tmpd)
+	//print "Device SN : "+mybinread(file, tmpd)
 	mybinread(file, 231-tmpd) // lets be generous and consider max 230 (or 231?) chars for the SN
 	fbinread /B=3/U/f=1 file, tmpd// ; print "???: ",tmpd
 	fbinread /B=3/U/f=2 file, tmpd// ; print "???: ",tmpd
 	fbinread /B=3/U/f=2 file, tmpd //; print "???: ",tmpd
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd
-	print "Comments : "+mybinread(file,tmpd)  // max 255
+	//print "Comments : "+mybinread(file,tmpd)  // max 255
 	mybinread(file, 255-tmpd) // skip next chars
-	fbinread /B=3/U/f=4 file, tmpd ; print "Mass of active Material (mg): ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "at x=: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Molecular weight of active material (at x=0): ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Atomic weight of intercaletd ion: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Aquisition started at: xo= ",tmpd
-	fbinread /B=3/U/f=2 file, tmpd ; print "Number of e- transfered per intercaleted ion: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Mass of active Material (mg): ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "at x=: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Molecular weight of active material (at x=0): ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Atomic weight of intercaletd ion: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Aquisition started at: xo= ",tmpd
+	fbinread /B=3/U/f=2 file, tmpd// ; print "Number of e- transfered per intercaleted ion: ",tmpd
 	fbinread /B=3/U/f=1 file, tmpd// ; print "??: ",tmpd
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd 
-	print "Electrode material : "+mybinread(file,tmpd) // max 80 
+	//print "Electrode material : "+mybinread(file,tmpd) // max 80 
 	mybinread(file, 80-tmpd) // skip next chars
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd 
-	print "Initial state : "+mybinread(file,tmpd) // max 80 
+	//print "Initial state : "+mybinread(file,tmpd) // max 80 
 	mybinread(file, 80-tmpd) // skip next chars
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of string ", tmpd
-	print "Electrolyte : "+mybinread(file,tmpd) // max 80
+	//print "Electrolyte : "+mybinread(file,tmpd) // max 80
 	mybinread(file, 80-tmpd) // skip next chars
-	fbinread /B=3/U/f=4 file, tmpd ; print "Electrode surface area: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Electrode surface area: ",tmpd
 	fbinread /B=3/U/f=1 file, tmpd// ; print "length of char: ", tmpd
-	print "Reference Electrode: "+mybinread(file, tmpd)
+	//print "Reference Electrode: "+mybinread(file, tmpd)
 	mybinread(file, 50-tmpd) //skip rest of chars
-	fbinread /B=3/U/f=4 file, tmpd ; print "Voltage shift vs. NHE: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Characteristic mass: ",tmpd
-	fbinread /B=3/U/f=1 file, tmpd ; print "Flag - Unit (Electrode surface area):", tmpd // Unit (Electrode surface area): 0=m^2; 1=dm^2; 2=cm^2; 3=mm^2; 4=µm^2; 5=nm^2
-	fbinread /B=3/U/f=1 file, tmpd ; print "Flag - Unit (Characteristic mass):",tmpd // Unit (Characteristic mass): 0=Kg; 1=g; 2=mg; 3=µg
-	fbinread /B=3/U/f=1 file, tmpd ; print "Flag - ???: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Equivalent Weight: ",tmpd
-	fbinread /B=3/U/f=4 file, tmpd ; print "Density ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Voltage shift vs. NHE: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Characteristic mass: ",tmpd
+	fbinread /B=3/U/f=1 file, tmpd// ; print "Flag - Unit (Electrode surface area):", tmpd // Unit (Electrode surface area): 0=m^2; 1=dm^2; 2=cm^2; 3=mm^2; 4=µm^2; 5=nm^2
+	fbinread /B=3/U/f=1 file, tmpd// ; print "Flag - Unit (Characteristic mass):",tmpd // Unit (Characteristic mass): 0=Kg; 1=g; 2=mg; 3=µg
+	fbinread /B=3/U/f=1 file, tmpd// ; print "Flag - ???: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Equivalent Weight: ",tmpd
+	fbinread /B=3/U/f=4 file, tmpd// ; print "Density ",tmpd
 	mybinread(file, 256)
 	fbinread /B=3/U/f=4 file, tmpd// ; print "??: ",tmpd
 	fbinread /B=3/U/f=4 file, tmpd// ; print "??: ",tmpd
@@ -756,7 +769,6 @@ function BIOLOGICmpr_load_data([optfile])
 			loaderend(importloader)
 			return -1
 		endif
-		//print mprhdr
 		strswitch(stripstrfirstlastspaces(mprhdr.shortname))
 			case "VMP data":
 				Debugprintf2("---- Found data!",0)

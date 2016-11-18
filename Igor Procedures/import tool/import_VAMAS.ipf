@@ -171,10 +171,10 @@ function Vamas_load_data([optfile])
 	variable n = loader_readline_num(filewave)
 	for (i = 0; i <n; i+=1) 
 		tmps = filewave.file[filewave.line]; filewave.line +=1
-		if(strlen(tmps) == 0)
-			Debugprintf2("Unexpected end of VMS-file.",0)
-			return -1
-		endif
+//		if(strlen(tmps) == 0)
+//			Debugprintf2("Unexpected end of VMS-file.",0)
+//			return -1
+//		endif
 		tmps=mycleanupstr(tmps)
 		headercomment += "header comment #"+num2str(i+1)+": "+tmps+"\r"
 	endfor
@@ -318,7 +318,8 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 	string sampleid = loader_readline_str(filewave)
 
 	blockid = cleanname(blockid)
-	Make /O/R/N=(10)  $(cleanname(sampleid[0,10])+"_"+num2str(count)+"_"+blockid[0,10]) /wave=ycols
+	//Make /O/R/N=(10)  $(cleanname(sampleid[0,10])+"_"+num2str(count)+"_"+blockid[0,10]) /wave=ycols
+	Make /O/R/N=(10)  $(num2str(count)+"_"+cleanname(sampleid[0,10])+"_"+blockid[0,10]) /wave=ycols
 	Note ycols, headercomment
 	Note ycols, "block id: "+ blockid
 	Note ycols, "sample identifier: "+ sampleid

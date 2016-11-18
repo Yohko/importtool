@@ -47,7 +47,7 @@ function  BIOLOGICmpt_load_data([optfile])
 	endif
 	string header = importloader.header
 	variable file = importloader.file
-
+	string valtmps = ""
 	string tmps = mycleanupstr(myreadline(file))
 	if(cmpstr(tmps, "EC-Lab ASCII FILE")!=0)
 		Debugprintf2("Invalid header!",0)
@@ -94,12 +94,13 @@ function  BIOLOGICmpt_load_data([optfile])
 		endif
 		tmps =ReplaceString(",",tmps,".")
 		for(i=0;i<ItemsInList(tmps,"\t");i+=1)
-			if(numtype(str2num(StringFromList(i,tmps, "\t")))!=0)
+			valtmps = StringFromList(i,tmps, "\t")
+			if(numtype(str2num(valtmps))!=0 && cmpstr(valtmps, "xxx")!=0) //some new files also contain "xxx" as a "number"
 				Debugprintf2("Error reading data!",0)
 				loaderend(importloader)
 				return -1
 			else
-				datawave[datacount-1][i] =str2num(StringFromList(i,tmps, "\t"))
+				datawave[datacount-1][i] =str2num(valtmps)
 			endif
 		endfor
 		

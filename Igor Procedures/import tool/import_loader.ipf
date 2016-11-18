@@ -82,7 +82,7 @@ function init_flags()
 		variable /G  $(mypath+":"+f_onlyDET)				= 0			// export just the detector (only for Dsets)
 	endif
 	if(exists(mypath+":"+f_divbyTF)!=2)
-		variable /G  $(mypath+":"+f_divbyTF) 				= 0			// create a new wave and devide Detector by Transmission function
+		variable /G  $(mypath+":"+f_divbyTF) 				= 1			// create a new wave and devide Detector by Transmission function
 	endif
 	if(exists(mypath+":"+f_askforE)!=2)
 		variable /G  $(mypath+":"+f_askforE) 				= 0			// ask for the excitation energy
@@ -235,7 +235,7 @@ function /S mybinread(file, count)
 	string line = ""
 	line = PadString(line, count, 0x20)
 	fstatus file
-	if(V_filepos+count<V_logeof)
+	if(V_filepos+count<=V_logeof)
 		FBinread/B=3 file, line
 	else
 		line = ""
