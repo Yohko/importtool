@@ -3,6 +3,8 @@ import tool for IgorPro
 
 General import tool for IgorPro for importing data files from different hardware/software
 
+<img src="GUI.png" width="400">
+
 **Supported formats**:
 
   - Agilent Binary Waveform *.bin
