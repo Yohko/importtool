@@ -47,26 +47,40 @@ function  BIOLOGICmpt_load_data([optfile])
 	endif
 	string header = importloader.header
 	variable file = importloader.file
+	
+	// load complete file into a text wave for faster processing
+	fstatus file
+	LoadWave/Q/J/V={"", "", 0, 0}/K=2/A=$("file") (S_path+S_fileName)
+	if(V_flag !=1)
+		loaderend(importloader)
+		return -1
+	endif
+	wave /T filewave = $(StringFromList(0, S_waveNames))
+	string wavetokill = GetDataFolder(1)+StringFromList(0, S_waveNames)
+	variable linecount = 0
+
 	string valtmps = ""
-	string tmps = mycleanupstr(myreadline(file))
+	string tmps = mycleanupstr(filewave[linecount]); linecount +=1
 	if(cmpstr(tmps, "EC-Lab ASCII FILE")!=0)
 		Debugprintf2("Invalid header!",0)
 		loaderend(importloader)
 		return -1	
 	endif
-	
+
 	// how many header lines in total
-	tmps = mycleanupstr(myreadline(file))
+	tmps = mycleanupstr(filewave[linecount]); linecount +=1
 	variable headerlines = 0
 	if(strsearch(tmps, "Nb header lines",0)!=-1)
 		headerlines = str2num(tmps[strsearch(tmps, ":",0)+1,inf])
 		if(numtype(headerlines)!=0)
 			Debugprintf2("Error in header lines!",0)
+			killwaves $wavetokill
 			loaderend(importloader)
 			return -1	
 		endif
 	else
 		Debugprintf2("Invalid header!",0)
+		killwaves $wavetokill
 		loaderend(importloader)
 		return -1
 	endif
@@ -74,11 +88,11 @@ function  BIOLOGICmpt_load_data([optfile])
 
 	// three lines: EC-LAB ASCII, header lines, and header names; rest are comments 
 	for(i=3;i<headerlines;i+=1)
-		header +="\r+Comment "+num2str(i-2)+": "+mycleanupstr(myreadline(file))
+		header +="\r+Comment "+num2str(i-2)+": "+mycleanupstr(filewave[linecount]); linecount +=1
 	endfor
 
 	// now getting name of columns
-	string wavenamelist = mycleanupstr(myreadline(file))//splitintolist(myreadline(file),"\t")
+	string wavenamelist = mycleanupstr(filewave[linecount]); linecount +=1
 
 	tmpS = "tmpwavearray" ; Make /O/D/N=(0,ItemsInList(wavenamelist,"\t")) $tmpS ; wave datawave = $tmpS
 	variable datacount = 1
@@ -86,9 +100,10 @@ function  BIOLOGICmpt_load_data([optfile])
 	// reading the data
 	do
 		redimension /N=(datacount,-1) datawave
-		tmps =mycleanupstr(myreadline(file))
+		tmps =mycleanupstr(filewave[linecount]); linecount +=1
 		if(ItemsInList(wavenamelist,"\t")!=ItemsInList(tmps,"\t"))
 			Debugprintf2("Column count mismatch!",0)
+			killwaves $wavetokill
 			loaderend(importloader)
 			return -1
 		endif
@@ -97,6 +112,7 @@ function  BIOLOGICmpt_load_data([optfile])
 			valtmps = StringFromList(i,tmps, "\t")
 			if(numtype(str2num(valtmps))!=0 && cmpstr(valtmps, "xxx")!=0) //some new files also contain "xxx" as a "number"
 				Debugprintf2("Error reading data!",0)
+				killwaves $wavetokill
 				loaderend(importloader)
 				return -1
 			else
@@ -105,8 +121,7 @@ function  BIOLOGICmpt_load_data([optfile])
 		endfor
 		
 		datacount+=1
-		fstatus file
-	while(V_logEOF>V_filePOS)
+	while(linecount<dimsize(filewave,0))
 	
 	// adding notes and renaming waves
 	note datawave, header
@@ -116,7 +131,7 @@ function  BIOLOGICmpt_load_data([optfile])
 		rename $("0_spk"+num2str(i)), $(num2str(i)+"_"+ cleanname(StringFromList(i,wavenamelist, "\t")))
 		Debugprintf2("... exporting: "+StringFromList(i,wavenamelist, "\t"),0)
 	endfor	
-
+	killwaves $wavetokill
 	importloader.success = 1
 	loaderend(importloader)
 end

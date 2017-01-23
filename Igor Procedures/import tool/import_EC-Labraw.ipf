@@ -434,6 +434,9 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 		case 436:
 			type.type=4; type.name="Ece dc/V"; type.wave_name = "Ece dc"
 			break
+		case 441:
+			type.type=4; type.name="<Ece>/V"; type.wave_name = "Ece2"
+			break
 		case 467:
 			type.type=5; type.name="Q charge/discharge/mA.h"; type.wave_name = "Qchargedis"
 			break	
@@ -560,7 +563,6 @@ static function BIOLOGICmpr_read_datamodule(file, mprhdr)
 	// check for consistency
 	fstatus file
 	if(V_filePOS != (oldpos+mprhdr.length))
-	print n_data_points
 		Debugprintf2("Something is wrong!",0)
 		sprintf tmps,"%08.0f != %08.0f \r", V_filePOS, (oldpos+mprhdr.length)
 		Debugprintf2(tmps,0)
