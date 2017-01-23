@@ -1,7 +1,7 @@
 import tool for IgorPro
 =======================
 
-General import tool for IgorPro for importing data files from different hardware/software
+General import tool for IgorPro for importing various data file formats.
 
 <img src="GUI.png" width="400">
 

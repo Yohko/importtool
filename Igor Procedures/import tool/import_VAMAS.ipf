@@ -892,6 +892,10 @@ function Vamasrpt_check_file(file)
 		line = mycleanupstr(line)
 		line = stripstrfirstlastspaces(line)
 		variable components =  itemsinlist(line,"	"), i=0
+		if(components <= 1)
+			fsetpos file, 0
+			return -1	
+		endif
 		// read first line of numbers
 		line=myreadline(file)
 		line = stripstrfirstlastspaces(line)
