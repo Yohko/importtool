@@ -14,7 +14,7 @@ static strconstant offsetsname2_flags = "4;6;8;69;73;37;133;4096;4098;4160"
 static strconstant offsetsname2_value = "List;change_done;Irregular;Spectrum;Split_Spectrum;Mapping;?? Auto Z;set_file;change_todo;Record_Spectrum"
 
 // #### flags
-static strconstant f_technique_names								= "AES;ISS;SIMS;XPS;SEM;SNMS;?;?;?"
+static strconstant f_technique_names								= "AES;ISS;SIMS;XPS;SEM;SNMS;RGA;TDS;UPS"
 static strconstant f_fat_resolution_names						= "Pass energy 5;Pass energy 10;Pass energy 20;Pass energy 40;Pass energy 80;Pass energy 160;Pass energy 320"
 static strconstant f_fat_resolution_values						= "5;10;20;40;80;160;320"
 static strconstant f_fixed_retard_ratio_names					= "Retard ratio 20/14;Retard ratio 10/11;Retard ratio 5/6;Retard ratio 2/3"
@@ -216,7 +216,7 @@ static function KratosDSET_checkID(file, Dsetobject, ID)
 end
 
 
-static function KratosDSET_resetDsetobject(Dsetobject)
+static function KratosDSET_resetDsetobject(Dsetobject) // 1298 known objects
 	struct KratosDsetobject &Dsetobject
 
 	NewDatafolder /O root:Packages ; NewDatafolder /O $directory
@@ -248,48 +248,49 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	
 	// 6: string
 
+	//	33: array of f =3: Signed 32-bit word; four bytes.
 	//	34: array of f =4:	32-bit IEEE floating point; four bytes.
 	//	35: array of f =5:	64-bit IEEE floating poin; eight bytes.
 	
-	KratosDSET_initaddobject(Dsetobject,1,3,"Technique","", "0=AES;1=ISS;2=SIMS;3=XPS;4=SEM;5=SNMS;6=RGA;8=UPS","")//AID_technique
+	KratosDSET_initaddobject(Dsetobject,1,3,"Technique","", "0=AES;1=ISS;2=SIMS;3=XPS;4=SEM;5=SNMS;6=RGA;8=UPS","")//AID_technique 0..15?
 	KratosDSET_initaddobject(Dsetobject,2,3,"Scan type","","0=Spectrum;1=Irregular;2=Mapping;3=Linescan;4=profile scan;5=Snapshot","")//AID_scan_type
 	KratosDSET_initaddobject(Dsetobject,3,5,"Spectrum scan start","eV","","")//AID_spectrum_start
 	KratosDSET_initaddobject(Dsetobject,4,5,"Spectrum scan step size","eV","","")//AID_spectrum_step_size
 	KratosDSET_initaddobject(Dsetobject,5,6,"Abscissa label","","","")//FID_abscissa_label
 	KratosDSET_initaddobject(Dsetobject,6,6,"Abscissa units","","","")//FID_abscissa_units
-	KratosDSET_initaddobject(Dsetobject,7,5,"Dwell time","","","")//AID_dwell_time
+	KratosDSET_initaddobject(Dsetobject,7,5,"Dwell time","seconds","","")//AID_dwell_time
 	KratosDSET_initaddobject(Dsetobject,8,6,"Ordinate label","","","")//FID_ordinate_label
 	KratosDSET_initaddobject(Dsetobject,9,6,"Ordinate units","","","")//FID_ordinate_units
-//	KratosDSET_initaddobject(Dsetobject,10,0,"# ordinate values","","","")//FID_no_abscissa_values
+	KratosDSET_initaddobject(Dsetobject,10,3,"# ordinate values","","","")//FID_no_abscissa_values
 	KratosDSET_initaddobject(Dsetobject,11,35,"Abscissa values","","","abscval")//FID_abscissa_values
 	KratosDSET_initaddobject(Dsetobject,12,34,"Ordinate values","","","ordval")//FID_ordinate_values
 	KratosDSET_initaddobject(Dsetobject,13,6,"Sample name","","","")//AID_sample_name
-	//KratosDSET_initaddobject(Dsetobject,14,0,"X-coordinate","","","")//FID_xcoord
-	//KratosDSET_initaddobject(Dsetobject,15,0,"Y-coordinate","","","")//FID_ycoord
-	//KratosDSET_initaddobject(Dsetobject,16,0,"Z-coordinate","","","")//FID_zcoord
-	//KratosDSET_initaddobject(Dsetobject,17,0,"Theta-coordinate","","","")//FID_theta_coord
-	//KratosDSET_initaddobject(Dsetobject,18,0,"Phi-coordinate","","","")//FID_phi_coord
-	//KratosDSET_initaddobject(Dsetobject,19,0,"Cumulative etch time","","","")//FID_total_etch_time
-	//KratosDSET_initaddobject(Dsetobject,20,0,"Excitation name","","","")//FID_excitation_name
-	//KratosDSET_initaddobject(Dsetobject,21,0,"Excitation energy","","","")//FID_excitation_energy
-	//KratosDSET_initaddobject(Dsetobject,22,0,"Excitation strength","","","")//FID_excitation_strength
-	//KratosDSET_initaddobject(Dsetobject,23,0,"Primary ion mass","","","")//FID_primary_mass
+	KratosDSET_initaddobject(Dsetobject,14,5,"X-coordinate","millimetres","","")//FID_xcoord
+	KratosDSET_initaddobject(Dsetobject,15,5,"Y-coordinate","millimetres","","")//FID_ycoord
+	KratosDSET_initaddobject(Dsetobject,16,5,"Z-coordinate","millimetres","","")//FID_zcoord
+	KratosDSET_initaddobject(Dsetobject,17,5,"Theta-coordinate","radians","","")//FID_theta_coord
+	KratosDSET_initaddobject(Dsetobject,18,5,"Phi-coordinate","radians","","")//FID_phi_coord
+	KratosDSET_initaddobject(Dsetobject,20,5,"Cumulative etch time","seconds","","")//FID_total_etch_time
+	KratosDSET_initaddobject(Dsetobject,21,6,"Excitation name","","","")//FID_excitation_name
+	KratosDSET_initaddobject(Dsetobject,22,5,"Excitation energy","eV","","")//FID_excitation_energy
+	KratosDSET_initaddobject(Dsetobject,23,5,"Excitation strength","","","")//FID_excitation_strength
+	KratosDSET_initaddobject(Dsetobject,24,3,"Primary ion mass","amu","","")//FID_primary_mass
 	KratosDSET_initaddobject(Dsetobject,25,3,"# points per line in map","","","")//AID_coord_n_points_x
 	KratosDSET_initaddobject(Dsetobject,26,3,"# lines in map","","","")//AID_coord_n_lines_y
-//	KratosDSET_initaddobject(Dsetobject,27,0,"Map start x","","","")//FID_map_start_x
-//	KratosDSET_initaddobject(Dsetobject,28,0,"Map start y","","","")//FID_map_start_y
-//	KratosDSET_initaddobject(Dsetobject,29,0,"Map end x","","","")//FID_map_end_x
-//	KratosDSET_initaddobject(Dsetobject,30,0,"Map end y","","","")//FID_map_end_y
-	KratosDSET_initaddobject(Dsetobject,31,5,"Etch time","","","")//AID_etch_time
-//	KratosDSET_initaddobject(Dsetobject,32,0,"Map counts","","","")//FID_map_counts
-//	KratosDSET_initaddobject(Dsetobject,33,0,"Minimum intensity","","","")//FID_min_intensity
-//	KratosDSET_initaddobject(Dsetobject,34,0,"Maximum intensity","","","")//FID_max_intensity
-//	KratosDSET_initaddobject(Dsetobject,35,0,"X step size","","","")//FID_delta_x
-//	KratosDSET_initaddobject(Dsetobject,36,0,"Y step size","","","")//FID_delta_y
+	KratosDSET_initaddobject(Dsetobject,27,3,"Map start x","","","")//FID_map_start_x
+	KratosDSET_initaddobject(Dsetobject,28,3,"Map start y","","","")//FID_map_start_y
+	KratosDSET_initaddobject(Dsetobject,29,3,"Map end x","","","")//FID_map_end_x
+	KratosDSET_initaddobject(Dsetobject,30,3,"Map end y","","","")//FID_map_end_y
+	KratosDSET_initaddobject(Dsetobject,31,5,"Etch time","seconds","","")//AID_etch_time
+	KratosDSET_initaddobject(Dsetobject,32,33,"Map counts","","","")//FID_map_counts
+	KratosDSET_initaddobject(Dsetobject,33,4,"Minimum intensity","","","")//FID_min_intensity
+	KratosDSET_initaddobject(Dsetobject,34,4,"Maximum intensity","","","")//FID_max_intensity
+	KratosDSET_initaddobject(Dsetobject,35,5,"X step size","millimetres","","")//FID_delta_x
+	KratosDSET_initaddobject(Dsetobject,36,5,"Y step size","millimetres","","")//FID_delta_y
 	KratosDSET_initaddobject(Dsetobject,37,6,"Acquisition name","","","")//AID_region_name
 	KratosDSET_initaddobject(Dsetobject,38,3,"State change type","","0=Etch;1=Position;2=Counter;9=Ion Gun Gas;10=Delay","")//FID_change_of_state
-	//KratosDSET_initaddobject(Dsetobject,39,0,"Gun current","","","")//AID_gun_current
-	//KratosDSET_initaddobject(Dsetobject,40,0,"Gun voltage","","","")//AID_gun_voltage
+	KratosDSET_initaddobject(Dsetobject,39,5,"Gun current","amps","","")//AID_gun_current
+	KratosDSET_initaddobject(Dsetobject,40,5,"Gun voltage","volts","","")//AID_gun_voltage
 	//KratosDSET_initaddobject(Dsetobject,41,0,"Analyser mode","","","")//FID_analyser_mode
 	KratosDSET_initaddobject(Dsetobject,42,5,"Pass energy","","","")//AID_pass_energy_nominal
 	//KratosDSET_initaddobject(Dsetobject,43,0,"Retard ratio","","","")//AID_retard_ratio_nominal
@@ -418,8 +419,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,167,0,"Intervention Default Bias","","","")//FID_intervention_default_bias
 	//KratosDSET_initaddobject(Dsetobject,168,0,"Intervention Sample Bias","","","")//FID_intervention_sample_bias
 	//KratosDSET_initaddobject(Dsetobject,169,0,"Points have been edited","","","")//FID_points_edited
-	//KratosDSET_initaddobject(Dsetobject,170,0,"Processing History","","","")//FID_proc_hist
-	KratosDSET_initaddobject(Dsetobject,170,3,"???","","","")
+	KratosDSET_initaddobject(Dsetobject,170,3,"Processing History","","","")//FID_proc_hist // should be an array (3x)
 	//KratosDSET_initaddobject(Dsetobject,171,0,"Sample Magazine Table","","","")//FID_sample_magazine_table
 	//KratosDSET_initaddobject(Dsetobject,172,0,"Sample Magazine Index","","","")//FID_sample_magazine_index
 	//KratosDSET_initaddobject(Dsetobject,173,0,"Sample Magazine Label","","","")//FID_sample_magazine_label
@@ -844,51 +844,45 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,597,0,"Axis HS scan x-offset","","","")//IID_hs_x_offset_factor
 	//KratosDSET_initaddobject(Dsetobject,598,0,"Axis HS scan y-offset","","","")//IID_hs_y_offset_factor
 	//KratosDSET_initaddobject(Dsetobject,599,0,"Electron Gun PSU type","","","")//IID_eg_psu_type
-	//KratosDSET_initaddobject(Dsetobject,600,0,"Process identifier","","","")//PID_process
-	//KratosDSET_initaddobject(Dsetobject,601,0,"Gaussian width","","","")//PID_gauss_width
-	//KratosDSET_initaddobject(Dsetobject,602,0,"Smooth type","","","")//PID_smooth_type
-	//KratosDSET_initaddobject(Dsetobject,603,0,"Derivative","","","")//PID_deriv
-	//KratosDSET_initaddobject(Dsetobject,604,0,"No. Points","","","")//PID_npoints
-	//KratosDSET_initaddobject(Dsetobject,605,0,"Polynomial Degree","","","")//PID_poly_degree
-	//KratosDSET_initaddobject(Dsetobject,606,0,"Direction of Integration","","","")//PID_integrate_direction
-	//KratosDSET_initaddobject(Dsetobject,607,0,"Deconvolution width","","","")//PID_deconvolute_width
-	//KratosDSET_initaddobject(Dsetobject,608,0,"Maximum iterations","","","")//PID_max_iterations
-	//KratosDSET_initaddobject(Dsetobject,609,0,"Tolerance","","","")//PID_tolerance
-	//KratosDSET_initaddobject(Dsetobject,610,0,"Deconvolution method","","","")//PID_deconv_method
-	//KratosDSET_initaddobject(Dsetobject,611,0,"Kernel size","","","")//PID_kernel_size
-	//KratosDSET_initaddobject(Dsetobject,612,0,"Kernel coefficients","","","")//PID_kernel_coeffs
-	//KratosDSET_initaddobject(Dsetobject,613,0,"Suppress -ve values","","","")//PID_suppress_negatives
-	//KratosDSET_initaddobject(Dsetobject,614,0,"Histogram threshold","","","")//PID_threshold
-	//KratosDSET_initaddobject(Dsetobject,615,0,"Histogram mass region","","","")//PID_mass_region
-	//KratosDSET_initaddobject(Dsetobject,616,0,"Linear correction factor","","","")//PID_linear_factor
-	//KratosDSET_initaddobject(Dsetobject,617,0,"Quadratic correction factor","","","")//PID_square_factor
-	//KratosDSET_initaddobject(Dsetobject,618,0,"X-ray correction side","","","")//PID_side
-	//KratosDSET_initaddobject(Dsetobject,619,0,"Shift regions with spectrum","","","")//PID_shift_regions
-	//KratosDSET_initaddobject(Dsetobject,620,0,"Calculation operator","","","")//PID_operator
-	//KratosDSET_initaddobject(Dsetobject,621,0,"Second Operand Type","","","")//PID_operand2_type
-	//KratosDSET_initaddobject(Dsetobject,622,0,"Constant operand","","","")//PID_constant_operand
-	//KratosDSET_initaddobject(Dsetobject,623,0,"Data operand","","","")//PID_data_operand
-	//KratosDSET_initaddobject(Dsetobject,624,0,"Operand 1st Dimension","","","")//PID_operand_dim1
-	//KratosDSET_initaddobject(Dsetobject,625,0,"Operand 2nd Dimension","","","")//PID_operand_dim2
-	//KratosDSET_initaddobject(Dsetobject,626,0,"Operand Abscissa start","","","")//PID_abscissa_start
-	//KratosDSET_initaddobject(Dsetobject,627,0,"Operand Abscissa increment","","","")//PID_abscissa_inc
-	//KratosDSET_initaddobject(Dsetobject,628,0,"Overwrite original","","","")//PID_overwrite
-	//KratosDSET_initaddobject(Dsetobject,629,0,"Sample Bias","","","")//PID_sample_bias
-	//KratosDSET_initaddobject(Dsetobject,630,0,"Sample to Pixel Transform","","","")//PID_image_xy_to_ij
-	//KratosDSET_initaddobject(Dsetobject,631,0,"New Object Name","","","")//PID_new_object_name
-	//KratosDSET_initaddobject(Dsetobject,632,0,"Direction","","","")//PID_new_direction
-	//KratosDSET_initaddobject(Dsetobject,633,0,"Elevation","","","")//PID_new_elevation
-	//KratosDSET_initaddobject(Dsetobject,634,0,"Orientation","","","")//PID_new_orientation
-	//KratosDSET_initaddobject(Dsetobject,635,0,"Actual Working Distance","","","")//PID_new_actual_wd
-	//KratosDSET_initaddobject(Dsetobject,636,0,"Full Scale Deflection","","","")//PID_new_fsd
-	//KratosDSET_initaddobject(Dsetobject,637,0,"Abscissa Values","","","")//PID_abscissa_values
-	//KratosDSET_initaddobject(Dsetobject,638,0,"Processing Abscissa Shift","","","")//PID_abscissa_shift
-	KratosDSET_initaddobject(Dsetobject,2001,3,"???","","","")
-	KratosDSET_initaddobject(Dsetobject,2003,5,"???","","","")
-	KratosDSET_initaddobject(Dsetobject,2004,3,"???","","","")
-	KratosDSET_initaddobject(Dsetobject,2005,3,"???","","","")
-	KratosDSET_initaddobject(Dsetobject,2006,3,"???","","","")
-	KratosDSET_initaddobject(Dsetobject,2007,3,"???","","","")
+	KratosDSET_initaddobject(Dsetobject,2001,3,"Process identifier","","","")//PID_process
+	KratosDSET_initaddobject(Dsetobject,2003,5,"Gaussian width","","","")//PID_gauss_width
+	KratosDSET_initaddobject(Dsetobject,2004,3,"Smooth type","","","")//PID_smooth_type
+	KratosDSET_initaddobject(Dsetobject,2005,3,"Derivative","","","")//PID_deriv
+	KratosDSET_initaddobject(Dsetobject,2006,3,"No. Points","","","")//PID_npoints
+	KratosDSET_initaddobject(Dsetobject,2007,3,"Polynomial Degree","","","")//PID_poly_degree
+	//KratosDSET_initaddobject(Dsetobject,2008,0,"Direction of Integration","","","")//PID_integrate_direction
+	//KratosDSET_initaddobject(Dsetobject,2009,0,"Deconvolution width","","","")//PID_deconvolute_width
+	//KratosDSET_initaddobject(Dsetobject,2010,0,"Maximum iterations","","","")//PID_max_iterations
+	//KratosDSET_initaddobject(Dsetobject,2011,0,"Tolerance","","","")//PID_tolerance
+	//KratosDSET_initaddobject(Dsetobject,2012,0,"Deconvolution method","","","")//PID_deconv_method
+	//KratosDSET_initaddobject(Dsetobject,2013,0,"Kernel size","","","")//PID_kernel_size
+	//KratosDSET_initaddobject(Dsetobject,2014,0,"Kernel coefficients","","","")//PID_kernel_coeffs
+	//KratosDSET_initaddobject(Dsetobject,2015,0,"Suppress -ve values","","","")//PID_suppress_negatives
+	//KratosDSET_initaddobject(Dsetobject,2016,0,"Histogram threshold","","","")//PID_threshold
+	//KratosDSET_initaddobject(Dsetobject,2017,0,"Histogram mass region","","","")//PID_mass_region
+	//KratosDSET_initaddobject(Dsetobject,2018,0,"Linear correction factor","","","")//PID_linear_factor
+	//KratosDSET_initaddobject(Dsetobject,2019,0,"Quadratic correction factor","","","")//PID_square_factor
+	//KratosDSET_initaddobject(Dsetobject,2020,0,"X-ray correction side","","","")//PID_side
+	//KratosDSET_initaddobject(Dsetobject,2021,0,"Shift regions with spectrum","","","")//PID_shift_regions
+	//KratosDSET_initaddobject(Dsetobject,2022,0,"Calculation operator","","","")//PID_operator
+	//KratosDSET_initaddobject(Dsetobject,2023,0,"Second Operand Type","","","")//PID_operand2_type
+	//KratosDSET_initaddobject(Dsetobject,2024,0,"Constant operand","","","")//PID_constant_operand
+	//KratosDSET_initaddobject(Dsetobject,2025,0,"Data operand","","","")//PID_data_operand
+	//KratosDSET_initaddobject(Dsetobject,2026,0,"Operand 1st Dimension","","","")//PID_operand_dim1
+	//KratosDSET_initaddobject(Dsetobject,2027,0,"Operand 2nd Dimension","","","")//PID_operand_dim2
+	//KratosDSET_initaddobject(Dsetobject,2028,0,"Operand Abscissa start","","","")//PID_abscissa_start
+	//KratosDSET_initaddobject(Dsetobject,2029,0,"Operand Abscissa increment","","","")//PID_abscissa_inc
+	//KratosDSET_initaddobject(Dsetobject,2030,0,"Overwrite original","","","")//PID_overwrite
+	//KratosDSET_initaddobject(Dsetobject,2031,0,"Sample Bias","","","")//PID_sample_bias
+	//KratosDSET_initaddobject(Dsetobject,2032,0,"Sample to Pixel Transform","","","")//PID_image_xy_to_ij
+	//KratosDSET_initaddobject(Dsetobject,2033,0,"New Object Name","","","")//PID_new_object_name
+	//KratosDSET_initaddobject(Dsetobject,2034,0,"Direction","","","")//PID_new_direction
+	//KratosDSET_initaddobject(Dsetobject,2035,0,"Elevation","","","")//PID_new_elevation
+	//KratosDSET_initaddobject(Dsetobject,2036,0,"Orientation","","","")//PID_new_orientation
+	//KratosDSET_initaddobject(Dsetobject,2037,0,"Actual Working Distance","","","")//PID_new_actual_wd
+	//KratosDSET_initaddobject(Dsetobject,2038,0,"Full Scale Deflection","","","")//PID_new_fsd
+	//KratosDSET_initaddobject(Dsetobject,2039,0,"Abscissa Values","","","")//PID_abscissa_values
+	//KratosDSET_initaddobject(Dsetobject,2040,0,"Processing Abscissa Shift","","","")//PID_abscissa_shift
 	KratosDSET_initaddobject(Dsetobject,2041,3,"Background type for spectra","","1=F_LINEAR;2=F_SHIRLEY","")//PID_background_type
 	//KratosDSET_initaddobject(Dsetobject,2042,0,"Background start coordinates","","","")//PID_background_start
 	//KratosDSET_initaddobject(Dsetobject,2043,0,"Background end coordinates","","","")//PID_background_end
@@ -977,19 +971,19 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3054,0,"Xray Gun Source","","","")//AID_manual_xray_gun_source
 	//KratosDSET_initaddobject(Dsetobject,3055,0,"ESCA Sample name","","","")//AID_esca_manipulator_sample_name
 	KratosDSET_initaddobject(Dsetobject,3056,5,"Raster Zoom Factor","","","")//AID_raster_zoom
-	//KratosDSET_initaddobject(Dsetobject,3057,0,"Raster X Offset Factor","","","")//AID_raster_x_offset
-	//KratosDSET_initaddobject(Dsetobject,3058,0,"Raster Y Offset Factor","","","")//AID_raster_y_offset
-	//KratosDSET_initaddobject(Dsetobject,3059,0,"Raster Kinetic Compensation Factor","","","")//AID_raster_ke_factor
-	//KratosDSET_initaddobject(Dsetobject,3060,0,"Raster X Scale Factor","","","")//AID_raster_x_scale
-	//KratosDSET_initaddobject(Dsetobject,3061,0,"Raster Y Scale Factor","","","")//AID_raster_y_scale
-	//KratosDSET_initaddobject(Dsetobject,3062,0,"Raster Rotation Angle","","","")//AID_raster_rotation
-	//KratosDSET_initaddobject(Dsetobject,3063,0,"Raster Shear Angle","","","")//AID_raster_shear
-	//KratosDSET_initaddobject(Dsetobject,3064,0,"Xray Gun Settle time","","","")//AID_xray_gun_settle_time
+	KratosDSET_initaddobject(Dsetobject,3057,5,"Raster X Offset Factor","","","")//AID_raster_x_offset
+	KratosDSET_initaddobject(Dsetobject,3058,5,"Raster Y Offset Factor","","","")//AID_raster_y_offset
+	KratosDSET_initaddobject(Dsetobject,3059,5,"Raster Kinetic Compensation Factor","","","")//AID_raster_ke_factor
+	KratosDSET_initaddobject(Dsetobject,3060,5,"Raster X Scale Factor","","","")//AID_raster_x_scale
+	KratosDSET_initaddobject(Dsetobject,3061,5,"Raster Y Scale Factor","","","")//AID_raster_y_scale
+	KratosDSET_initaddobject(Dsetobject,3062,5,"Raster Rotation Angle","Rads","","")//AID_raster_rotation
+	KratosDSET_initaddobject(Dsetobject,3063,5,"Raster Shear Angle","Rads","","")//AID_raster_shear
+	KratosDSET_initaddobject(Dsetobject,3064,5,"Xray Gun Settle time","seconds","","")//AID_xray_gun_settle_time
 	KratosDSET_initaddobject(Dsetobject,3065,5,"Charge Neutraliser Charge Balance","","","")//AID_neutraliser_charge_balance
 	KratosDSET_initaddobject(Dsetobject,3066,5,"Charge Neutraliser Filament Current","","","")//AID_neutraliser_filament_current
 	KratosDSET_initaddobject(Dsetobject,3067,5,"Charge Neutraliser Filament Bias","","","")//AID_neutraliser_filament_bias
 	KratosDSET_initaddobject(Dsetobject,3068,5,"Magnet Lens Trim Coil","","","")//AID_neutraliser_trim_coil
-	//KratosDSET_initaddobject(Dsetobject,3069,0,"Magnet Lens Deguass","","","")//AID_neutraliser_deguass
+	KratosDSET_initaddobject(Dsetobject,3069,5,"Magnet Lens Deguass","","","")//AID_neutraliser_deguass
 	KratosDSET_initaddobject(Dsetobject,3070,3,"Neutraliser Switch State","","1=F_NEUTRALISER_LEAVE_ON;3=F_NEUTRALISER_MANUAL_SETTINGS","")//AID_neutraliser_state
 	KratosDSET_initaddobject(Dsetobject,3071,3,"Hardware Control State","","","")//AID_hardware_control
 	//KratosDSET_initaddobject(Dsetobject,3072,0,"Analyser Energy","","","")//AID_analyser_energy
@@ -1028,14 +1022,14 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3091,5,"Stage X Rotation","","","")//AID_stage_x_rotation
 	KratosDSET_initaddobject(Dsetobject,3092,5,"Stage Y Rotation","","","")//AID_stage_y_rotation
 	KratosDSET_initaddobject(Dsetobject,3093,5,"Stage Z Rotation","","","")//AID_stage_z_rotation
-	//KratosDSET_initaddobject(Dsetobject,3094,0,"Motor Name","","","")//AID_motor_name
-	//KratosDSET_initaddobject(Dsetobject,3095,0,"Motor Position","","","")//AID_motor_position
+	KratosDSET_initaddobject(Dsetobject,3094,6,"Motor Name","","","")//AID_motor_name
+	KratosDSET_initaddobject(Dsetobject,3095,5,"Motor Position","m","","")//AID_motor_position
 	KratosDSET_initaddobject(Dsetobject,3096,3,"pixel square per point","","","")//AID_image_point_size
 	KratosDSET_initaddobject(Dsetobject,3097,3,"Map type","","0=F_MAP_SCANNED;1=F_MAP_STIGMATIC","")//AID_map_type
 	KratosDSET_initaddobject(Dsetobject,3098,3,"Stage Position Table","","","")//AID_stage_position_table
 	//KratosDSET_initaddobject(Dsetobject,3099,0,"Stage Manual Button State","","","")//AID_stage_button_state
-	//KratosDSET_initaddobject(Dsetobject,3100,0,"Motor Position Name","","","")//AID_motor_position_name
-	KratosDSET_initaddobject(Dsetobject,3101,3,"Selected Area Aperture","","0=F_APERTURE_3by12","")//AID_selected_area_aperture
+	KratosDSET_initaddobject(Dsetobject,3100,6,"Motor Position Name","","","")//AID_motor_position_name
+	KratosDSET_initaddobject(Dsetobject,3101,3,"Selected Area Aperture","","0=F_APERTURE_3by12;1=F_APERTURE_10mm;2=F_APERTURE_2mm;3=F_APERTURE_1mm;4=F_APERTURE_400um;5=F_APERTURE_150um;6=F_NO_APERTURE_SIZES","")//AID_selected_area_aperture
 	KratosDSET_initaddobject(Dsetobject,3102,3,"Active Analyser Type","","0=HEMISPHERICAL;1=MIRROR HEMISPHERICAL","")//AID_active_analyser_type
 	KratosDSET_initaddobject(Dsetobject,3103,3,"Manually Acquired Data Saved","","","")//AID_iman_current_image_flag
 	KratosDSET_initaddobject(Dsetobject,3104,3,"Detector used to set analyser energy map/linescan","","","")//AID_key_detector_number
@@ -1083,7 +1077,7 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3146,0,"Start Spellman U.V. Discharge Current","","","")//AID_ss_uv_discharge_current
 	//KratosDSET_initaddobject(Dsetobject,3147,0,"Start Spellman X.Gun Mono Bias","","","")//AID_ss_xgun_mono_bias
 	//KratosDSET_initaddobject(Dsetobject,3148,0,"Start Spellman X.Gun filament Limit","","","")//AID_ss_xgun_filament_limit
-	KratosDSET_initaddobject(Dsetobject,3149,3,"Start Spellman X.Gun Energy Reference","","1=F_REFER_TO_XRAY_AL","")//AID_ss_xgun_energy_ref
+	KratosDSET_initaddobject(Dsetobject,3149,3,"Start Spellman X.Gun Energy Reference","","0=F_REFER_TO_XRAY_MG;1=F_REFER_TO_XRAY_AL;2=F_REFER_TO_NONE;3=F_REFER_TO_XRAY_AG;4=F_REFER_TO_UV_HE_I;5=F_REFER_TO_UV_HE_II;6=F_REFER_TO_XRAY_ZR;7=F_REFER_TO_XRAY_TI;8=F_REFER_TO_XRAY_MONO_AL;9=F_NO_ENERGY_REFERENCES","")//AID_ss_xgun_energy_ref
 	//KratosDSET_initaddobject(Dsetobject,3150,0,"X.Gun filament Degas first time","","","")//AID_ss_xgun_degas_first_time
 	//KratosDSET_initaddobject(Dsetobject,3151,0,"X.Gun filament Degas second time","","","")//AID_ss_xgun_degas_second_time
 	//KratosDSET_initaddobject(Dsetobject,3152,0,"X.Gun filament Degas first current","","","")//AID_ss_xgun_degas_first_current
@@ -1102,12 +1096,12 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3165,0,"Lens Sweep Initialise","","","")//AID_lens_sweep_initialise
 	//KratosDSET_initaddobject(Dsetobject,3166,0,"Lens Sweep abscissa","","","")//AID_lens_sweep_abscissa
 	KratosDSET_initaddobject(Dsetobject,3167,3,"Selected Area Iris Index","","","")//AID_iris_position_index
-	//KratosDSET_initaddobject(Dsetobject,3168,0,"X.Gun Energy Reference","","","")//AID_manual_xgun_energy_ref
+	KratosDSET_initaddobject(Dsetobject,3168,3,"X.Gun Energy Reference","","","")//AID_manual_xgun_energy_ref
 	//KratosDSET_initaddobject(Dsetobject,3169,0,"ESCA 3200 Xray Emission","","","")//AID_esca3200_xray_gun_emission
 	//KratosDSET_initaddobject(Dsetobject,3170,0,"ESCA 3200 Xray Accel HT","","","")//AID_esca3200_xray_gun_accelHT
 	//KratosDSET_initaddobject(Dsetobject,3171,0,"ESCA 3X00 Resolution","","","")//AID_esca3X00_analyser_resolution
 	//KratosDSET_initaddobject(Dsetobject,3172,0,"Samples Positions Active","","","")//AID_xsam_carousel_samples_enabled
-	//KratosDSET_initaddobject(Dsetobject,3173,0,"Sample Positions Number","","","")//AID_xsam_carousel_position
+	KratosDSET_initaddobject(Dsetobject,3173,3,"Sample Positions Number","","","")//AID_xsam_carousel_position
 	//KratosDSET_initaddobject(Dsetobject,3174,0,"XSAM Sample name","","","")//AID_xsam_carousel_sample_name
 	//KratosDSET_initaddobject(Dsetobject,3175,0,"Analyser operation suppress flag","","","")//AID_dont_mess_with_analyser
 	//KratosDSET_initaddobject(Dsetobject,3176,0,"Samples Position Active","","","")//AID_sample_bar_samples_enabled
@@ -1129,20 +1123,20 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3192,5,"NICPU X-ray Gun Emission Current","A","","")//AID_nicpu_xgun_emission_current
 	KratosDSET_initaddobject(Dsetobject,3193,5,"NICPU X-ray Gun Anode HT Voltage","V","","")//AID_nicpu_xgun_ht_voltage
 	KratosDSET_initaddobject(Dsetobject,3194,5,"NICPU X-ray Gun Focus Voltage","V","","")//AID_nicpu_xgun_focus_voltage
-	//KratosDSET_initaddobject(Dsetobject,3195,0,"NICPU X-ray Gun Filament Current Limit","","","")//AID_nicpu_xgun_filament_current_limit
-	//KratosDSET_initaddobject(Dsetobject,3196,0,"NICPU X-ray gun filament degas first time","","","")//AID_nicpu_xgun_degas_first_time
-	//KratosDSET_initaddobject(Dsetobject,3197,0,"NICPU X-ray gun filament degas second time","","","")//AID_nicpu_xgun_degas_second_time
-	//KratosDSET_initaddobject(Dsetobject,3198,0,"NICPU X-ray gun filament degas first current","","","")//AID_nicpu_xgun_degas_first_current
-	//KratosDSET_initaddobject(Dsetobject,3199,0,"NICPU X-ray gun filament degas second current","","","")//AID_nicpu_xgun_degas_second_current
+	KratosDSET_initaddobject(Dsetobject,3195,5,"NICPU X-ray Gun Filament Current Limit","A","","")//AID_nicpu_xgun_filament_current_limit
+	KratosDSET_initaddobject(Dsetobject,3196,5,"NICPU X-ray gun filament degas first time","s","","")//AID_nicpu_xgun_degas_first_time
+	KratosDSET_initaddobject(Dsetobject,3197,5,"NICPU X-ray gun filament degas second time","s","","")//AID_nicpu_xgun_degas_second_time
+	KratosDSET_initaddobject(Dsetobject,3198,5,"NICPU X-ray gun filament degas first current","A","","")//AID_nicpu_xgun_degas_first_current
+	KratosDSET_initaddobject(Dsetobject,3200,5,"NICPU X-ray gun filament degas second current","A","","")//AID_nicpu_xgun_degas_second_current
 	KratosDSET_initaddobject(Dsetobject,3201,5,"Magnet Lens Trim Coil 2","","","")//AID_neutraliser_trim_coil_2
 	KratosDSET_initaddobject(Dsetobject,3202,5,"Magnet Lens Trim Coil 3","","","")//AID_neutraliser_trim_coil_3
 	KratosDSET_initaddobject(Dsetobject,3203,5,"NICPU Ion Gun PSU beam_ht","V","","")//AID_nicpu_igun_beam_ht
-	//KratosDSET_initaddobject(Dsetobject,3204,0,"NICPU Ion Gun PSU LMIG Beam HT","","","")//AID_nicpu_igun_LMIG_beam_ht
+	KratosDSET_initaddobject(Dsetobject,3204,5,"NICPU Ion Gun PSU LMIG Beam HT","V","","")//AID_nicpu_igun_LMIG_beam_ht
 	KratosDSET_initaddobject(Dsetobject,3205,5,"NICPU Ion Gun PSU Float Voltage","V","","")//AID_nicpu_igun_float_voltage
-	//KratosDSET_initaddobject(Dsetobject,3206,0,"NICPU Ion Gun PSU LMIG Filament Current","","","")//AID_nicpu_igun_LMIG_filament_current
-	//KratosDSET_initaddobject(Dsetobject,3207,0,"NICPU Ion Gun PSU LMIG Beam Current","","","")//AID_nicpu_igun_LMIG_beam_current
+	KratosDSET_initaddobject(Dsetobject,3206,5,"NICPU Ion Gun PSU LMIG Filament Current","A","","")//AID_nicpu_igun_LMIG_filament_current
+	KratosDSET_initaddobject(Dsetobject,3207,5,"NICPU Ion Gun PSU LMIG Beam Current","A","","")//AID_nicpu_igun_LMIG_beam_current
 	KratosDSET_initaddobject(Dsetobject,3208,5,"NICPU Ion Gun PSU grid_voltage","V","","")//AID_nicpu_igun_grid_voltage
-	//KratosDSET_initaddobject(Dsetobject,3209,0,"NICPU Ion Gun PSU Filament Current Limit","","","")//AID_nicpu_igun_filament_current_limit
+	KratosDSET_initaddobject(Dsetobject,3209,5,"NICPU Ion Gun PSU Filament Current Limit","A","","")//AID_nicpu_igun_filament_current_limit
 	KratosDSET_initaddobject(Dsetobject,3210,5,"NICPU Ion Gun PSU Emission Current","A","","")//AID_nicpu_igun_emission_current
 	KratosDSET_initaddobject(Dsetobject,3211,5,"NICPU Ion Gun PSU Extractor Voltage","V","","")//AID_nicpu_igun_extractor_voltage
 	KratosDSET_initaddobject(Dsetobject,3212,5,"NICPU Ion Gun PSU Extractor Current","A","","")//AID_nicpu_igun_extractor_current
@@ -1151,14 +1145,14 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3215,5,"NICPU Ion Gun PSU Condenser Voltage","V","","")//AID_nicpu_igun_condenser_voltage
 	KratosDSET_initaddobject(Dsetobject,3216,5,"NICPU Ion Gun PSU Focus Voltage","V","","")//AID_nicpu_igun_focus_voltage
 	KratosDSET_initaddobject(Dsetobject,3217,3,"NICPU Ion Gun PSU filament","","0=F_NICPU_ION_GUN_FILAMENT_1","")//AID_nicpu_igun_filament
-	//KratosDSET_initaddobject(Dsetobject,3218,0,"NICPU Ion Gun PSU HT Tracking On","","","")//AID_nicpu_igun_ht_tracking_on
+	KratosDSET_initaddobject(Dsetobject,3218,3,"NICPU Ion Gun PSU HT Tracking On","","","")//AID_nicpu_igun_ht_tracking_on
 	KratosDSET_initaddobject(Dsetobject,3219,5,"NICPU Ion Gun PSU Raster Offset X","V","","")//AID_nicpu_igun_raster_offset_x_voltage
 	KratosDSET_initaddobject(Dsetobject,3220,5,"NICPU Ion Gun PSU Raster Offset Y","V","","")//AID_nicpu_igun_raster_offset_y_voltage
 	KratosDSET_initaddobject(Dsetobject,3221,5,"NICPU Ion Gun PSU Raster Scale X","V","","")//AID_nicpu_igun_raster_scale_x_voltage
 	KratosDSET_initaddobject(Dsetobject,3222,5,"NICPU Ion Gun PSU Raster Scale Y","V","","")//AID_nicpu_igun_raster_scale_x_voltage
-	//KratosDSET_initaddobject(Dsetobject,3223,0,"NICPU Analyser Number Detectors","","","")//AID_nicpu_analyser_number_detectors
-	KratosDSET_initaddobject(Dsetobject,3224,3,"NICPU X.Gun Energy Reference","","8=F_REFER_TO_XRAY_MONO_AL","")//AID_nicpu_xgun_energy_ref
-	//KratosDSET_initaddobject(Dsetobject,3225,0,"NICPU Imager integration time","","","")//AID_image_integration_time
+	KratosDSET_initaddobject(Dsetobject,3223,3,"NICPU Analyser Number Detectors","","","")//AID_nicpu_analyser_number_detectors
+	KratosDSET_initaddobject(Dsetobject,3224,3,"NICPU X.Gun Energy Reference","","0=F_REFER_TO_XRAY_MG;1=F_REFER_TO_XRAY_AL;2=F_REFER_TO_NONE;3=F_REFER_TO_XRAY_AG;4=F_REFER_TO_UV_HE_I;5=F_REFER_TO_UV_HE_II;6=F_REFER_TO_XRAY_ZR;7=F_REFER_TO_XRAY_TI;8=F_REFER_TO_XRAY_MONO_AL;9=F_NO_ENERGY_REFERENCES","")//AID_nicpu_xgun_energy_ref
+	KratosDSET_initaddobject(Dsetobject,3225,5,"NICPU Imager integration time","","","")//AID_image_integration_time
 	KratosDSET_initaddobject(Dsetobject,3226,5,"NICPU Ion Gun filament Degas first time","","","")//AID_nicpu_igun_degas_first_time
 	KratosDSET_initaddobject(Dsetobject,3227,5,"NICPU Ion Gun filament Degas second time","","","")//AID_nicpu_igun_degas_second_time
 	KratosDSET_initaddobject(Dsetobject,3228,5,"NICPU Ion Gun filament Degas first current","","","")//AID_nicpu_igun_degas_first_current
@@ -1169,55 +1163,55 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,3233,5,"Position of image centre wrt sample holder centre y","","","")//AID_image_centre_wrt_sample_holder_y
 	KratosDSET_initaddobject(Dsetobject,3234,0,"Scan Sweep OBJECT","","","SWO")//AID_scan_sweep_object
 	//KratosDSET_initaddobject(Dsetobject,3235,0,"Scan Sweep Option","","","")//AID_scan_sweep_option
-	//KratosDSET_initaddobject(Dsetobject,3236,0,"Scan Sweep Row","","","")//AID_scan_sweep_row
-	//KratosDSET_initaddobject(Dsetobject,3237,0,"Scan Sweep Row","","","")//AID_scan_sweep_active
-	//KratosDSET_initaddobject(Dsetobject,3238,0,"Scan Sweep Counter","","","")//AID_scan_sweep_counter
-	//KratosDSET_initaddobject(Dsetobject,3239,0,"Scan Sweep Initialise","","","")//AID_scan_sweep_initialise
-	//KratosDSET_initaddobject(Dsetobject,3240,0,"Lens Sweep abscissa","","","")//AID_scan_sweep_abscissa
-	//KratosDSET_initaddobject(Dsetobject,3241,0,"Lens Sweep ordinate acquire","","","")//AID_scan_sweep_ordinate_needed
-	//KratosDSET_initaddobject(Dsetobject,3242,0,"Selected ordinate in Profile scan","","","")//AID_scan_sweep_quant_ordinate_type
+	KratosDSET_initaddobject(Dsetobject,3236,3,"Scan Sweep Row","","","")//AID_scan_sweep_row
+	KratosDSET_initaddobject(Dsetobject,3237,3,"Scan Sweep Row","","","")//AID_scan_sweep_active
+	KratosDSET_initaddobject(Dsetobject,3238,3,"Scan Sweep Counter","","","")//AID_scan_sweep_counter
+	KratosDSET_initaddobject(Dsetobject,3239,3,"Scan Sweep Initialise","","","")//AID_scan_sweep_initialise
+	KratosDSET_initaddobject(Dsetobject,3240,5,"Lens Sweep abscissa","","","")//AID_scan_sweep_abscissa
+	KratosDSET_initaddobject(Dsetobject,3241,3,"Lens Sweep ordinate acquire","","","")//AID_scan_sweep_ordinate_needed
+	KratosDSET_initaddobject(Dsetobject,3242,3,"Selected ordinate in Profile scan","","","")//AID_scan_sweep_quant_ordinate_type
 	KratosDSET_initaddobject(Dsetobject,3244,3,"Origin of platen","","","")//AID_platen_level
 	KratosDSET_initaddobject(Dsetobject,3245,3,"Type of platen","","","")//AID_platen_type
-	//KratosDSET_initaddobject(Dsetobject,3246,0,"NICPU X-ray Gun Water Flow Rate Limit","","","")//AID_nicpu_xgun_water_flow_rate_limit
+	KratosDSET_initaddobject(Dsetobject,3246,5,"NICPU X-ray Gun Water Flow Rate Limit","A","","")//AID_nicpu_xgun_water_flow_rate_limit
 	KratosDSET_initaddobject(Dsetobject,3247,5,"NICPU X-ray Gun Suppressor or Bias Voltage","V","","")//AID_nicpu_xgun_suppressor_bias_voltage
-	//KratosDSET_initaddobject(Dsetobject,3248,0,"NOVA sputter shield control bit (0 for no, 1 for yes)","","","")//AID_enable_sputter_shield
+	KratosDSET_initaddobject(Dsetobject,3248,3,"NOVA sputter shield control bit (0 for no, 1 for yes)","","","")//AID_enable_sputter_shield
 	KratosDSET_initaddobject(Dsetobject,3249,5,"Position of image centre wrt sample holder centre z","","","")//AID_image_centre_wrt_sample_holder_z
 	KratosDSET_initaddobject(Dsetobject,3250,3,"Auto Z coordinate","","","")//AID_auto_z_this_coordinate
 	KratosDSET_initaddobject(Dsetobject,3251,3,"NICPU Ion Gun Enable Azimuthal Rotation","","","")//AID_nicpu_igun_enable_azimuthal_rotation
-	//KratosDSET_initaddobject(Dsetobject,3252,0,"Electron Gun Filament Voltage","","","")//AID_electron_gun_filament_voltage
-	//KratosDSET_initaddobject(Dsetobject,3253,0,"Electron Gun Float Voltage","","","")//AID_electron_gun_float_voltage
+	KratosDSET_initaddobject(Dsetobject,3252,5,"Electron Gun Filament Voltage","V","","")//AID_electron_gun_filament_voltage
+	KratosDSET_initaddobject(Dsetobject,3253,5,"Electron Gun Float Voltage","V","","")//AID_electron_gun_float_voltage
 	KratosDSET_initaddobject(Dsetobject,3254,3,"Auto Z ordinate","","","")//AID_ordinate_choice_for_auto_z
 	KratosDSET_initaddobject(Dsetobject,3255,5,"Z Step size (mm) for auto z","","","")//AID_delta_z_auto_z
 	KratosDSET_initaddobject(Dsetobject,3256,3,"Number of steps in auto z","","","")//AID_n_delta_z
-	//KratosDSET_initaddobject(Dsetobject,3257,0,"Marker to indicate auto z has been performed 1 for yes 0 for no","","","")//AID_auto_z_done
-	//KratosDSET_initaddobject(Dsetobject,3258,0,"Marker to request a fine scan after the main scan","","","")//AID_fine_auto_z
-	KratosDSET_initaddobject(Dsetobject,3259,5,"Optimum z position","","","")//AID_auto_z_max_position
+	KratosDSET_initaddobject(Dsetobject,3257,3,"Marker to indicate auto z has been performed 1 for yes 0 for no","","","")//AID_auto_z_done
+	KratosDSET_initaddobject(Dsetobject,3258,5,"Marker to request a fine scan after the main scan","","","")//AID_fine_auto_z
+	KratosDSET_initaddobject(Dsetobject,3259,5,"Optimum z position","m","","")//AID_auto_z_max_position
 	KratosDSET_initaddobject(Dsetobject,3260,3,"Ordinate value at optimum z position","","","")//AID_auto_z_max_position_ordinate_value
 	KratosDSET_initaddobject(Dsetobject,3261,3,"This an index to a row in either position tables","","","")//AID_position_table_row
 	KratosDSET_initaddobject(Dsetobject,3262,3,"This is an index which identifies a position table","","","")//AID_position_table_id
-	//KratosDSET_initaddobject(Dsetobject,3263,0,"Index to Scan used for auto z","","","")//AID_auto_z_scan_choice
-	KratosDSET_initaddobject(Dsetobject,3264,5,"Width of region in spectra scan","","","")//AID_last_scan_width
+	KratosDSET_initaddobject(Dsetobject,3263,3,"Index to Scan used for auto z","","","")//AID_auto_z_scan_choice
+	KratosDSET_initaddobject(Dsetobject,3264,5,"Width of region in spectra scan","eV","","")//AID_last_scan_width
 	KratosDSET_initaddobject(Dsetobject,3265,3,"Energy/line scan # steps","","","")//AID_last_scan_n_steps
-	KratosDSET_initaddobject(Dsetobject,3266,5,"Spectrum scan step size","","","")//AID_last_spectrum_step_size
-	KratosDSET_initaddobject(Dsetobject,3267,5,"Dwell/sweep time","","","")//AID_last_dwell_time
-	KratosDSET_initaddobject(Dsetobject,3268,5,"Dwell/sweep time","","","")//AID_snapshot_last_dwell_time
-	KratosDSET_initaddobject(Dsetobject,3269,3,"The point of viewed when acquisition is in progress","","","")//???
+	KratosDSET_initaddobject(Dsetobject,3266,5,"Spectrum scan step size","eV","","")//AID_last_spectrum_step_size
+	KratosDSET_initaddobject(Dsetobject,3267,5,"Dwell/sweep time","seconds","","")//AID_last_dwell_time
+	KratosDSET_initaddobject(Dsetobject,3268,5,"Dwell/sweep time","seconds","","")//AID_snapshot_last_dwell_time
+	KratosDSET_initaddobject(Dsetobject,3269,3,"The point of viewed when acquisition is in progress","","","")//AID_POV_id
 	//KratosDSET_initaddobject(Dsetobject,3269,0,"This Id',27h,'s a camera as either SAC or SEC","","","")//AID_Nova_camera_id
-	//KratosDSET_initaddobject(Dsetobject,3270,0,"degree of spherical correction","","","")//AID_spherical_correction_value
+	KratosDSET_initaddobject(Dsetobject,3272,5,"degree of spherical correction","","","")//AID_spherical_correction_value
 	KratosDSET_initaddobject(Dsetobject,3273,3,"Ion Gun Gas State","","","")//AID_nicpu_igun_gas_state
-	//KratosDSET_initaddobject(Dsetobject,3274,0,"NICPU X-ray Gun Leakage Current Trip High","","","")//AID_nicpu_xgun_leakage_current_trip_high
-	//KratosDSET_initaddobject(Dsetobject,3275,0,"NICPU X-ray Gun Leakage Current Trip Low","","","")//AID_nicpu_xgun_leakage_current_trip_low
-	//KratosDSET_initaddobject(Dsetobject,3276,0,"NICPU X-ray Gun Deionise Delay","","","")//AID_nicpu_xgun_deionise_delay
-	KratosDSET_initaddobject(Dsetobject,3278,5,"NICPU Ion Gun Standby Delay Time","","","")//AID_nicpu_igun_standby_time
-	KratosDSET_initaddobject(Dsetobject,3279,5,"State Change Delay Time","","","")//AID_state_change_delay
+	KratosDSET_initaddobject(Dsetobject,3275,5,"NICPU X-ray Gun Leakage Current Trip High","mA","","")//AID_nicpu_xgun_leakage_current_trip_high
+	KratosDSET_initaddobject(Dsetobject,3276,5,"NICPU X-ray Gun Leakage Current Trip Low","mA","","")//AID_nicpu_xgun_leakage_current_trip_low
+	KratosDSET_initaddobject(Dsetobject,3277,5,"NICPU X-ray Gun Deionise Delay","seconds","","")//AID_nicpu_xgun_deionise_delay
+	KratosDSET_initaddobject(Dsetobject,3278,5,"NICPU Ion Gun Standby Delay Time","seconds","","")//AID_nicpu_igun_standby_time
+	KratosDSET_initaddobject(Dsetobject,3279,5,"State Change Delay Time","seconds","","")//AID_state_change_delay
 	KratosDSET_initaddobject(Dsetobject,3280,3,"Index used to id flow chart object originated from","","","")//AID_flow_chart_index
 	KratosDSET_initaddobject(Dsetobject,3281,3,"Index used to id object in flow diagram","","","")//AID_object_in_flow_chart_index
 	KratosDSET_initaddobject(Dsetobject,3282,6,"Descriptor for aperture size used in acquisition","","","")//AID_aperture_size_name
 	KratosDSET_initaddobject(Dsetobject,3283,6,"Descriptor for iris position used in acquisition","","","")//AID_iris_position_name
-	//KratosDSET_initaddobject(Dsetobject,3284,0,"Number of images in X direction (image stitching)","","","")//AID_image_count_x
-	//KratosDSET_initaddobject(Dsetobject,3285,0,"Number of images in Y direction (image stitching)","","","")//AID_image_count_y
-	//KratosDSET_initaddobject(Dsetobject,3286,0,"Sample exchange needed","","","")//AID_external_exchange
-	//KratosDSET_initaddobject(Dsetobject,3287,0,"This is an index that denotes the part of vision that created any' given stage position","","","")//AID_position_source
+	KratosDSET_initaddobject(Dsetobject,3284,3,"Number of images in X direction (image stitching)","","","")//AID_image_count_x
+	KratosDSET_initaddobject(Dsetobject,3285,3,"Number of images in Y direction (image stitching)","","","")//AID_image_count_y
+	KratosDSET_initaddobject(Dsetobject,3286,3,"Sample exchange needed","","","")//AID_external_exchange
+	KratosDSET_initaddobject(Dsetobject,3287,3,"This is an index that denotes the part of vision that created any' given stage position","","","")//AID_position_source
 	//KratosDSET_initaddobject(Dsetobject,3288,0,"TIFF file name","","","")//AID_tiff_file_name
 	//KratosDSET_initaddobject(Dsetobject,3289,0,"Scan direction","","","")//AID_scan_direction
 	KratosDSET_initaddobject(Dsetobject,3290,6,"Vision Software Version","","","")//AID_vision_software_version
@@ -1229,7 +1223,9 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	// against the version of Vision you are using each time a new upgrade to Vision is released ...
 	// MMRC:	5177 b4901 NICPU: 70 296 b296
 	// JCAP:	6432 b6303 NICPU: 72 492 b492
-	//KratosDSET_initaddobject(Dsetobject,3291,0,"Instrument name","","","")//CID_instrument_name
+	KratosDSET_initaddobject(Dsetobject,3323,6,"Sample holder name","","","")//AID_sh_name
+	KratosDSET_initaddobject(Dsetobject,3324,6,"Export datset file name","","","")//AID_export_file_name
+	KratosDSET_initaddobject(Dsetobject,5000,6,"Instrument name","","","")//CID_instrument_name
 	//KratosDSET_initaddobject(Dsetobject,3292,0,"Techniques Available","","","")//CID_techniques_available
 	//KratosDSET_initaddobject(Dsetobject,3293,0,"Instrument interface type","","","")//CID_intrument_interface
 	//KratosDSET_initaddobject(Dsetobject,3294,0,"II processor","","","")//CID_es_processor
@@ -1237,36 +1233,36 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	//KratosDSET_initaddobject(Dsetobject,3296,0,"II port name","","","")//CID_es_port_name
 	//KratosDSET_initaddobject(Dsetobject,3297,0,"II serial speed","","","")//CID_es_serial_port_speed
 	//KratosDSET_initaddobject(Dsetobject,3298,0,"Excitation sources","","","")//CID_excitation_source_array
-	//KratosDSET_initaddobject(Dsetobject,3299,0,"Excitation technique","","","")//CID_excitation_technique
-	//KratosDSET_initaddobject(Dsetobject,3300,0,"Xray excitation code","","","")//CID_xray_excitation_code
-	//KratosDSET_initaddobject(Dsetobject,3301,0,"Xray photon energy","","","")//CID_xray_photon_energy
-	//KratosDSET_initaddobject(Dsetobject,3302,0,"Xray gun voltage control flag","","","")//CID_xray_gun_voltage_control_flag
-	//KratosDSET_initaddobject(Dsetobject,3303,0,"Xray gun current control flag","","","")//CID_xray_gun_current_control_flag
+	KratosDSET_initaddobject(Dsetobject,5022,3,"Excitation technique","","","")//CID_excitation_technique
+	KratosDSET_initaddobject(Dsetobject,5030,3,"Xray excitation code","","","")//CID_xray_excitation_code
+	KratosDSET_initaddobject(Dsetobject,5031,4,"Xray photon energy","","","")//CID_xray_photon_energy
+	KratosDSET_initaddobject(Dsetobject,5032,3,"Xray gun voltage control flag","","","")//CID_xray_gun_voltage_control_flag
+	KratosDSET_initaddobject(Dsetobject,5033,3,"Xray gun current control flag","","","")//CID_xray_gun_current_control_flag
 	//KratosDSET_initaddobject(Dsetobject,3304,0,"Xray anode type","","","")//CID_xray_anode_type
-	//KratosDSET_initaddobject(Dsetobject,3305,0,"Electron Gun excitation code","","","")//CID_egun_excitation_code
-	//KratosDSET_initaddobject(Dsetobject,3306,0,"Electron Gun gun voltage control flag","","","")//CID_egun_gun_voltage_control_flag
-	//KratosDSET_initaddobject(Dsetobject,3307,0,"Electron Gun gun current control flag","","","")//CID_egun_gun_current_control_flag
+	KratosDSET_initaddobject(Dsetobject,5040,3,"Electron Gun excitation code","","","")//CID_egun_excitation_code
+	KratosDSET_initaddobject(Dsetobject,5041,3,"Electron Gun gun voltage control flag","","","")//CID_egun_gun_voltage_control_flag
+	KratosDSET_initaddobject(Dsetobject,5042,3,"Electron Gun gun current control flag","","","")//CID_egun_gun_current_control_flag
 	//KratosDSET_initaddobject(Dsetobject,3308,0,"Lens array","","","")//CID_lens_array
-	//KratosDSET_initaddobject(Dsetobject,3309,0,"Lens name","","","")//CID_lens_name
+	KratosDSET_initaddobject(Dsetobject,5101,6,"Lens name","","","")//CID_lens_name
 	//KratosDSET_initaddobject(Dsetobject,3310,0,"Lens unit number","","","")//CID_lens_unit_number
 	//KratosDSET_initaddobject(Dsetobject,3311,0,"Lens polarity","","","")//CID_lens_polarity
-	//KratosDSET_initaddobject(Dsetobject,3312,0,"Lens max voltage","","","")//CID_lens_max_voltage
-	//KratosDSET_initaddobject(Dsetobject,3313,0,"Lens Information array","","","")//CID_lens_information_array
-	//KratosDSET_initaddobject(Dsetobject,3314,0,"Lens Mode array","","","")//CID_lens_mode_array
-	//KratosDSET_initaddobject(Dsetobject,3315,0,"Lens Mode","","","")//CID_lens_mode
-	//KratosDSET_initaddobject(Dsetobject,3316,0,"Lens Resolution Array","","","")//CID_lens_resolution_array
-	//KratosDSET_initaddobject(Dsetobject,3317,0,"Lens Energy offset","","","")//CID_lens_energy_offset
-	//KratosDSET_initaddobject(Dsetobject,3318,0,"Lens unit functions","","","")//CID_lens_unit_functions
-	//KratosDSET_initaddobject(Dsetobject,3319,0,"Lens Function Analyser Energy","","","")//CID_lens_analyser_energy
-	//KratosDSET_initaddobject(Dsetobject,3320,0,"Lens Function Voltage","","","")//CID_lens_voltage
-	//KratosDSET_initaddobject(Dsetobject,3321,0,"Analyser Resolutions FAT Flag","","","")//CID_analyser_resolution_fat_flags
-	//KratosDSET_initaddobject(Dsetobject,3322,0,"Analyser Resolutions Value","","","")//CID_analyser_resolution_exact_values
-	//KratosDSET_initaddobject(Dsetobject,3323,0,"Analyser Resolutions Offset","","","")//CID_analyser_resolution_offsets
-	//KratosDSET_initaddobject(Dsetobject,3324,0,"Analyser Resolutions Gain","","","")//CID_analyser_resolution_gains
-	//KratosDSET_initaddobject(Dsetobject,3325,0,"Analyser work function","","","")//CID_analyser_work_function
-	//KratosDSET_initaddobject(Dsetobject,3326,0,"# detectors","","","")//CID_n_detectors
-	//KratosDSET_initaddobject(Dsetobject,3327,0,"Detectors separation ratio","","","")//CID_detector_separation_ratio
-	//KratosDSET_initaddobject(Dsetobject,3328,0,"Detectors channeltron voltages","","","")//CID_detector_channeltron_voltages
+	KratosDSET_initaddobject(Dsetobject,5104,4,"Lens max voltage","V","","")//CID_lens_max_voltage
+	KratosDSET_initaddobject(Dsetobject,5105,3,"Lens Information array","","","")//CID_lens_information_array
+	KratosDSET_initaddobject(Dsetobject,5106,3,"Lens Mode array","","","")//CID_lens_mode_array
+	//KratosDSET_initaddobject(Dsetobject,5107,0,"Lens Mode","","","")//CID_lens_mode
+	KratosDSET_initaddobject(Dsetobject,5108,3,"Lens Resolution Array","eV","","")//CID_lens_resolution_array
+	KratosDSET_initaddobject(Dsetobject,5109,4,"Lens Energy offset","","","")//CID_lens_energy_offset
+	KratosDSET_initaddobject(Dsetobject,5110,3,"Lens unit functions","","","")//CID_lens_unit_functions
+	KratosDSET_initaddobject(Dsetobject,5111,35,"Lens Function Analyser Energy","","","")//CID_lens_analyser_energy
+	KratosDSET_initaddobject(Dsetobject,5112,35,"Lens Function Voltage","","","")//CID_lens_voltage
+	KratosDSET_initaddobject(Dsetobject,5126,33,"Analyser Resolutions FAT Flag","","","")//CID_analyser_resolution_fat_flags
+	KratosDSET_initaddobject(Dsetobject,5127,35,"Analyser Resolutions Value","","","")//CID_analyser_resolution_exact_values
+	KratosDSET_initaddobject(Dsetobject,5128,35,"Analyser Resolutions Offset","","","")//CID_analyser_resolution_offsets
+	KratosDSET_initaddobject(Dsetobject,5129,35,"Analyser Resolutions Gain","","","")//CID_analyser_resolution_gains
+	KratosDSET_initaddobject(Dsetobject,5130,5,"Analyser work function","","","")//CID_analyser_work_function
+	KratosDSET_initaddobject(Dsetobject,5150,3,"# detectors","","","")//CID_n_detectors
+	KratosDSET_initaddobject(Dsetobject,5151,4,"Detectors separation ratio","V","","")//CID_detector_separation_ratio
+	KratosDSET_initaddobject(Dsetobject,5152,34,"Detectors channeltron voltages","","","")//CID_detector_channeltron_voltages
 	KratosDSET_initaddobject(Dsetobject,5500,3,"Configuration Option Toggle State","","0=F_CONFIG_OPTION_DISABLED;1=F_CONFIG_OPTION_ENABLED","")//CID_config_option_state
 	KratosDSET_initaddobject(Dsetobject,5501,3,"Configuration VME baud rate","","3=F_VME_38400_BAUD","")//CID_vme_baud_rate
 	KratosDSET_initaddobject(Dsetobject,5502,3,"Configuration Host Serial Port","","0=F_HOST_SERIAL_PORT_A","")//CID_host_serial_port
@@ -1274,49 +1270,49 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,5504,3,"Configuration Host/Slave Comms","","","")//CID_config_host_slave
 	KratosDSET_initaddobject(Dsetobject,5505,6,"Configuration Option Name","","","")//CID_option_name
 	KratosDSET_initaddobject(Dsetobject,5506,3,"Configuration Instrument","","","")//CID_config_instrument
-	//KratosDSET_initaddobject(Dsetobject,3336,0,"K4 Vacuum Options","","","")//CID_k4_config_options
-	//KratosDSET_initaddobject(Dsetobject,3337,0,"K4 Vacuum Fibre OpticSerial Port","","","")//CID_k4_serial_port
-	//KratosDSET_initaddobject(Dsetobject,3338,0,"Lens Single PSU Options","","","")//CID_lens_single_psu_array
-	//KratosDSET_initaddobject(Dsetobject,3339,0,"Lens first name","","","")//CID_lens_first_name
-	//KratosDSET_initaddobject(Dsetobject,3340,0,"Lens PSU unit number","","","")//CID_lens_psu_unit_number
-	//KratosDSET_initaddobject(Dsetobject,3341,0,"Lens PSU polarity","","","")//CID_lens_psu_polarity
-	//KratosDSET_initaddobject(Dsetobject,3342,0,"Lens PSU range limit","","","")//CID_lens_psu_range_limit
-	//KratosDSET_initaddobject(Dsetobject,3343,0,"Lens Magnification Options","","","")//CID_lens_magnifications
+	KratosDSET_initaddobject(Dsetobject,5507,33,"K4 Vacuum Options","","","")//CID_k4_config_options
+	KratosDSET_initaddobject(Dsetobject,5508,3,"K4 Vacuum Fibre OpticSerial Port","","","")//CID_k4_serial_port
+	KratosDSET_initaddobject(Dsetobject,5510,3,"Lens Single PSU Options","","","")//CID_lens_single_psu_array
+	KratosDSET_initaddobject(Dsetobject,5511,3,"Lens first name","","","")//CID_lens_first_name
+	KratosDSET_initaddobject(Dsetobject,5512,3,"Lens PSU unit number","","","")//CID_lens_psu_unit_number
+	KratosDSET_initaddobject(Dsetobject,5513,3,"Lens PSU polarity","","","")//CID_lens_psu_polarity
+	KratosDSET_initaddobject(Dsetobject,5514,4,"Lens PSU range limit","","","")//CID_lens_psu_range_limit
+	//KratosDSET_initaddobject(Dsetobject,5515,0,"Lens Magnification Options","","","")//CID_lens_magnifications
 	KratosDSET_initaddobject(Dsetobject,5516,3,"No. Fibre-Optic Timer/Counters","","","")//CID_No_optical_timer_counters
 	KratosDSET_initaddobject(Dsetobject,5517,3,"FAT Pass Energy Options","","","")//CID_fat_pass_energy_options
 	KratosDSET_initaddobject(Dsetobject,5518,5,"Exact Pass Energy","","","")//CID_exact_pass_energy
-	//KratosDSET_initaddobject(Dsetobject,3347,0,"Pass Energy 25meV Offset","","","")//CID_pass_energy_25_offset
-	//KratosDSET_initaddobject(Dsetobject,3348,0,"Pass Energy 25meV Gain","","","")//CID_pass_energy_25_gain
-	//KratosDSET_initaddobject(Dsetobject,3349,0,"Pass Energy 50meV Offset","","","")//CID_pass_energy_50_offset
-	//KratosDSET_initaddobject(Dsetobject,3350,0,"Pass Energy 50meV Gain","","","")//CID_pass_energy_50_gain
-	//KratosDSET_initaddobject(Dsetobject,3351,0,"Pass Energy 100meV Offset","","","")//CID_pass_energy_100_offset
-	//KratosDSET_initaddobject(Dsetobject,3352,0,"Pass Energy 100meV Gain","","","")//CID_pass_energy_100_gain
-	//KratosDSET_initaddobject(Dsetobject,3353,0,"Retard Ratio Options","","","")//CID_frr_options
-	//KratosDSET_initaddobject(Dsetobject,3354,0,"Exact Retard Ratio","","","")//CID_exact_retard_ratio
-	//KratosDSET_initaddobject(Dsetobject,3355,0,"Retard Ratio 25meV Offset","","","")//CID_retard_ratio_25_offset
-	//KratosDSET_initaddobject(Dsetobject,3356,0,"Retard Ratio 25meV Gain","","","")//CID_retard_ratio_25_gain
-	//KratosDSET_initaddobject(Dsetobject,3357,0,"Retard Ratio 50meV Offset","","","")//CID_retard_ratio_50_offset
-	//KratosDSET_initaddobject(Dsetobject,3358,0,"Retard Ratio 50meV Gain","","","")//CID_retard_ratio_50_gain
-	//KratosDSET_initaddobject(Dsetobject,3359,0,"Retard Ratio 100meV Offset","","","")//CID_retard_ratio_100_offset
-	//KratosDSET_initaddobject(Dsetobject,3360,0,"Retard Ratio 100meV Gain","","","")//CID_retard_ratio_100_gain
+	KratosDSET_initaddobject(Dsetobject,5519,5,"Pass Energy 25meV Offset","","","")//CID_pass_energy_25_offset
+	KratosDSET_initaddobject(Dsetobject,5520,5,"Pass Energy 25meV Gain","","","")//CID_pass_energy_25_gain
+	KratosDSET_initaddobject(Dsetobject,5521,5,"Pass Energy 50meV Offset","","","")//CID_pass_energy_50_offset
+	KratosDSET_initaddobject(Dsetobject,5522,5,"Pass Energy 50meV Gain","","","")//CID_pass_energy_50_gain
+	KratosDSET_initaddobject(Dsetobject,5523,5,"Pass Energy 100meV Offset","","","")//CID_pass_energy_100_offset
+	KratosDSET_initaddobject(Dsetobject,5524,5,"Pass Energy 100meV Gain","","","")//CID_pass_energy_100_gain
+	KratosDSET_initaddobject(Dsetobject,5525,3,"Retard Ratio Options","","","")//CID_frr_options
+	KratosDSET_initaddobject(Dsetobject,5526,5,"Exact Retard Ratio","","","")//CID_exact_retard_ratio
+	KratosDSET_initaddobject(Dsetobject,5527,5,"Retard Ratio 25meV Offset","","","")//CID_retard_ratio_25_offset
+	KratosDSET_initaddobject(Dsetobject,5528,5,"Retard Ratio 25meV Gain","","","")//CID_retard_ratio_25_gain
+	KratosDSET_initaddobject(Dsetobject,5529,5,"Retard Ratio 50meV Offset","","","")//CID_retard_ratio_50_offset
+	KratosDSET_initaddobject(Dsetobject,5530,5,"Retard Ratio 50meV Gain","","","")//CID_retard_ratio_50_gain
+	KratosDSET_initaddobject(Dsetobject,5531,5,"Retard Ratio 100meV Offset","","","")//CID_retard_ratio_100_offset
+	KratosDSET_initaddobject(Dsetobject,5532,5,"Retard Ratio 100meV Gain","","","")//CID_retard_ratio_100_gain
 	KratosDSET_initaddobject(Dsetobject,5533,5,"Work function","eV","","")//CID_work_function
-	//KratosDSET_initaddobject(Dsetobject,3362,0,"HSA decrease Slew-rate","","","")//CID_hsa_decrease_slew_rate
-	//KratosDSET_initaddobject(Dsetobject,3363,0,"HSA increase Slew-rate","","","")//CID_hsa_increase_slew_rate
-	//KratosDSET_initaddobject(Dsetobject,3364,0,"HSA channel Settle-Time","","","")//CID_hsa_channel_settle_time
-	//KratosDSET_initaddobject(Dsetobject,3365,0,"HSA 25 meV DAC enabled","","","")//CID_hsa_25meV_steps_enabled
-	//KratosDSET_initaddobject(Dsetobject,3366,0,"Channeltrons PSU Options","","","")//CID_channeltron_psu_options
-	//KratosDSET_initaddobject(Dsetobject,3367,0,"Channeltron PSU Limit","","","")//CID_channeltron_psu_limit
-	//KratosDSET_initaddobject(Dsetobject,3368,0,"Channeltron PSU Values","","","")//CID_channeltron_psu_value
-	//KratosDSET_initaddobject(Dsetobject,3369,0,"Manual Xray PSU Options","","","")//CID_manual_xray_psu_options
-	//KratosDSET_initaddobject(Dsetobject,3370,0,"Manual PSU Anode","","","")//CID_manual_xray_psu_anode
-	//KratosDSET_initaddobject(Dsetobject,3371,0,"Manual Xray PSU Fibre Optic Serial Port","","","")//CID_manual_xray_PSU_serial_port
-	//KratosDSET_initaddobject(Dsetobject,3372,0,"Manual Xray PSU Ramp-Time","","","")//CID_manual_xray_PSU_ramp_time
-	//KratosDSET_initaddobject(Dsetobject,3373,0,"HSA Detectors separation ratio","","","")//CID_hsa_detector_separation_ratio
-	//KratosDSET_initaddobject(Dsetobject,3374,0,"HSA Standby Energy","","","")//CID_hsa_standby_energy
-	//KratosDSET_initaddobject(Dsetobject,3375,0,"No. HSA Channeltron Detectors","","","")//CID_number_of_channeltrons
-	//KratosDSET_initaddobject(Dsetobject,3376,0,"Channeltron Settle-Time",NaN,"s","","","")//CID_channeltron_settle_time
-	//KratosDSET_initaddobject(Dsetobject,3377,0,"Channeltron Standby Voltage","","","")//CID_channeltron_standby_voltage
-	//KratosDSET_initaddobject(Dsetobject,3378,0,"Channeltron Dead-Time","","","")//CID_channeltron_dead_time
+	KratosDSET_initaddobject(Dsetobject,5534,5,"HSA decrease Slew-rate","","","")//CID_hsa_decrease_slew_rate
+	KratosDSET_initaddobject(Dsetobject,5535,5,"HSA increase Slew-rate","","","")//CID_hsa_increase_slew_rate
+	KratosDSET_initaddobject(Dsetobject,5536,5,"HSA channel Settle-Time","s","","")//CID_hsa_channel_settle_time
+	KratosDSET_initaddobject(Dsetobject,5537,3,"HSA 25 meV DAC enabled","","","")//CID_hsa_25meV_steps_enabled
+	KratosDSET_initaddobject(Dsetobject,5538,3,"Channeltrons PSU Options","","","")//CID_channeltron_psu_options
+	KratosDSET_initaddobject(Dsetobject,5539,35,"Channeltron PSU Limit","V","","")//CID_channeltron_psu_limit
+	KratosDSET_initaddobject(Dsetobject,5540,35,"Channeltron PSU Values","V","","")//CID_channeltron_psu_value
+	KratosDSET_initaddobject(Dsetobject,5542,3,"Manual Xray PSU Options","","","")//CID_manual_xray_psu_options
+	KratosDSET_initaddobject(Dsetobject,5543,3,"Manual PSU Anode","","","")//CID_manual_xray_psu_anode
+	KratosDSET_initaddobject(Dsetobject,5544,3,"Manual Xray PSU Fibre Optic Serial Port","","","")//CID_manual_xray_PSU_serial_port
+	KratosDSET_initaddobject(Dsetobject,5545,5,"Manual Xray PSU Ramp-Time","","","")//CID_manual_xray_PSU_ramp_time
+	KratosDSET_initaddobject(Dsetobject,5546,5,"HSA Detectors separation ratio","","","")//CID_hsa_detector_separation_ratio
+	KratosDSET_initaddobject(Dsetobject,5547,5,"HSA Standby Energy","","","")//CID_hsa_standby_energy
+	KratosDSET_initaddobject(Dsetobject,5548,3,"No. HSA Channeltron Detectors","","","")//CID_number_of_channeltrons
+	KratosDSET_initaddobject(Dsetobject,5549,5,"Channeltron Settle-Time","s","","")//CID_channeltron_settle_time
+	KratosDSET_initaddobject(Dsetobject,5550,5,"Channeltron Standby Voltage","V","","")//CID_channeltron_standby_voltage
+	KratosDSET_initaddobject(Dsetobject,5551,5,"Channeltron Dead-Time","s","","")//CID_channeltron_dead_time
 	KratosDSET_initaddobject(Dsetobject,5562,5,"ESCA decrease Slew-rate","","","")//CID_esca_decrease_slew_rate
 	KratosDSET_initaddobject(Dsetobject,5563,5,"ESCA increase Slew-rate","","","")//CID_esca_increase_slew_rate
 	KratosDSET_initaddobject(Dsetobject,5564,5,"ESCA channel Settle-Time","s","","")//CID_esca_channel_settle_time
@@ -1325,102 +1321,102 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,5567,5,"ESCA Scan DAC Offset","","","")//CID_esca_scan_dac_offset
 	KratosDSET_initaddobject(Dsetobject,5568,3,"ESCA Xray Anode Option","","0=F_ESCA_SINGLE_MG_ANODE","")//CID_esca_xray_anode
 	KratosDSET_initaddobject(Dsetobject,5569,3,"ESCA Manipulator Option","","1=F_ESCA_10_POSITION_PROBE","")//CID_esca_manipulator_option
-	//KratosDSET_initaddobject(Dsetobject,3387,0,"HSA Lens Magnification Options","","","")//CID_hsa_lens_magnifications
-	//KratosDSET_initaddobject(Dsetobject,3388,0,"HSA Lens Magnification Options","","","")//CID_hsa_lens_magn_option
-	//KratosDSET_initaddobject(Dsetobject,3389,0,"MHSA Lens Magnification Options","","","")//CID_mhsa_lens_magnifications
-	//KratosDSET_initaddobject(Dsetobject,3390,0,"MHSA Lens Magnification Options","","","")//CID_mhsa_lens_magnoption
-	//KratosDSET_initaddobject(Dsetobject,3391,0,"Lens Magnification Scanning Enabled","","","")//CID_lens_scanning_enabled
-	//KratosDSET_initaddobject(Dsetobject,3392,0,"Lens Magnification Full-Scale-Deflection","","","")//CID_lens_magn_fsd
-	//KratosDSET_initaddobject(Dsetobject,3393,0,"Analyser Operating State Data","","","")//CID_analyser_operating_states
-	//KratosDSET_initaddobject(Dsetobject,3394,0,"Analyser Scan Mode","","","")//CID_analyser_scan_mode
-	//KratosDSET_initaddobject(Dsetobject,3395,0,"Acquisition Parameters","","","")//CID_acquisition_parameters
-	//KratosDSET_initaddobject(Dsetobject,3396,0,"Lens Double PSU Options","","","")//CID_lens_double_psu_array
-	//KratosDSET_initaddobject(Dsetobject,3397,0,"Lens second name","","","")//CID_lens_second_name
-	//KratosDSET_initaddobject(Dsetobject,3398,0,"Channeltron Instrument Config","","","")//CID_channeltron_config
-	//KratosDSET_initaddobject(Dsetobject,3399,0,"Channel-Plate PSU Limit","","","")//CID_channelplate_psu_limit
-	//KratosDSET_initaddobject(Dsetobject,3400,0,"Channel-Plate PSU Values","","","")//CID_channelplate_psu_value
-	//KratosDSET_initaddobject(Dsetobject,3401,0,"Channel-Plate PSU Standby","","","")//CID_channelplate_standby
-	//KratosDSET_initaddobject(Dsetobject,3402,0,"Channel-Plate PSU Settle-Time","","","")//CID_channelplate_settle_time
+	KratosDSET_initaddobject(Dsetobject,5570,3,"HSA Lens Magnification Options","","","")//CID_hsa_lens_magnifications
+	//KratosDSET_initaddobject(Dsetobject,5571,3,"HSA Lens Magnification Options","","","")//CID_hsa_lens_magn_option
+	KratosDSET_initaddobject(Dsetobject,5572,3,"MHSA Lens Magnification Options","","","")//CID_mhsa_lens_magnifications
+	//KratosDSET_initaddobject(Dsetobject,5573,3,"MHSA Lens Magnification Options","","","")//CID_mhsa_lens_magnoption
+	KratosDSET_initaddobject(Dsetobject,5574,3,"Lens Magnification Scanning Enabled","","","")//CID_lens_scanning_enabled
+	KratosDSET_initaddobject(Dsetobject,5575,5,"Lens Magnification Full-Scale-Deflection","","","")//CID_lens_magn_fsd
+	KratosDSET_initaddobject(Dsetobject,5576,3,"Analyser Operating State Data","","","")//CID_analyser_operating_states
+	KratosDSET_initaddobject(Dsetobject,5577,3,"Analyser Scan Mode","","","")//CID_analyser_scan_mode
+	//KratosDSET_initaddobject(Dsetobject,5578,0,"Acquisition Parameters","","","")//CID_acquisition_parameters
+	KratosDSET_initaddobject(Dsetobject,5579,3,"Lens Double PSU Options","","","")//CID_lens_double_psu_array
+	KratosDSET_initaddobject(Dsetobject,5580,3,"Lens second name","","","")//CID_lens_second_name
+	KratosDSET_initaddobject(Dsetobject,5581,3,"Channeltron Instrument Config","","","")//CID_channeltron_config
+	KratosDSET_initaddobject(Dsetobject,5582,5,"Channel-Plate PSU Limit","V","","")//CID_channelplate_psu_limit
+	KratosDSET_initaddobject(Dsetobject,5583,5,"Channel-Plate PSU Values","V","","")//CID_channelplate_psu_value
+	KratosDSET_initaddobject(Dsetobject,5584,5,"Channel-Plate PSU Standby","V","","")//CID_channelplate_standby
+	KratosDSET_initaddobject(Dsetobject,5585,5,"Channel-Plate PSU Settle-Time","s","","")//CID_channelplate_settle_time
 	KratosDSET_initaddobject(Dsetobject,5586,5,"ESCA Xray PSU Settle-Time","s","","")//CID_esca_xray_settle_time	
 	KratosDSET_initaddobject(Dsetobject,5587,0,"Transmission Function Object (ke,t)","","","TFO")//CID_transmission_function
-	//KratosDSET_initaddobject(Dsetobject,5588,0,"Number of Limit Switches","","","")//CID_motor_no_limit_switches
-	//KratosDSET_initaddobject(Dsetobject,5589,0,"Number of Calibration Switches","","","")//CID_motor_no_calib_switches
-	//KratosDSET_initaddobject(Dsetobject,5590,0,"Negative-Limit Distance from origin","","","")//CID_motor_negative_limit
-	//KratosDSET_initaddobject(Dsetobject,5591,0,"Positive-Limit Distancefrom origin","","","")//CID_motor_positive_limit
-	//KratosDSET_initaddobject(Dsetobject,5592,0,"Number of Steps Per Unit for Motor Axis","","","")//CID_motor_steps_per_unit
-	//KratosDSET_initaddobject(Dsetobject,5593,0,"Motor Set Number","","","")//CID_motor_group_number
-	//KratosDSET_initaddobject(Dsetobject,5594,0,"Hardware motor number","","","")//CID_motor_hardware_motor_number
-	//KratosDSET_initaddobject(Dsetobject,5595,0,"Motor Reverse Direction Flag","","","")//CID_motor_reverse_direction
-	//KratosDSET_initaddobject(Dsetobject,5596,0,"Motor Start Speed","","","")//CID_motor_start_speed
-	//KratosDSET_initaddobject(Dsetobject,5597,0,"Motor Final Speed","","","")//CID_motor_final_speed
-	//KratosDSET_initaddobject(Dsetobject,5598,0,"Motor Acceleration","","","")//CID_motor_acceleration
-	//KratosDSET_initaddobject(Dsetobject,5599,0,"Motor Manual Slow Speed","","","")//CID_motor_manual_slow_speed
-	//KratosDSET_initaddobject(Dsetobject,5600,0,"Motor Manual Fast Speed","","","")//CID_motor_manual_fast_speed
-	//KratosDSET_initaddobject(Dsetobject,5601,0,"Motor Creep Speed","","","")//CID_motor_creep_speed
-	//KratosDSET_initaddobject(Dsetobject,5602,0,"Motor Creep Distance","","","")//CID_motor_creep_distance
-	//KratosDSET_initaddobject(Dsetobject,5603,0,"Motor Backlash","","","")//CID_motor_backlash
-	//KratosDSET_initaddobject(Dsetobject,5604,0,"Motor Calibration Switch Position","","","")//CID_motor_calib_switch_position
-	//KratosDSET_initaddobject(Dsetobject,5605,0,"Motor Calibration Switch Backoff","","","")//CID_motor_calib_switch_backoff
-	//KratosDSET_initaddobject(Dsetobject,5606,0,"Motor Move With Motor Set Allowed","","","")//CID_motor_move_with_motor_set_allowed
-	//KratosDSET_initaddobject(Dsetobject,5607,0,"Motor Calibration Sequence Number","","","")//CID_motor_calibration_sequence_number
-	//KratosDSET_initaddobject(Dsetobject,5608,0,"Stage Axes","","","")//CID_stage_axes
+	KratosDSET_initaddobject(Dsetobject,5588,3,"Number of Limit Switches","","","")//CID_motor_no_limit_switches
+	KratosDSET_initaddobject(Dsetobject,5589,3,"Number of Calibration Switches","","","")//CID_motor_no_calib_switches
+	KratosDSET_initaddobject(Dsetobject,5590,5,"Negative-Limit Distance from origin","","","")//CID_motor_negative_limit
+	KratosDSET_initaddobject(Dsetobject,5591,5,"Positive-Limit Distancefrom origin","","","")//CID_motor_positive_limit
+	KratosDSET_initaddobject(Dsetobject,5592,3,"Number of Steps Per Unit for Motor Axis","","","")//CID_motor_steps_per_unit
+	KratosDSET_initaddobject(Dsetobject,5593,3,"Motor Set Number","","","")//CID_motor_group_number
+	KratosDSET_initaddobject(Dsetobject,5594,3,"Hardware motor number","","","")//CID_motor_hardware_motor_number
+	KratosDSET_initaddobject(Dsetobject,5595,3,"Motor Reverse Direction Flag","","","")//CID_motor_reverse_direction
+	KratosDSET_initaddobject(Dsetobject,5596,5,"Motor Start Speed","","","")//CID_motor_start_speed
+	KratosDSET_initaddobject(Dsetobject,5597,5,"Motor Final Speed","","","")//CID_motor_final_speed
+	KratosDSET_initaddobject(Dsetobject,5598,5,"Motor Acceleration","","","")//CID_motor_acceleration
+	KratosDSET_initaddobject(Dsetobject,5599,5,"Motor Manual Slow Speed","","","")//CID_motor_manual_slow_speed
+	KratosDSET_initaddobject(Dsetobject,5600,5,"Motor Manual Fast Speed","","","")//CID_motor_manual_fast_speed
+	KratosDSET_initaddobject(Dsetobject,5601,5,"Motor Creep Speed","","","")//CID_motor_creep_speed
+	KratosDSET_initaddobject(Dsetobject,5602,5,"Motor Creep Distance","","","")//CID_motor_creep_distance
+	KratosDSET_initaddobject(Dsetobject,5603,5,"Motor Backlash","","","")//CID_motor_backlash
+	KratosDSET_initaddobject(Dsetobject,5604,5,"Motor Calibration Switch Position","","","")//CID_motor_calib_switch_position
+	KratosDSET_initaddobject(Dsetobject,5605,5,"Motor Calibration Switch Backoff","","","")//CID_motor_calib_switch_backoff
+	KratosDSET_initaddobject(Dsetobject,5606,3,"Motor Move With Motor Set Allowed","","","")//CID_motor_move_with_motor_set_allowed
+	KratosDSET_initaddobject(Dsetobject,5607,3,"Motor Calibration Sequence Number","","","")//CID_motor_calibration_sequence_number
+	KratosDSET_initaddobject(Dsetobject,5608,3,"Stage Axes","","","")//CID_stage_axes
 	//KratosDSET_initaddobject(Dsetobject,5609,0,"Aperture Motors","","","")//CID_aperture_motors
-	//KratosDSET_initaddobject(Dsetobject,5610,0,"Motor Position Table","","","")//CID_motor_position_table
-	//KratosDSET_initaddobject(Dsetobject,5611,0,"MHSA Lens Magnification Full-Scale-Deflection","","","")//CID_lens_mhsa_magn_fsd
-	//KratosDSET_initaddobject(Dsetobject,5612,0,"X Shift between scanned and parallel images","","","")//CID_stigmatic_shift_x
-	//KratosDSET_initaddobject(Dsetobject,5613,0,"Y Shift between scanned and parallel images","","","")//CID_stigmatic_shift_y
-	//KratosDSET_initaddobject(Dsetobject,5614,0,"XPS framestore black-level [0,1]","","","")//CID_iman_framestore_black_level
+	KratosDSET_initaddobject(Dsetobject,5610,3,"Motor Position Table","","","")//CID_motor_position_table
+	KratosDSET_initaddobject(Dsetobject,5611,5,"MHSA Lens Magnification Full-Scale-Deflection","","","")//CID_lens_mhsa_magn_fsd
+	KratosDSET_initaddobject(Dsetobject,5612,5,"X Shift between scanned and parallel images","","","")//CID_stigmatic_shift_x
+	KratosDSET_initaddobject(Dsetobject,5613,5,"Y Shift between scanned and parallel images","","","")//CID_stigmatic_shift_y
+	KratosDSET_initaddobject(Dsetobject,5614,5,"XPS framestore black-level [0,1]","","","")//CID_iman_framestore_black_level
 	KratosDSET_initaddobject(Dsetobject,5615,35,"Transmission Function Kinetic Energy","","","trans_ke")//CID_transmission_ke
 	KratosDSET_initaddobject(Dsetobject,5616,35,"Transmission Function Value","","","trans_val")//CID_transmission_value
 	//KratosDSET_initaddobject(Dsetobject,5617,0,"ESCA sample information","","","")//CID_esca_sample_info
-	//KratosDSET_initaddobject(Dsetobject,5618,0,"XPS Neutraliser Default Settings","","","")//CID_xps_neutraliser_default_settings
+	KratosDSET_initaddobject(Dsetobject,5618,0,"XPS Neutraliser Default Settings","","","")//CID_xps_neutraliser_default_settings
 	//KratosDSET_initaddobject(Dsetobject,5619,0,"Electron Gun Operating Settings","","","")//CID_electron_gun_operating_settings
-	//KratosDSET_initaddobject(Dsetobject,5620,0,"Electron Gun Beam Voltage Limits","","","")//CID_electron_gun_beam_voltage
-	//KratosDSET_initaddobject(Dsetobject,5621,0,"Electron Gun Filament Current Limits","","","")//CID_electron_gun_filament_current
-	//KratosDSET_initaddobject(Dsetobject,5622,0,"Electron Gun Emission Current Limits","","","")//CID_electron_gun_emission_current
-	//KratosDSET_initaddobject(Dsetobject,5623,0,"Electron Gun Extractor Voltage Limits","","","")//CID_electron_gun_extractor_voltage
-	//KratosDSET_initaddobject(Dsetobject,5624,0,"Electron Gun Suppressor Voltage Limits","","","")//CID_electron_gun_suppressor_voltage
-	//KratosDSET_initaddobject(Dsetobject,5625,0,"Electron Gun Spot Size Lens Limits","","","")//CID_electron_gun_spot_size
-	//KratosDSET_initaddobject(Dsetobject,5626,0,"Electron Gun Focus Lens Limits","","","")//CID_electron_gun_focus
-	//KratosDSET_initaddobject(Dsetobject,5627,0,"Electron Gun Alignment Limits","","","")//CID_electron_gun_alignment
-	//KratosDSET_initaddobject(Dsetobject,5628,0,"Electron Gun Stigmator Limits","","","")//CID_electron_gun_stigmator
-	//KratosDSET_initaddobject(Dsetobject,5629,0,"SED Collector bias Limits","","","")//CID_SED_collector_bias
-	//KratosDSET_initaddobject(Dsetobject,5630,0,"SED Multiplier bias Limits","","","")//CID_SED_multiplier_bias
-	//KratosDSET_initaddobject(Dsetobject,5631,0,"SED Black Level Limits","","","")//CID_SED_black_level
-	//KratosDSET_initaddobject(Dsetobject,5632,0,"Electron Gun Type","","","")//CID_electron_gun_type
+	KratosDSET_initaddobject(Dsetobject,5620,35,"Electron Gun Beam Voltage Limits","","","")//CID_electron_gun_beam_voltage
+	KratosDSET_initaddobject(Dsetobject,5621,35,"Electron Gun Filament Current Limits","","","")//CID_electron_gun_filament_current
+	KratosDSET_initaddobject(Dsetobject,5622,35,"Electron Gun Emission Current Limits","","","")//CID_electron_gun_emission_current
+	KratosDSET_initaddobject(Dsetobject,5623,35,"Electron Gun Extractor Voltage Limits","","","")//CID_electron_gun_extractor_voltage
+	KratosDSET_initaddobject(Dsetobject,5624,35,"Electron Gun Suppressor Voltage Limits","","","")//CID_electron_gun_suppressor_voltage
+	KratosDSET_initaddobject(Dsetobject,5625,35,"Electron Gun Spot Size Lens Limits","","","")//CID_electron_gun_spot_size
+	KratosDSET_initaddobject(Dsetobject,5626,35,"Electron Gun Focus Lens Limits","","","")//CID_electron_gun_focus
+	KratosDSET_initaddobject(Dsetobject,5627,35,"Electron Gun Alignment Limits","","","")//CID_electron_gun_alignment
+	KratosDSET_initaddobject(Dsetobject,5628,35,"Electron Gun Stigmator Limits","","","")//CID_electron_gun_stigmator
+	KratosDSET_initaddobject(Dsetobject,5629,35,"SED Collector bias Limits","","","")//CID_SED_collector_bias
+	KratosDSET_initaddobject(Dsetobject,5630,35,"SED Multiplier bias Limits","","","")//CID_SED_multiplier_bias
+	KratosDSET_initaddobject(Dsetobject,5631,35,"SED Black Level Limits","","","")//CID_SED_black_level
+	KratosDSET_initaddobject(Dsetobject,5632,3,"Electron Gun Type","","","")//CID_electron_gun_type
 	//KratosDSET_initaddobject(Dsetobject,5633,0,"SED Operating Modes","","","")//CID_sed_operating_modes
 	//KratosDSET_initaddobject(Dsetobject,5634,0,"Slow-scan Geometry List","","","")//CID_slowscan_geometry
-	//KratosDSET_initaddobject(Dsetobject,5635,0,"Slow-scan Full scan deflection","","","")//CID_slowscan_fsd
-	//KratosDSET_initaddobject(Dsetobject,5636,0,"Accel EGUN PSU Fibre Optic Serial Port","","","")//CID_egun_accel_PSU_serial_port
-	//KratosDSET_initaddobject(Dsetobject,5637,0,"Start Spellman Xray PSU Options","","","")//CID_spellman_xray_psu_options
-	//KratosDSET_initaddobject(Dsetobject,5638,0,"Start Spellman Xray PSU bias Limit","","","")//CID_spellman_xray_psu_mono_bias_limit
-	//KratosDSET_initaddobject(Dsetobject,5639,0,"ISS Bipolar relays enabled","","","")//CID_iss_bipolar_relays_enabled
-	//KratosDSET_initaddobject(Dsetobject,5640,0,"Number of VME motor control cards","","","")//CID_no_vme_motor_controllers
-	//KratosDSET_initaddobject(Dsetobject,5641,0,"VME motor control card number","","","")//CID_vme_motor_controller
+	KratosDSET_initaddobject(Dsetobject,5635,5,"Slow-scan Full scan deflection","","","")//CID_slowscan_fsd
+	KratosDSET_initaddobject(Dsetobject,5636,3,"Accel EGUN PSU Fibre Optic Serial Port","","","")//CID_egun_accel_PSU_serial_port
+	KratosDSET_initaddobject(Dsetobject,5637,3,"Start Spellman Xray PSU Options","","","")//CID_spellman_xray_psu_options
+	KratosDSET_initaddobject(Dsetobject,5638,5,"Start Spellman Xray PSU bias Limit","","","")//CID_spellman_xray_psu_mono_bias_limit
+	KratosDSET_initaddobject(Dsetobject,5639,3,"ISS Bipolar relays enabled","","","")//CID_iss_bipolar_relays_enabled
+	KratosDSET_initaddobject(Dsetobject,5640,3,"Number of VME motor control cards","","","")//CID_no_vme_motor_controllers
+	KratosDSET_initaddobject(Dsetobject,5641,3,"VME motor control card number","","","")//CID_vme_motor_controller
 	//KratosDSET_initaddobject(Dsetobject,5642,0,"ESCA Scan DAC Gain","","","")//CID_esca_res_dac_gain
 	//KratosDSET_initaddobject(Dsetobject,5643,0,"ESCA Scan DAC Offset","","","")//CID_esca_res_dac_offset
 	KratosDSET_initaddobject(Dsetobject,5644,3,"ESCA Resolution Option","","0=F_ESCA_ONE_RESOLUTION","")//CID_esca_resolution_option
 	KratosDSET_initaddobject(Dsetobject,5645,3,"ESCA Calibrate Analyser","","0=F_ESCA_CALIBRATE_NEVER","")//CID_esca_calibrate_analyser
-	//KratosDSET_initaddobject(Dsetobject,5646,0,"XSAM Carousel Option","","","")//CID_xsam_carousel_option
-	//KratosDSET_initaddobject(Dsetobject,5647,0,"Energy offset for mirror analyser","","","")//CID_mhsa_image_energy_offset
+	KratosDSET_initaddobject(Dsetobject,5646,3,"XSAM Carousel Option","","","")//CID_xsam_carousel_option
+	KratosDSET_initaddobject(Dsetobject,5647,5,"Energy offset for mirror analyser","","","")//CID_mhsa_image_energy_offset
 	//KratosDSET_initaddobject(Dsetobject,5648,0,"XSAM Carousel sample information","","","")//CID_xsam_carousel_sample_info
 	//KratosDSET_initaddobject(Dsetobject,5649,0,"Sample Bar sample information","","","")//CID_sample_bar_sample_info
-	//KratosDSET_initaddobject(Dsetobject,5650,0,"Stage Sequences of Moves","","","")//CID_stage_sequences
-	//KratosDSET_initaddobject(Dsetobject,5651,0,"Stage Sequence name","","","")//CID_stage_sequence_name
+	KratosDSET_initaddobject(Dsetobject,5650,3,"Stage Sequences of Moves","","","")//CID_stage_sequences
+	KratosDSET_initaddobject(Dsetobject,5651,6,"Stage Sequence name","","","")//CID_stage_sequence_name
 	//KratosDSET_initaddobject(Dsetobject,5652,0,"Stage Sequence enabled","","","")//CID_stage_sequence_enabled
-	//KratosDSET_initaddobject(Dsetobject,5653,0,"Motor Valve Interlock Flag","","","")//CID_motor_valve_interlock
-	//KratosDSET_initaddobject(Dsetobject,5654,0,"Motor Valve Distance","","","")//CID_motor_valve_distance
+	KratosDSET_initaddobject(Dsetobject,5653,3,"Motor Valve Interlock Flag","","","")//CID_motor_valve_interlock
+	KratosDSET_initaddobject(Dsetobject,5654,5,"Motor Valve Distance","","","")//CID_motor_valve_distance
 	KratosDSET_initaddobject(Dsetobject,5655,3,"ESCA Xray Max Accel HT","","0=F_ESCA_JP_XRAY_ACCELHT_2","")//CID_esca_xray_maxHT_code
 	KratosDSET_initaddobject(Dsetobject,5656,6,"Engineer Mode Password","","","")//CID_engineer_mode_password
 	//KratosDSET_initaddobject(Dsetobject,5657,0,"Engineer Mode Password Length","","","")//CID_engineer_mode_password_length
-	//KratosDSET_initaddobject(Dsetobject,5658,0,"Sample Bias","","","")//CID_sample_bias
-	//KratosDSET_initaddobject(Dsetobject,5659,0,"Sample bias Switch Fitted","","","")//CID_sample_bias_switch_fitted
-	//KratosDSET_initaddobject(Dsetobject,5660,0,"Divide by 10 Box Fitted","","","")//CID_divide_by_10_fitted
-	//KratosDSET_initaddobject(Dsetobject,5661,0,"Camera FSDs X","","","")//CID_camera_fsd_x
-	//KratosDSET_initaddobject(Dsetobject,5662,0,"Not Used (but has been used)","","","")//CID_camera_2_fsd
-	//KratosDSET_initaddobject(Dsetobject,5663,0,"Camera options","","","")//CID_camera_options
-	//KratosDSET_initaddobject(Dsetobject,5664,0,"Rotation axis for v1","","","")//CID_rotation_axis_v1
-	//KratosDSET_initaddobject(Dsetobject,5665,0,"Rotation axis for v2","","","")//CID_rotation_axis_v2
+	KratosDSET_initaddobject(Dsetobject,5658,5,"Sample Bias","","","")//CID_sample_bias
+	KratosDSET_initaddobject(Dsetobject,5659,3,"Sample bias Switch Fitted","","","")//CID_sample_bias_switch_fitted
+	KratosDSET_initaddobject(Dsetobject,5660,3,"Divide by 10 Box Fitted","","","")//CID_divide_by_10_fitted
+	KratosDSET_initaddobject(Dsetobject,5661,35,"Camera FSDs X","mm","","")//CID_camera_fsd_x
+	KratosDSET_initaddobject(Dsetobject,5662,35,"Not Used (but has been used)","","","")//CID_camera_2_fsd
+	KratosDSET_initaddobject(Dsetobject,5663,3,"Camera options","","","")//CID_camera_options
+	KratosDSET_initaddobject(Dsetobject,5664,35,"Rotation axis for v1","","","")//CID_rotation_axis_v1
+	KratosDSET_initaddobject(Dsetobject,5665,35,"Rotation axis for v2","","","")//CID_rotation_axis_v2
 	KratosDSET_initaddobject(Dsetobject,5666,3,"Registered Users","","","")//CID_user_list
 	KratosDSET_initaddobject(Dsetobject,5667,6,"User Name","","","")//CID_user_name
 	KratosDSET_initaddobject(Dsetobject,5668,6,"User Password","","","")//CID_user_password
@@ -1431,115 +1427,152 @@ static function KratosDSET_resetDsetobject(Dsetobject)
 	KratosDSET_initaddobject(Dsetobject,5673,3,"Polarity of Hardware Bit 15 SML_OR_MCR","","","")//CID_escak1_control_15
 	KratosDSET_initaddobject(Dsetobject,5674,3,"Polarity of Hardware Bit 16 MIRR_ERR","","","")//CID_escak1_control_16
 	KratosDSET_initaddobject(Dsetobject,5675,3,"Polarity of Hardware Bit 19 HV_OFF","","","")//CID_escak1_control_19
-	//KratosDSET_initaddobject(Dsetobject,5676,0,"Delay Line Detector Imaging","","","")//CID_nicpu_detector_imaging
-	//KratosDSET_initaddobject(Dsetobject,5677,0,"NICPU Motor Control Unit Option","","","")//CID_nicpu_motor_control_option
-	//KratosDSET_initaddobject(Dsetobject,5678,0,"NICPU Analyser FRR Option","","","")//CID_nicpu_analyser_frr
-	//KratosDSET_initaddobject(Dsetobject,5679,0,"NICPU Analyser ISS Option","","","")//CID_nicpu_analyser_iss
-	//KratosDSET_initaddobject(Dsetobject,5680,0,"NICPU Analyser UPS Option","","","")//CID_nicpu_analyser_ups
-	//KratosDSET_initaddobject(Dsetobject,5681,0,"NICPU Analyser TOF Option","","","")//CID_nicpu_analyser_tof
-	//KratosDSET_initaddobject(Dsetobject,5682,0,"NICPU Magnet Unit Option","","","")//CID_nicpu_magnet_unit_option
-	//KratosDSET_initaddobject(Dsetobject,5683,0,"NICPU Analyser Standby Energy","","","")//CID_nicpu_standby_energy
-	//KratosDSET_initaddobject(Dsetobject,5684,0,"NICPU Analyser Maximum Energy","","","")//CID_nicpu_max_energy
-	//KratosDSET_initaddobject(Dsetobject,5685,0,"Motor Half Step Flag","","","")//CID_motor_half_step
-	//KratosDSET_initaddobject(Dsetobject,5686,0,"Motor Winding Phase Reversed Flag","","","")//CID_motor_winding_phase_reversed
-	//KratosDSET_initaddobject(Dsetobject,5687,0,"NICPU Xray PSU Filaments","","","")//CID_nicpu_xray_psu_filaments
-	//KratosDSET_initaddobject(Dsetobject,5688,0,"NICPU Xray PSU focus Limit","","","")//CID_nicpu_xray_psu_focus_voltage_limit
-	//KratosDSET_initaddobject(Dsetobject,5689,0,"NICPU Xray PSU Anode Material","","","")//CID_nicpu_xray_psu_anode_material
-	//KratosDSET_initaddobject(Dsetobject,5690,0,"NICPU Ion Gun PSU Condenser Max","","","")//CID_nicpu_ion_gun_psu_condenser_max
-	//KratosDSET_initaddobject(Dsetobject,5691,0,"NICPU Ion Gun PSU Condenser Min","","","")//CID_nicpu_ion_gun_psu_condenser_min
-	//KratosDSET_initaddobject(Dsetobject,5692,0,"NICPU Ion Gun PSU Objective Max","","","")//CID_nicpu_ion_gun_psu_objective_max
-	//KratosDSET_initaddobject(Dsetobject,5693,0,"NICPU Ion Gun PSU Objective Min","","","")//CID_nicpu_ion_gun_psu_objective_min
-	//KratosDSET_initaddobject(Dsetobject,5694,0,"NICPU Ion Gun Type","","","")//CID_nicpu_ion_gun_type
-	//KratosDSET_initaddobject(Dsetobject,5695,0,"NICPU Ion Gun PSU Operating Settings","","","")//CID_nicpu_igun_operating_settings
-	//KratosDSET_initaddobject(Dsetobject,5696,0,"NICPU XRay Gun PSU Focus Settings","","","")//CID_nicpu_xray_psu_spot_settings
-	//KratosDSET_initaddobject(Dsetobject,5697,0,"NICPU Ion Gun PSU Filament Current Limit","","","")//CID_nicpu_igun_filament_current_limit
-	//KratosDSET_initaddobject(Dsetobject,5698,0,"NICPU Delay Line Detector Rotation","","","")//CID_nicpu_detector_rotation
-	//KratosDSET_initaddobject(Dsetobject,5699,0,"NICPU Delay Line Detector X Shear","","","")//CID_nicpu_detector_x_shear
-	//KratosDSET_initaddobject(Dsetobject,5700,0,"NICPU Delay Line Detector Y Shear","","","")//CID_nicpu_detector_y_shear
-	//KratosDSET_initaddobject(Dsetobject,5701,0,"NICPU Delay Line Detector X Offset","","","")//CID_nicpu_detector_x_offset
-	//KratosDSET_initaddobject(Dsetobject,5702,0,"NICPU Delay Line Detector Y Offset","","","")//CID_nicpu_detector_y_offset
-	//KratosDSET_initaddobject(Dsetobject,5703,0,"NICPU Delay Line Detector X Compression","","","")//CID_nicpu_detector_x_compression
-	//KratosDSET_initaddobject(Dsetobject,5704,0,"NICPU Delay Line Detector Y Compression","","","")//CID_nicpu_detector_y_compression
-	//KratosDSET_initaddobject(Dsetobject,5705,0,"Camera Centre","","","")//CID_camera_centre
-	//KratosDSET_initaddobject(Dsetobject,5706,0,"NICPU Vacuum Serial Port","","","")//CID_nicpu_serial_port
-	//KratosDSET_initaddobject(Dsetobject,5707,0,"NOVA Platen Control Option","","","")//CID_nova_platen_control
+	KratosDSET_initaddobject(Dsetobject,5676,3,"Delay Line Detector Imaging","","","")//CID_nicpu_detector_imaging
+	KratosDSET_initaddobject(Dsetobject,5677,3,"NICPU Motor Control Unit Option","","","")//CID_nicpu_motor_control_option
+	KratosDSET_initaddobject(Dsetobject,5678,3,"NICPU Analyser FRR Option","","","")//CID_nicpu_analyser_frr
+	KratosDSET_initaddobject(Dsetobject,5679,3,"NICPU Analyser ISS Option","","","")//CID_nicpu_analyser_iss
+	KratosDSET_initaddobject(Dsetobject,5680,3,"NICPU Analyser UPS Option","","","")//CID_nicpu_analyser_ups
+	KratosDSET_initaddobject(Dsetobject,5681,3,"NICPU Analyser TOF Option","","","")//CID_nicpu_analyser_tof
+	KratosDSET_initaddobject(Dsetobject,5682,3,"NICPU Magnet Unit Option","","","")//CID_nicpu_magnet_unit_option
+	KratosDSET_initaddobject(Dsetobject,5683,5,"NICPU Analyser Standby Energy","eV","","")//CID_nicpu_standby_energy
+	KratosDSET_initaddobject(Dsetobject,5684,5,"NICPU Analyser Maximum Energy","eV","","")//CID_nicpu_max_energy
+	KratosDSET_initaddobject(Dsetobject,5685,3,"Motor Half Step Flag","","","")//CID_motor_half_step
+	KratosDSET_initaddobject(Dsetobject,5686,3,"Motor Winding Phase Reversed Flag","","","")//CID_motor_winding_phase_reversed
+	KratosDSET_initaddobject(Dsetobject,5687,3,"NICPU Xray PSU Filaments","","","")//CID_nicpu_xray_psu_filaments
+	KratosDSET_initaddobject(Dsetobject,5688,5,"NICPU Xray PSU focus Limit","V","","")//CID_nicpu_xray_psu_focus_voltage_limit
+	KratosDSET_initaddobject(Dsetobject,5689,3,"NICPU Xray PSU Anode Material","","","")//CID_nicpu_xray_psu_anode_material
+	KratosDSET_initaddobject(Dsetobject,5690,5,"NICPU Ion Gun PSU Condenser Max","","","")//CID_nicpu_ion_gun_psu_condenser_max
+	KratosDSET_initaddobject(Dsetobject,5691,5,"NICPU Ion Gun PSU Condenser Min","","","")//CID_nicpu_ion_gun_psu_condenser_min
+	KratosDSET_initaddobject(Dsetobject,5692,5,"NICPU Ion Gun PSU Objective Max","","","")//CID_nicpu_ion_gun_psu_objective_max
+	KratosDSET_initaddobject(Dsetobject,5693,5,"NICPU Ion Gun PSU Objective Min","","","")//CID_nicpu_ion_gun_psu_objective_min
+	KratosDSET_initaddobject(Dsetobject,5694,3,"NICPU Ion Gun Type","","","")//CID_nicpu_ion_gun_type
+	KratosDSET_initaddobject(Dsetobject,5695,3,"NICPU Ion Gun PSU Operating Settings","","","")//CID_nicpu_igun_operating_settings
+	KratosDSET_initaddobject(Dsetobject,5696,3,"NICPU XRay Gun PSU Focus Settings","","","")//CID_nicpu_xray_psu_spot_settings
+	KratosDSET_initaddobject(Dsetobject,5697,5,"NICPU Ion Gun PSU Filament Current Limit","A","","")//CID_nicpu_igun_filament_current_limit
+	KratosDSET_initaddobject(Dsetobject,5698,5,"NICPU Delay Line Detector Rotation","Rads","","")//CID_nicpu_detector_rotation
+	KratosDSET_initaddobject(Dsetobject,5699,5,"NICPU Delay Line Detector X Shear","Rads","","")//CID_nicpu_detector_x_shear
+	KratosDSET_initaddobject(Dsetobject,5700,5,"NICPU Delay Line Detector Y Shear","Rads","","")//CID_nicpu_detector_y_shear
+	KratosDSET_initaddobject(Dsetobject,5701,5,"NICPU Delay Line Detector X Offset","","","")//CID_nicpu_detector_x_offset
+	KratosDSET_initaddobject(Dsetobject,5702,5,"NICPU Delay Line Detector Y Offset","","","")//CID_nicpu_detector_y_offset
+	KratosDSET_initaddobject(Dsetobject,5703,5,"NICPU Delay Line Detector X Compression","","","")//CID_nicpu_detector_x_compression
+	KratosDSET_initaddobject(Dsetobject,5704,5,"NICPU Delay Line Detector Y Compression","","","")//CID_nicpu_detector_y_compression
+	KratosDSET_initaddobject(Dsetobject,5705,35,"Camera Centre","","","")//CID_camera_centre
+	KratosDSET_initaddobject(Dsetobject,5706,3,"NICPU Vacuum Serial Port","","","")//CID_nicpu_serial_port
+	KratosDSET_initaddobject(Dsetobject,5707,3,"NOVA Platen Control Option","","","")//CID_nova_platen_control
 	//KratosDSET_initaddobject(Dsetobject,5708,0,"NOVA Platen Zone Limits","","","")//CID_nova_platen_zone_limits
 	//KratosDSET_initaddobject(Dsetobject,5709,0,"NOVA Platen Zone Lower Limit","","","")//CID_nova_platen_zone_lower_limit
 	//KratosDSET_initaddobject(Dsetobject,5710,0,"NOVA Platen Zone Upper Limit","","","")//CID_nova_platen_zone_upper_limit
 	//KratosDSET_initaddobject(Dsetobject,5711,0,"Nova Platen Reference coordintates","","","")//CID_nova_platen_ref_coordinates
-	//KratosDSET_initaddobject(Dsetobject,5712,0,"Delay line detector variant","","","")//CID_dld_detector_PSU_variant
+	KratosDSET_initaddobject(Dsetobject,5712,3,"Delay line detector variant","","","")//CID_dld_detector_PSU_variant
 	//KratosDSET_initaddobject(Dsetobject,5713,0,"NOVA Platen SAC Position","","","")//CID_nova_platen_sac_position
 	//KratosDSET_initaddobject(Dsetobject,5714,0,"NOVA Platen XPS Position","","","")//CID_nova_platen_xps_position
 	//KratosDSET_initaddobject(Dsetobject,5715,0,"NOVA Platen SEC Camera Position","","","")//CID_nova_platen_sec_camera_position
-	//KratosDSET_initaddobject(Dsetobject,5716,0,"NICPU number of enabled detectors","","","")//CID_nicpu_number_of_enabled_detectors
-	//KratosDSET_initaddobject(Dsetobject,5717,0,"Current Platen Configuration","","","")//CID_nova_platen_current_state
-	//KratosDSET_initaddobject(Dsetobject,5718,0,"NICPU Vacuum Options","","","")//CID_nicpu_vacuum_config_options
-	//KratosDSET_initaddobject(Dsetobject,5719,0,"NICPU Vacuum Chamber Style","","","")//CID_nicpu_vacuum_chamber_style
-	//KratosDSET_initaddobject(Dsetobject,5720,0,"NICPU configuration data (private to NICPU)","","","")//CID_nicpu_private_info
-	//KratosDSET_initaddobject(Dsetobject,5721,0,"NICPU Xray psu instrument type","","","")//CID_nicpu_xray_psu_instrument
-	//KratosDSET_initaddobject(Dsetobject,5722,0,"Camera Type","","","")//CID_camera_type
-	//KratosDSET_initaddobject(Dsetobject,5723,0,"PixeLINK Camera Serial Number","","","")//CID_pixelink_camera_serial_number
-	//KratosDSET_initaddobject(Dsetobject,5724,0,"Coarse Image Rotation","","","")//CID_coarse_image_rotation
-	//KratosDSET_initaddobject(Dsetobject,5725,0,"Mirror Image","","","")//CID_mirror_image
-	//KratosDSET_initaddobject(Dsetobject,5726,0,"Nova gripper unload level","","","")//CID_nova_gripper_unload_level
-	//KratosDSET_initaddobject(Dsetobject,5727,0,"Nova elevator level 1 content","","","")//CID_nova_elevator_level_1_content
-	//KratosDSET_initaddobject(Dsetobject,5728,0,"Nova elevator level 2 content","","","")//CID_nova_elevator_level_2_content
-	//KratosDSET_initaddobject(Dsetobject,5729,0,"Nova elevator level 3 content","","","")//CID_nova_elevator_level_3_content
-	//KratosDSET_initaddobject(Dsetobject,5730,0,"Nova gripper content","","","")//CID_nova_gripper_content
-	//KratosDSET_initaddobject(Dsetobject,5731,0,"PixeLINK exposure time","","","")//CID_pixelink_exposure_time
+	KratosDSET_initaddobject(Dsetobject,5716,3,"NICPU number of enabled detectors","","","")//CID_nicpu_number_of_enabled_detectors
+	KratosDSET_initaddobject(Dsetobject,5717,33,"Current Platen Configuration","","","")//CID_nova_platen_current_state
+	KratosDSET_initaddobject(Dsetobject,5718,33,"NICPU Vacuum Options","","","")//CID_nicpu_vacuum_config_options
+	KratosDSET_initaddobject(Dsetobject,5719,3,"NICPU Vacuum Chamber Style","","","")//CID_nicpu_vacuum_chamber_style
+	KratosDSET_initaddobject(Dsetobject,5720,34,"NICPU configuration data (private to NICPU)","","","")//CID_nicpu_private_info //check
+	KratosDSET_initaddobject(Dsetobject,5721,3,"NICPU Xray psu instrument type","","","")//CID_nicpu_xray_psu_instrument
+	KratosDSET_initaddobject(Dsetobject,5722,3,"Camera Type","","","")//CID_camera_type
+	KratosDSET_initaddobject(Dsetobject,5723,6,"PixeLINK Camera Serial Number","","","")//CID_pixelink_camera_serial_number
+	KratosDSET_initaddobject(Dsetobject,5724,4,"Coarse Image Rotation","","","")//CID_coarse_image_rotation
+	KratosDSET_initaddobject(Dsetobject,5725,3,"Mirror Image","","","")//CID_mirror_image
+	KratosDSET_initaddobject(Dsetobject,5726,3,"Nova gripper unload level","","","")//CID_nova_gripper_unload_level
+	KratosDSET_initaddobject(Dsetobject,5727,3,"Nova elevator level 1 content","","","")//CID_nova_elevator_level_1_content
+	KratosDSET_initaddobject(Dsetobject,5728,3,"Nova elevator level 2 content","","","")//CID_nova_elevator_level_2_content
+	KratosDSET_initaddobject(Dsetobject,5729,3,"Nova elevator level 3 content","","","")//CID_nova_elevator_level_3_content
+	KratosDSET_initaddobject(Dsetobject,5730,3,"Nova gripper content","","","")//CID_nova_gripper_content
+	KratosDSET_initaddobject(Dsetobject,5731,4,"PixeLINK exposure time","s","","")//CID_pixelink_exposure_time
 	//KratosDSET_initaddobject(Dsetobject,5732,0,"Array of acquisition settings: This should include analyser, Xray' PSU and energy region information","","","")//CID_acquisition_lookup_table
-	//KratosDSET_initaddobject(Dsetobject,5733,0,"Analyser HT Decay Time Constant","","","")//CID_hsa_ht_decay_time
-	//KratosDSET_initaddobject(Dsetobject,5734,0,"NICPU Motor Step Mode","","","")//CID_nicpu_motor_step_mode
-	//KratosDSET_initaddobject(Dsetobject,5735,0,"NICPU Motor Holding Current","","","")//CID_nicpu_motor_holding_current
-	//KratosDSET_initaddobject(Dsetobject,5736,0,"NICPU VM1 PLD Number","","","")//CID_nicpu_pld_option
-	//KratosDSET_initaddobject(Dsetobject,5737,0,"DLD (NICPU) active","","","")//CID_DLD_signal_conditioning_PCB
-	//KratosDSET_initaddobject(Dsetobject,5738,0,"Image stitching","","","")//CID_image_stitching
+	KratosDSET_initaddobject(Dsetobject,5733,5,"Analyser HT Decay Time Constant","","","")//CID_hsa_ht_decay_time
+	KratosDSET_initaddobject(Dsetobject,5734,3,"NICPU Motor Step Mode","","","")//CID_nicpu_motor_step_mode
+	KratosDSET_initaddobject(Dsetobject,5735,3,"NICPU Motor Holding Current","","","")//CID_nicpu_motor_holding_current
+	KratosDSET_initaddobject(Dsetobject,5736,3,"NICPU VM1 PLD Number","","","")//CID_nicpu_pld_option
+	KratosDSET_initaddobject(Dsetobject,5737,3,"DLD (NICPU) active","","","")//CID_DLD_signal_conditioning_PCB
+	KratosDSET_initaddobject(Dsetobject,5738,4,"Image stitching","","","")//CID_image_stitching
 	KratosDSET_initaddobject(Dsetobject,5745,6,"VME IP address or hostname","","","")//CID_vme_ethernet_address
-	//KratosDSET_initaddobject(Dsetobject,5740,0,"Fine Image Rotation Enabled","","","")//CID_fine_rotation
-	//KratosDSET_initaddobject(Dsetobject,5741,0,"Fine Image Rotation Angle","","","")//CID_fine_rotation_angle
-	//KratosDSET_initaddobject(Dsetobject,5742,0,"Camera FSDs Y","","","")//CID_camera_fsd_y
-	//KratosDSET_initaddobject(Dsetobject,5743,0,"5 Position Manual Zoom Lens Fitted","","","")//CID_5_position_manual_zoom_lens
-	//KratosDSET_initaddobject(Dsetobject,5744,0,"Index into Camera FSDs X/Y of FSD currently applicable","","","")//CID_camera_fsd_index
-	//KratosDSET_initaddobject(Dsetobject,5745,0,"Trim coil 3 illumination","","","")//CID_trim_coil_3_illumination
-	//KratosDSET_initaddobject(Dsetobject,5746,0,"Trim coil 3 max illumination current","","","")//CID_trim_coil_3_max_illumination_current
-	//KratosDSET_initaddobject(Dsetobject,5747,0,"NICPU XRay HT Ramp Step Time","","","")//CID_nicpu_xray_ht_ramp_step_time
-	//KratosDSET_initaddobject(Dsetobject,5748,0,"PixeLINK gamma","","","")//CID_pixelink_gamma
-	//KratosDSET_initaddobject(Dsetobject,5749,0,"Autofocus","","","")//CID_autofocus
-	//KratosDSET_initaddobject(Dsetobject,5750,0,"Autofocus range","","","")//CID_autofocus_range
-	//KratosDSET_initaddobject(Dsetobject,5751,0,"Autofocus accuracy","","","")//CID_autofocus_accuracy
-	//KratosDSET_initaddobject(Dsetobject,5752,0,"Autofocus move x & y with z","","","")//CID_autofocus_move_xy_with_z
-	//KratosDSET_initaddobject(Dsetobject,5753,0,"Autofocus dx/dz","","","")//CID_autofocus_xz_gradient
-	//KratosDSET_initaddobject(Dsetobject,5754,0,"Autofocus dy/dz","","","")//CID_autofocus_yz_gradient
-	//KratosDSET_initaddobject(Dsetobject,5755,0,"Trim coil 2 illumination","","","")//CID_trim_coil_2_illumination
-	//KratosDSET_initaddobject(Dsetobject,5756,0,"Trim coil 2 max illumination current","","","")//CID_trim_coil_2_max_illumination_current
-	//KratosDSET_initaddobject(Dsetobject,5757,0,"PixeLINK v3 red gain","","","")//CID_pixelink_v3_red_gain
-	//KratosDSET_initaddobject(Dsetobject,5758,0,"PixeLINK v3 green gain","","","")//CID_pixelink_v3_green_gain
-	//KratosDSET_initaddobject(Dsetobject,5759,0,"PixeLINK v3 blue gain","","","")//CID_pixelink_v3_blue_gain
-	//KratosDSET_initaddobject(Dsetobject,5760,0,"NICPU XPS imaging pixel weights","","","")//CID_nicpu_xps_imaging_pixel_weights
-	//KratosDSET_initaddobject(Dsetobject,5761,0,"NICPU XPS imaging flat field calibration object","","","")//CID_nicpu_xps_imaging_flat_field_calibration_object
-	//KratosDSET_initaddobject(Dsetobject,5762,0,"DLD Detector PSU PCB Option","","","")//CID_dld_detector_psu_pcb_option
-	//KratosDSET_initaddobject(Dsetobject,5763,0,"AES down scanning","","","")//CID_aes_down_scanning
-	//KratosDSET_initaddobject(Dsetobject,5764,0,"NICPU Xray PSU Version","","","")//CID_nicpu_xray_psu_version
-	//KratosDSET_initaddobject(Dsetobject,5765,0,"NICPU XRay HV PSU emission current software limit","","","")//CID_nicpu_xray_emission_current_software_limit
-	//KratosDSET_initaddobject(Dsetobject,5766,0,"NICPU Xray Control Unit Version","","","")//CID_nicpu_xray_control_unit_version
-	//KratosDSET_initaddobject(Dsetobject,5767,0,"ALIAS","","","")//ALIAS
-	//KratosDSET_initaddobject(Dsetobject,5768,0,"ALIAS","","","")//ALIAS
+	KratosDSET_initaddobject(Dsetobject,5746,3,"Fine Image Rotation Enabled","","","")//CID_fine_rotation
+	KratosDSET_initaddobject(Dsetobject,5747,4,"Fine Image Rotation Angle","degrees","","")//CID_fine_rotation_angle
+	KratosDSET_initaddobject(Dsetobject,5748,35,"Camera FSDs Y","mm","","")//CID_camera_fsd_y
+	KratosDSET_initaddobject(Dsetobject,5749,3,"5 Position Manual Zoom Lens Fitted","","","")//CID_5_position_manual_zoom_lens
+	KratosDSET_initaddobject(Dsetobject,5750,3,"Index into Camera FSDs X/Y of FSD currently applicable","","","")//CID_camera_fsd_index
+	KratosDSET_initaddobject(Dsetobject,5751,3,"Trim coil 3 illumination","","","")//CID_trim_coil_3_illumination
+	KratosDSET_initaddobject(Dsetobject,5752,5,"Trim coil 3 max illumination current","A","","")//CID_trim_coil_3_max_illumination_current
+	KratosDSET_initaddobject(Dsetobject,5753,5,"NICPU XRay HT Ramp Step Time","s","","")//CID_nicpu_xray_ht_ramp_step_time
+	KratosDSET_initaddobject(Dsetobject,5754,4,"PixeLINK gamma","","","")//CID_pixelink_gamma
+	KratosDSET_initaddobject(Dsetobject,5755,3,"Autofocus","","","")//CID_autofocus
+	KratosDSET_initaddobject(Dsetobject,5756,5,"Autofocus range","m","","")//CID_autofocus_range
+	KratosDSET_initaddobject(Dsetobject,5757,5,"Autofocus accuracy","m","","")//CID_autofocus_accuracy
+	//KratosDSET_initaddobject(Dsetobject,5758,0,"Autofocus move x & y with z","","","")//CID_autofocus_move_xy_with_z
+	KratosDSET_initaddobject(Dsetobject,5759,5,"Autofocus dx/dz","","","")//CID_autofocus_xz_gradient
+	KratosDSET_initaddobject(Dsetobject,5760,5,"Autofocus dy/dz","","","")//CID_autofocus_yz_gradient
+	KratosDSET_initaddobject(Dsetobject,5761,3,"Trim coil 2 illumination","","","")//CID_trim_coil_2_illumination
+	KratosDSET_initaddobject(Dsetobject,5762,5,"Trim coil 2 max illumination current","A","","")//CID_trim_coil_2_max_illumination_current
+	KratosDSET_initaddobject(Dsetobject,5763,3,"PixeLINK v3 red gain","","","")//CID_pixelink_v3_red_gain
+	KratosDSET_initaddobject(Dsetobject,5764,3,"PixeLINK v3 green gain","","","")//CID_pixelink_v3_green_gain
+	KratosDSET_initaddobject(Dsetobject,5765,3,"PixeLINK v3 blue gain","","","")//CID_pixelink_v3_blue_gain
+	KratosDSET_initaddobject(Dsetobject,5766,34,"NICPU XPS imaging pixel weights","","","")//CID_nicpu_xps_imaging_pixel_weights
+	KratosDSET_initaddobject(Dsetobject,5767,0,"NICPU XPS imaging flat field calibration object","","","")//CID_nicpu_xps_imaging_flat_field_calibration_object
+	KratosDSET_initaddobject(Dsetobject,5768,3,"DLD Detector PSU PCB Option","","","")//CID_dld_detector_psu_pcb_option
+	KratosDSET_initaddobject(Dsetobject,5769,3,"AES down scanning","","","")//CID_aes_down_scanning
+	KratosDSET_initaddobject(Dsetobject,5770,3,"NICPU Xray PSU Version","","","")//CID_nicpu_xray_psu_version
+	KratosDSET_initaddobject(Dsetobject,5771,5,"NICPU XRay HV PSU emission current software limit","A","","")//CID_nicpu_xray_emission_current_software_limit
+	KratosDSET_initaddobject(Dsetobject,5772,3,"NICPU Xray Control Unit Version","","","")//CID_nicpu_xray_control_unit_version
+	KratosDSET_initaddobject(Dsetobject,33885409,6,"ALIAS","","","")//ALIAS
+	KratosDSET_initaddobject(Dsetobject,33885410,6,"ALIAS","","","")//ALIAS
 	KratosDSET_initaddobject(Dsetobject,538971360,3,"NICPU Ion Gun PSU PAH Gun Mode","","","")//AID_nicpu_igun_pah_gun_mode
 	KratosDSET_initaddobject(Dsetobject,538971367,3,"NICPU Ion Gun PSU PAH Action On Completion","","","")//AID_nicpu_igun_pah_action_on_completion
-	//KratosDSET_initaddobject(Dsetobject,538971368,0,"NICPU PAH Ion Gun Manually Differentially Pumped","","","")//CID_nicpu_pah_manually_diff_pumped
-	//KratosDSET_initaddobject(Dsetobject,538971369,0,"NICPU Elevator Controlled by Theta Z Buttons","","","")//CID_nicpu_elevator_controlled_by_theta_z
+	KratosDSET_initaddobject(Dsetobject,538971370,3,"Index into the last sample holder file","","","")//AID_next_sh_index
+	KratosDSET_initaddobject(Dsetobject,538971373,3,"Data file index	","","","")//AID_file_index
+	KratosDSET_initaddobject(Dsetobject,538971374,3,"Type of experiment contained in AID_sample_holder_acquisition_list","","","")//AID_experiment_type
+	KratosDSET_initaddobject(Dsetobject,538971377,3,"Index of sample holder in gripper","","","")//AID_sh_at_analysis
+	KratosDSET_initaddobject(Dsetobject,538971379,3,"Index into images dataset","","","")//AID_sh_image_ref
+	KratosDSET_initaddobject(Dsetobject,538971381,3,"This indexes identifies the exact sample holder","","","")//AID_sample_holder_index
+	KratosDSET_initaddobject(Dsetobject,538971382,3,"Stage frame of reference","","","")//AID_stage_FOV
+	KratosDSET_initaddobject(Dsetobject,538971383,3,"This value depicts an item locked state. A value of zero always denotes an unlocked state","","","")//AID_lock_state
+	KratosDSET_initaddobject(Dsetobject,538971384,3,"Used to show last file index used to save uncalibrated data","","","")//AID_free_space_file_index
+	KratosDSET_initaddobject(Dsetobject,538971395,3,"Number of Tilt Increments","","","")//AID_n_tilt_increments
+	KratosDSET_initaddobject(Dsetobject,538971397,3,"Unique experiment index for any given sample holder","","","")//AID_experiment_index
+	KratosDSET_initaddobject(Dsetobject,538971401,3,"0 for not, anything else for is","","","")//AID_enabled
+	KratosDSET_initaddobject(Dsetobject,538971403,3,"Unique experiment index for any collection in a sample holder","","","")//AID_experiment_collection_index
+	KratosDSET_initaddobject(Dsetobject,538971405,3,"counts the number of experiments in the queue","","","")//AID_queue_counter
+	KratosDSET_initaddobject(Dsetobject,538971406,3,"Cluster Size","","","")//AID_nicpu_igun_mb6_cluster_size
+	KratosDSET_initaddobject(Dsetobject,538973839,3,"NICPU PAH Ion Gun Manually Differentially Pumped","","","")//CID_nicpu_pah_manually_diff_pumped
+	KratosDSET_initaddobject(Dsetobject,538973841,3,"NICPU Elevator Controlled by Theta Z Buttons","","","")//CID_nicpu_elevator_controlled_by_theta_z
+	//KratosDSET_initaddobject(Dsetobject,538973842,0,"VCU gauge resolution","","","")//CID_VCU_gauge_resolution
+	//KratosDSET_initaddobject(Dsetobject,538973846,0,"Number of elevator levels","","","")//CID_n_elevator_levels
 	KratosDSET_initaddobject(Dsetobject,542117083,5,"NICPU Ion Gun PSU PAH Wien Voltage","","","")//AID_nicpu_igun_pah_wien_voltage
 	KratosDSET_initaddobject(Dsetobject,542117084,5,"NICPU Ion Gun PSU PAH Beam Bend Voltage","","","")//AID_nicpu_igun_pah_beam_bend_voltage
-	//KratosDSET_initaddobject(Dsetobject,542117085,0,"NICPU Ion Gun PSU PAH Oven Temperature","","","")//AID_nicpu_igun_pah_oven_temperature
-	//KratosDSET_initaddobject(Dsetobject,542117086,0,"NICPU Ion Gun PSU PAH Oven Ramp Rate","","","")//AID_nicpu_igun_pah_oven_ramp_rate
-	//KratosDSET_initaddobject(Dsetobject,542117087,0,"Start Spellman X.Gun Anode HT Voltage Limit","","","")//AID_ss_xgun_anode_ht_voltage_limit
-	//KratosDSET_initaddobject(Dsetobject,542117088,0,"NICPU X-Ray Gun Anode HT Voltage Limit","","","")//AID_nicpu_xgun_anode_ht_voltage_limit
+	KratosDSET_initaddobject(Dsetobject,542117085,5,"NICPU Ion Gun PSU PAH Oven Temperature","","","")//AID_nicpu_igun_pah_oven_temperature
+	KratosDSET_initaddobject(Dsetobject,542117087,5,"NICPU Ion Gun PSU PAH Oven Ramp Rate","","","")//AID_nicpu_igun_pah_oven_ramp_rate
+	KratosDSET_initaddobject(Dsetobject,542117089,5,"Start Spellman X.Gun Anode HT Voltage Limit","V","","")//AID_ss_xgun_anode_ht_voltage_limit
+	KratosDSET_initaddobject(Dsetobject,542117090,5,"NICPU X-Ray Gun Anode HT Voltage Limit","V","","")//AID_nicpu_xgun_anode_ht_voltage_limit
 	KratosDSET_initaddobject(Dsetobject,542117091,5,"NICPU Ion Gun PSU PAH Beam Monitor Current","","","")//AID_nicpu_igun_pah_beam_monitor_current
-	//KratosDSET_initaddobject(Dsetobject,542117092,0,"NICPU Ion Gun PSU PAH Emission Current Hold Time","","","")//AID_nicpu_igun_pah_warm_up_emission_hold_time
-	//KratosDSET_initaddobject(Dsetobject,542117093,0,"NICPU Ion Gun PSU PAH Temperature Hold Time","","","")//AID_nicpu_igun_pah_warm_up_temperature_hold_time
-	//KratosDSET_initaddobject(Dsetobject,542117094,0,"NICPU Ion Gun PSU PAH Cool Down Time","","","")//AID_nicpu_igun_pah_cool_down_time
-	//KratosDSET_initaddobject(Dsetobject,542117095,0,"NICPU PAH Ion Gun Oven Temperature Limit","","","")//CID_nicpu_pah_oven_temp_limit
-	//KratosDSET_initaddobject(Dsetobject,542117096,0,"NICPU PAH Ion Gun PSU Argon Mode Operating Settings","","","")//CID_nicpu_pah_igun_pah_mode_operating_settings
+	KratosDSET_initaddobject(Dsetobject,542117092,5,"NICPU Ion Gun PSU PAH Emission Current Hold Time","seconds","","")//AID_nicpu_igun_pah_warm_up_emission_hold_time
+	KratosDSET_initaddobject(Dsetobject,542117093,5,"NICPU Ion Gun PSU PAH Temperature Hold Time","seconds","","")//AID_nicpu_igun_pah_warm_up_temperature_hold_time
+	KratosDSET_initaddobject(Dsetobject,542117094,5,"NICPU Ion Gun PSU PAH Cool Down Time","seconds","","")//AID_nicpu_igun_pah_cool_down_time
+	KratosDSET_initaddobject(Dsetobject,542117124,5,"Size of each Tilt Increment	degree","","","")//AID_tilt_increment_size
+	KratosDSET_initaddobject(Dsetobject,542117130,5,"Estimate of sample thickness in m","","","")//AID_sample_thickness
+	KratosDSET_initaddobject(Dsetobject,542119565,5,"NICPU PAH Ion Gun Oven Temperature Limit","","","")//CID_nicpu_pah_oven_temp_limit
+	KratosDSET_initaddobject(Dsetobject,542119572,5,"NICPU Minibeam 6 Gas Mass","","","")//CID_nicpu_igun_mb6_gas_mass
+	KratosDSET_initaddobject(Dsetobject,542119573,5,"NICPU Minibeam 6 Magnetic Field","","","")//CID_nicpu_igun_mb6_magnetic_field
+	//KratosDSET_initaddobject(Dsetobject,548408559,0,"Object that contains the experiment","","","")//AID_experiment_object
+	//KratosDSET_initaddobject(Dsetobject,548408582,0,"Object contain info needed to create (x,y) repeat positions","","","")//AID_xy_repeat_data
+	//KratosDSET_initaddobject(Dsetobject,548408583,0,"Object contain info needed to create angle resolved angles","","","")//AID_arxps_data
+	//KratosDSET_initaddobject(Dsetobject,548408584,0,"Object contain info needed to create stack z heights","","","")//AID_z_stack_data
+	//KratosDSET_initaddobject(Dsetobject,805309680,0,"Experiemt name","","","")//AID_experiment_name
+	//KratosDSET_initaddobject(Dsetobject,807406824,0,"Unused","","","")//AID_sample_holder_file_index
+	//KratosDSET_initaddobject(Dsetobject,807406825,0,"Indicies of holders loaded in Instrument","","","")//AID_sh_look_up_array
+	//KratosDSET_initaddobject(Dsetobject,807406834,0,"Indicies showing contents of each holder location","","","")//AID_sh_content_look_up
+	//KratosDSET_initaddobject(Dsetobject,807406841,0,"List of removed sample holder id's to date for instrument","","","")//AID_used_sh_list
+	//KratosDSET_initaddobject(Dsetobject,816844011,0,"An array of experiments to be performed in FIFO order","","","")//AID_experiment_list
+	//KratosDSET_initaddobject(Dsetobject,816844012,0,"An experiment done at a given, locked, stage position","","","")//AID_experiment
+	//KratosDSET_initaddobject(Dsetobject,816844020,0,"Images meta data","","","")//AID_images_meta
+	//KratosDSET_initaddobject(Dsetobject,816844026,0,"Each item in the array gives to details of a defined platen","","","")//AID_sh_look_up_details
+	//KratosDSET_initaddobject(Dsetobject,816844044,0,"Experiment Queue","","","")//AID_experiment_queue
+	KratosDSET_initaddobject(Dsetobject,816846478,3,"NICPU PAH Ion Gun PSU PAH Mode Operating Settings","","","")//CID_nicpu_pah_igun_pah_mode_operating_settings
+	KratosDSET_initaddobject(Dsetobject,816846480,3,"NICPU PAH Ion Gun PSU Argon Mode Operating Settings","","","")//CID_nicpu_pah_igun_ar_mode_operating_settings
+	KratosDSET_initaddobject(Dsetobject,816846483,3,"NICPU Minibeam 6 Ion Gun PSU Operating Settings","","","")//CID_nicpu_igun_MB6_mode_operating_settings
 end
 
 
