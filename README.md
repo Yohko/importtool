@@ -17,6 +17,8 @@ General import tool for IgorPro for importing various data file formats.
   - DBWS *.dwb, *.rit, *.neu
   - EC-Lab raw *.mpr
   - EC-Lab text *.mpt
+  - EXTECH ASCII log files *.txt
+  - EXTECH BINARY log files *.AsmDat
   - FOURYA/XFIT/Koalariet *.xdd
   - Gwyddion 2.x *.gwy
   - Kratos Vision *.dset
