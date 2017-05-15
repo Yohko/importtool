@@ -78,7 +78,7 @@ The following routines depend on ZIP.XOP (http://www.igorexchange.com/project/ZI
   - Createc *.dat (only v2Z)
 
 **Authors**
-  - Matthias Richter richtmat@yahoo.co.uk
+  - Matthias Richter matthias.h.richter@gmail.com
 
 **Credits**:
   - Parts of the procedures are based on xylib by Marcin Wojdyr
