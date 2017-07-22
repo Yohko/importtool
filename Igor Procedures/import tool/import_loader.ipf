@@ -26,6 +26,7 @@ strconstant f_converttoWN = "f_converttoWN" // converttoWN
 strconstant f_includeTF = "f_includeTF" // includetransmission
 strconstant f_vsEkin = "f_vsEkin" // vskineticenergy
 strconstant f_askforEXT = "f_askforEXT" //askforappenddet
+strconstant f_askforwaveprefix = "f_askforwaveprefix"
 strconstant f_onlyDET = "f_onlyDET" //justdetector
 strconstant f_divbyTF = "f_divbyTF" // f_DivTF
 strconstant f_askforE = "f_askforE" // f_askenergy
@@ -77,6 +78,9 @@ function init_flags()
 	endif
 	if(exists(mypath+":"+f_askforEXT)!=2)
 		variable /G  $(mypath+":"+f_askforEXT)	 		= 0			// Ask for a different name to be added to detector
+	endif
+	if(exists(mypath+":"+f_askforwaveprefix)!=2)
+		variable /G  $(mypath+":"+f_askforwaveprefix)	 		= 0	// Ask for Name to be added in front of every wave
 	endif
 	if(exists(mypath+":"+f_onlyDET)!=2)
 		variable /G  $(mypath+":"+f_onlyDET)				= 0			// export just the detector (only for Dsets)
@@ -267,6 +271,19 @@ Function checkEnergyScale(w, eps)
 end
 
 
+function checkemptywave(w)
+	wave w
+	variable j = 0
+	variable i
+	for(i=0; i<dimsize(w,0); i+=1)
+		if(numtype(w[i]) != 0)
+			j+=1
+		endif
+	endfor
+	return dimsize(w,0)-i
+end
+
+
 Function /S cleanname(str)
 	string str
 	str = cleanupname(str,0)
@@ -274,7 +291,6 @@ Function /S cleanname(str)
 	str= ReplaceString(" ",str,"")
 	return shortname(str, 20)
 end
-
 
 
 Function/S stripstrfirstlastspaces(str)

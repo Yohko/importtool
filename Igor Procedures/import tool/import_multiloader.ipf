@@ -193,7 +193,7 @@ function multiLoader_info(ba) : ButtonControl
 	STRUCT WMButtonAction &ba
 	switch( ba.eventCode )
 		case 2: // mouse up
-			Debugprintf2("(C) 2012-2016 Matthias Richter\r\rhttps://github.com/Yohko/importtool",2)
+			Debugprintf2("(C) 2012-2017 Matthias Richter\r\rhttps://github.com/Yohko/importtool",2)
 			break
 	endswitch
 	return 0
@@ -263,7 +263,8 @@ Function multiLoader_MakePanel()
 		DrawText 10,160+y,"Storing"
 		CheckBox check12 title="store@root",pos={10,170+y},variable=$("root:Packages:Import_Tool:flags:"+f_importtoroot)
 		CheckBox check13 title="ask for append",pos={10,190+y},variable=$("root:Packages:Import_Tool:flags:"+f_askforEXT)
-		SetVariable setvar0  title="suffix",pos={10,210+y},size={115,20},value=$("root:Packages:Import_Tool:flags:"+f_suffix)
+		CheckBox check15 title="ask for wave prefix",pos={10,210+y},variable=$("root:Packages:Import_Tool:flags:"+f_askforwaveprefix)
+		SetVariable setvar0  title="suffix",pos={10,230+y},size={115,20},value=$("root:Packages:Import_Tool:flags:"+f_suffix)
 
 		SetDrawLayer UserBack
 		// spectra
