@@ -32,6 +32,8 @@ function BruckerRaw_check_file(file)
 		return 1
 	elseif (cmpstr(head,"RAW1")==0 && cmpstr(head2,".01")==0)
 		return 1
+	elseif (cmpstr(head,"RAW4")==0)
+		return 1
 	else
 		return -1
 	endif
@@ -61,7 +63,7 @@ function BruckerRaw_load_data([optfile])
 	header+="\r"
 
 	string head = mybinread(file,4)
-	if(cmpstr(head,"RAW ")!=0 && cmpstr(head,"RAW2")!=0 && cmpstr(head,"RAW1")!=0)
+	if(cmpstr(head,"RAW ")!=0 && cmpstr(head,"RAW2")!=0 && cmpstr(head,"RAW1")!=0 && cmpstr(head,"RAW4")!=0)
 		Debugprintf2("Wrong Version/Format!",0)
 		close file
 		return -1
@@ -70,8 +72,10 @@ function BruckerRaw_load_data([optfile])
 		BruckerRaw_load_version1(file,header)
 	elseif (cmpstr(head[3],"2")==0)
 		BruckerRaw_load_version2(file,header)
-	else // head[3] == '1'
+	elseif (cmpstr(head[3],"1")==0) // head[3] == '1'
 		BruckerRaw_load_version1_01(file,header)
+	elseif (cmpstr(head[3],"4")==0) // head[3] == '1'
+		BruckerRaw_load_version4(file,header)
 	endif
 	importloader.success = 1
 	loaderend(importloader)
@@ -358,3 +362,23 @@ static function BruckerRaw_load_version1_01(file,header)
 	endfor
 end
 
+
+static function BruckerRaw_load_version4(file,header)
+	variable file
+	string header
+	header +="format version: V4" +"\r"
+	print "V4 detected, not finished..."
+
+	variable tmp
+	fsetpos file, 12	
+	string hdate = "MEASURE_DATE: " +mybinread(file,10) // address 12 - 22
+	print hdate
+	fsetpos file, 24
+	string htime = "MEASURE_TIME: " +mybinread(file,8) // address 24 - 32
+	print htime
+	
+	fsetpos file, 1421 // start 2theta
+	fbinread /B=3 /F=5 file, tmp
+	print tmp	
+	
+end

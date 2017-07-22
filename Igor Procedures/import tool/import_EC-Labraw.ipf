@@ -152,6 +152,9 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 		case 24:
 			type.type=5; type.name="cyclic number"; type.wave_name = "cyclenumber"
 			break
+		case 26:
+			type.type=4; type.name="Rapp/Ohm"; type.wave_name = "Rapp"
+			break
 		case 31:
 			type.type=1; type.name="Ns changes"; type.wave_name = "Ns"; type.mask = 32 // 0x20
 			if(type.readflags==1)
@@ -237,6 +240,12 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 		case 101:
 			type.type=4; type.name="-Im(Zce)/Ohm"; type.wave_name = "-Im(Zce)"
 			break
+		case 123:
+		type.type=5; type.name="Energy charge/W.h"; type.wave_name = "Energycharge"
+			break
+		case 124:
+			type.type=5; type.name="Energy discharge/W.h"; type.wave_name = "Energydischarge/"
+			break
 		case 125:
 			type.type=5; type.name="Capacitance charge/µF"; type.wave_name = "Capacitancecharge"
 			break		
@@ -253,6 +262,9 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 			break
 		case 163:
 			type.type=4; type.name="|Estack|/V"; type.wave_name = "|Estack|"
+			break
+		case 168:
+			type.type=4; type.name="Rcmp/Ohm"; type.wave_name = "Rcmp"
 			break
 		case 169:
 			type.type=4; type.name="Cs/µF"; type.wave_name = "Cs"
@@ -425,6 +437,18 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 		case 425:
 			type.type=4; type.name="-Im(Zstack)/Ohm"; type.wave_name = "-Im(Zstack)"
 			break
+		case 430: //????
+			type.type=4; type.name="Phase(Zwe-ce)/deg"; type.wave_name = "Phase_Zwe_ce"
+			break
+		case 431: //????
+			type.type=4; type.name="|Zwe-ce|/Ohm"; type.wave_name = "Zwe_ce"
+			break
+		case 432: //????
+			type.type=4; type.name="Re(Zwe-ce)/Ohm"; type.wave_name = "Re_Zwe_ce"
+			break
+		case 433: //????
+			type.type=4; type.name="-Im(Zwe-ce)/Ohm"; type.wave_name = "Im_Zwe_ce"
+			break
 		case 434:
 			type.type=4; type.name="(Q-Qo)/C"; type.wave_name = "Q"
 			break
@@ -442,7 +466,10 @@ static function BIOLOGICmpr_check_datatype(ID, type)
 			break	
 		case 468:
 			type.type=4; type.name="half cycle"; type.wave_name = "halfcycle"
-			break	
+			break
+		case 471: //????
+			type.type=4; type.name="<Ece>/V"; type.wave_name = "Ece3"
+			break
 		default:
 				Debugprintf2("Unknown ColID: "+num2str(ID),0)
 				return -1
@@ -721,7 +748,7 @@ function BIOLOGICmpr_check_file(file)
 	Fbinread /B=3/F=3 file, tmpd	// 4x NULL
 	if(cmpstr(tmps, "BIO-LOGIC MODULAR FILE                         ")!=0 && tmpd !=0)
 		fsetpos file, 0
-		return -1	
+		return -1
 	endif
 	tmps = mybinread(file, 6)
 	fsetpos file, 0
