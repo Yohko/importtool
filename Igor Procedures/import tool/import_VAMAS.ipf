@@ -30,6 +30,7 @@ static structure Vamas_param
 	variable discrete_ydim
 	variable FOV_x
 	variable FOV_y
+	string waveprefix
 endstructure
 
 
@@ -135,6 +136,21 @@ function Vamas_load_data([optfile])
 	struct Vamas_param param
 	variable i=0, optf=0
 	string tmps=""
+
+
+	param.waveprefix = ""
+	if(str2num(get_flags(f_askforwaveprefix)))
+		tmps = param.waveprefix
+		prompt tmps, "What string to use for wave prefix?"
+		doprompt "Import flags!", tmps
+		if(V_flag==1)
+			Debugprintf2("Cancel import!",0)
+			loaderend(importloader)
+			return -1
+		endif
+		param.waveprefix = tmps
+	endif
+
 	// sometimes there are empty lines at the beginning
 	// need to find the magic line
 	string key="", val=""
@@ -354,8 +370,9 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 		for (i = 0; i <cmt_lines; i+=1) 
 			tmps = filewave.file[filewave.line]; filewave.line +=1
 			if(strlen(tmps) == 0)
-				Debugprintf2("Unexpected end of VMS-file.",0)
-				return -1
+				//Debugprintf2("Unexpected end of VMS-file.",0)
+				//return -1
+				//empty comment
 			endif
 			tmps=mycleanupstr(tmps)
 			note ycols, "spectra comment #"+num2str(i+1)+": "+stripstrfirstlastspaces(tmps)
@@ -594,6 +611,7 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 	ydim -=(param.first_start_y-1)
 
 	string ycols_name = nameofwave(ycols)
+	ycols_name = param.waveprefix+ycols_name
 	strswitch(scan_mode)
 		case "MAPPING":
 			Redimension/N=(xdim,ydim) ycols
