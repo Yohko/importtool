@@ -1861,6 +1861,7 @@ end
 static function KratosDSET_readblock(file, Dsetobject, Dsetobjectlist)
 	variable file; struct KratosDsetobject &Dsetobject; struct KratosDsetobjectlist &Dsetobjectlist
 	variable ID = 0, markercount=0, blocklength = 0
+	variable lastmarkerpos = -1
 	string tmps=""
 	Fstatus file
 	variable offlast=V_filePOS//variable offlast=offsets[currentobject][0]
@@ -1891,11 +1892,19 @@ static function KratosDSET_readblock(file, Dsetobject, Dsetobjectlist)
 				Fstatus file
 				if(ID==0) // maybe a marker
 					if(KratosDSET_getmarkers(file, markercount, Dsetobjectlist.object_nextlist, blocklength+offlast,Dsetobject)!=1)
-						// found no markers
-						sprintf tmps, "%10.0f", (V_filePOS-4) ; Debugprintf2("Unknown value at position1: "+tmps+" ; Value: "+num2str(ID)+" ; ID: "+num2str(Dsetobjectlist.currentobject+1),0)
-						break
-					else 
+						fstatus file
+						if(lastmarkerpos != V_filePOS-4)
+							// found no markers
+							sprintf tmps, "%10.0f", (V_filePOS-4) ; Debugprintf2("Unknown value at position1: "+tmps+" ; Value: "+num2str(ID)+" ; ID: "+num2str(Dsetobjectlist.currentobject+1),0)
+							break
+						else
+							// maybe some unaccounted marker?, need to rewrite the complete maker detection routine
+							sprintf tmps, "%10.0f", (V_filePOS-4) ; Debugprintf2("Unaccounted marker at position1: "+tmps,1)
+						endif
+					else
 						// found markers
+						fstatus file
+						lastmarkerpos = V_filePOS
 					endif
 					//print Dsetobject.IDchain
 				else
