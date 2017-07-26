@@ -9,6 +9,7 @@ General import tool for IgorPro for importing various data file formats.
 
   - Agilent Binary Waveform *.bin
   - BESSYII EMP *.dat
+  - Bruker Diffrac.Suite *.xye, *.xy
   - Canberra AccuSpec MCA *.mca
   - Canberra CNF *.cnf
   - ChiPlot *.chi
@@ -41,11 +42,13 @@ General import tool for IgorPro for importing various data file formats.
   - SpecsLab1 *.exp
   - SpecsLab2 *.xml and *.xy
   - Spectra *.#
+  - SRI GC (PeakSimple) *.asc, *.chr, *.thu
   - SSRL ASCII EXAFS data *.dat
   - SSRL BINARY EXAFS data *.dat
   - SSRL µEXAFS data *.dat
   - UKSOFT2001 *.dat, *.dav
   - VAMAS *.vms
+  - Varian Cary WinUV *.csv, *.dsw, *.bsw, *.csw
   - Veeco *.hdf
   - Veeco Nanoscope III *.#
   - VersaStudio data *.par
