@@ -692,7 +692,7 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 							Vamas_casaInfo($(ycols_name))
 						endif
 					elseif(i==1) // transmission function
-						if(str2num(get_flags(f_includeTF)) == 1&& str2num(get_flags(f_onlyDET))==0)
+						if(str2num(get_flags(f_includeTF)) == 1 && str2num(get_flags(f_onlyDET))==0)
 							rename $(ycols_name+"_spk"+num2str(i)), $(ycols_name+"_TF")
 						else
 							killwaves $(ycols_name+"_spk"+num2str(i))
