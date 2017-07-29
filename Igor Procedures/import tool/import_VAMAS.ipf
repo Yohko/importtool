@@ -653,7 +653,6 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 			else
 				SetScale/P  x,x_start,x_step,x_name, ycols
 			endif
-
 			Redimension/N=(cur_blk_steps/cor_var,cor_var) ycols
 			variable col = 0
 			n=0
@@ -681,6 +680,11 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 			endif
 			if(str2num(get_flags(f_divbytime)) == 1)
 				ycols/=dwelltime
+			endif
+			if(str2num(get_flags(f_divbyNscans)) == 1 && str2num(get_flags(f_divbytime)) == 1)
+				SetScale d 0,100,"cps", ycols
+			else
+				SetScale d 0,100,"a.u.", ycols
 			endif
 	
 			splitmatrix(ycols, ycols_name)
