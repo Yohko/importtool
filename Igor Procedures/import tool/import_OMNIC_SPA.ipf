@@ -11,19 +11,21 @@ static structure OMNICSPA_param
 	wave w_blockOffset
 	wave w_blockLength
 	wave w_data
-	wave w_data102	
+	wave w_data102
+	wave w_data103
 	string comments
 	string infos
 	struct OMNICSPA_SpectrumHeader SpectrumHeader
 	struct OMNICSPA_BenchInfo BenchInfo
+	struct OMNICSPA_AFFTHeader AFFTHeader
 endstructure
 
 
 structure OMNICSPA_SpectrumHeader
-	variable DataType_ID // 3 ..Sample
+	variable DataType_ID // 3=Sample
 	variable NumPoints
-	variable XUnits_ID // 1 .. Wavenumbers (cm-1)
-	variable YUnits_ID // 17 .. Absorbance
+	variable XUnits_ID // 1=Wavenumbers (cm-1)
+	variable YUnits_ID // 16=% Transmission;17=Absorbance
 	variable FirstX
 	variable LastX
 	variable Noise
@@ -35,11 +37,11 @@ structure OMNICSPA_SpectrumHeader
 	variable NumPostPeakPts
 	variable BKNumScans
 	variable BKGain
-	variable ApodID // 0 .. Happ-Genzel
+	variable ApodID // 0=Happ-Genzel;5=Norton-Beer, medium
 	variable ApodValue
 	variable Duration
 	variable BurstPeakHeight
-	variable PhaseCorrID // 0 .. Mertz
+	variable PhaseCorrID // 0=Mertz
 	variable LaserFreq
 	variable SSP
 	variable ApertureRef
@@ -55,10 +57,10 @@ endstructure
 
 
 structure OMNICSPA_BenchInfo
-	variable BenchID // 29 .. Magnum 550
-	variable DetectorID // 12 .. DTGS KRS5
-	variable BeamSplitID // 1 .. GE KBr
-	variable SourceID // 2 .. IR Source
+	variable BenchID // 29=Magnum 550;115=Unknown
+	variable DetectorID // 1=MCT/A;10=DTGS KBr;12=DTGS KRS5
+	variable BeamSplitID // 1=GE KBr
+	variable SourceID // 2=IR Source
 	variable ADBits
 	variable HPF
 	variable LPF
@@ -69,6 +71,16 @@ structure OMNICSPA_BenchInfo
 	variable Gain
 	variable Velocity
 	variable AccessoryID
+endstructure
+
+
+structure OMNICSPA_AFFTHeader // Archived Interferogram Header
+	variable NumPoints
+	variable NumScans
+	variable Noise
+	variable InterpPeak
+	variable FinalPeakPos
+	variable Laser
 endstructure
 
 
@@ -139,20 +151,20 @@ function OMNICSPA_load_data([optfile])
 	for(i=0;i<param.nblock;i+=1)
 		switch(param.w_blockType[i])
 			case 2: // Spectrum Header (length: 140)
-				Debugprintf2("Reading Spectrum Header Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading Spectrum Header Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				OMNICSPA_read_SpectrumHeader(file, param)
 				break
 			case 3: // spectrum
-				Debugprintf2("Reading Data Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading Data Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				// numpoints = param.w_blockLength[i]/4
 				tmps = cleanname(param.spectrum_name)
 				Make /O/D/N=(param.SpectrumHeader.NumPoints)  $tmps; wave param.w_data = $tmps
 				OMNICSPA_read_wave(file, param.w_data) // because fbinread with a struct wave doesn't work
 				break
-			case 4: // comments
-				Debugprintf2("Reading Comment Block at "+num2str(param.w_blockOffset[i]),1)
+			case 4: // Annotation
+				Debugprintf2("Reading Annotation Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				do
 					freadline /T=(num2char(0)) file, tmps
@@ -160,8 +172,8 @@ function OMNICSPA_load_data([optfile])
 					fstatus file
 				while((param.w_blockOffset[i]+param.w_blockLength[i])>V_filePOS)
 				break
-			case 27: // settings and infos
-				Debugprintf2("Reading 27 Block at "+num2str(param.w_blockOffset[i]),1)
+			case 27: // History
+				Debugprintf2("Reading History Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				do
 					freadline /T=(num2char(0)) file, tmps
@@ -170,41 +182,70 @@ function OMNICSPA_load_data([optfile])
 				while((param.w_blockOffset[i]+param.w_blockLength[i])>V_filePOS)
 				break
 			case 100:
-				Debugprintf2("Reading 100 Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading 100 Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				break
-			case 102: // another data stream (looks like a FFT?)
-				Debugprintf2("Reading 102 (FFT?) Block at "+num2str(param.w_blockOffset[i]),1)
+			case 101: // Archived Background Interferogram Header (length: 24)
+				Debugprintf2("Reading Archived Background Interferogram Header Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
-				tmp = param.w_blockLength[i]/4
-				tmps = "data_102"
+				OMNICSPA_read_ABGFFTHeader(file, param)
+				break
+			case 102: // Archived sample interferogram
+				Debugprintf2("Reading Archived sample interferogram Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
+				fsetpos file, param.w_blockOffset[i]
+				tmp = param.w_blockLength[i]/4 // param.ABGFFTHeader.NumPoints
+				tmps = "sampleFFT"
 				Make /O/D/N=(tmp)  $tmps; wave param.w_data102 = $tmps
 				OMNICSPA_read_wave(file, param.w_data102) // because fbinread with a struct wave doesn't work
 				break
+			case 103: // Archived background interferogram (looks like a FFT?); Unit: VOLTS?
+				Debugprintf2("Reading Archived background interferogram Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
+				fsetpos file, param.w_blockOffset[i]
+				tmp = param.w_blockLength[i]/4 // param.AFFTHeader.NumPoints
+				tmps = "BGFFT"
+				Make /O/D/N=(tmp)  $tmps; wave param.w_data103 = $tmps
+				OMNICSPA_read_wave(file, param.w_data103) // because fbinread with a struct wave doesn't work
+				break
 			case 105: // History Bits
-				Debugprintf2("Reading History Bits Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading History Bits Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				fbinread /B=3/F=3 file, tmp//; print tmp
 				fbinread /B=3/F=3 file, tmp//; print tmp
 				fbinread /B=3/F=3 file, tmp//; print tmp
 				break
 			case 106: // Bench Info  (length: 56)
-				Debugprintf2("Reading Bench Info Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading Bench Info Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				OMNICSPA_read_BenchInfo(file, param)
 				break
 			case 107:
-				Debugprintf2("Reading 107 Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading 107 Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				break
-			case 130:
-				Debugprintf2("Reading 130 Block at "+num2str(param.w_blockOffset[i]),1)
+			case 130: // can also appear more than once!
+				Debugprintf2("Reading 130 Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
-				print (param.w_blockLength[i])
-				print (param.SpectrumHeader.NumPoints)
+				break
+			case 146: // some text?
+				Debugprintf2("Reading 146 Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
+				fsetpos file, param.w_blockOffset[i]
+				do
+					freadline /T=(num2char(0)) file, tmps
+					//print tmps[0, strlen(tmps)-2]
+					fstatus file
+				while((param.w_blockOffset[i]+param.w_blockLength[i])>V_filePOS)
+				break
+			case 339: // some text (History)
+				Debugprintf2("Reading 339 Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
+				fsetpos file, param.w_blockOffset[i]
+				do
+					freadline /T=(num2char(0)) file, tmps
+					//print tmps[0, strlen(tmps)-2]
+					fstatus file
+				while((param.w_blockOffset[i]+param.w_blockLength[i])>V_filePOS)
 				break
 			case 384:
-				Debugprintf2("Reading 384 Block at "+num2str(param.w_blockOffset[i]),1)
+				Debugprintf2("Reading 384 Block at "+num2str(param.w_blockOffset[i])+"; length: "+num2str(param.w_blockLength[i]),1)
 				fsetpos file, param.w_blockOffset[i]
 				break
 			default:
@@ -230,8 +271,10 @@ function OMNICSPA_load_data([optfile])
 	endswitch
 
 	switch(param.SpectrumHeader.YUnits_ID)
+		case 16:
+			y_unit = "% Transmission"
 		case 17:
-			x_unit = "Absorbance"
+			y_unit = "Absorbance"
 			break
 		default:
 			break
@@ -300,6 +343,7 @@ static function OMNICSPA_read_SpectrumHeader(file, param)
 	FBinRead /B=3 /F=3 file, tmp//; print "136", tmp // 136
 end
 
+
 static function OMNICSPA_read_BenchInfo(file, param)
 	variable file
 	struct OMNICSPA_param &param
@@ -317,4 +361,16 @@ static function OMNICSPA_read_BenchInfo(file, param)
 	FBinRead /B=3 /F=4 file, param.BenchInfo.Gain // 44
 	FBinRead /B=3 /F=4 file, param.BenchInfo.Velocity // 48
 	FBinRead /B=3 /U/F=3 file, param.BenchInfo.AccessoryID // 52
+end
+
+
+static function OMNICSPA_read_ABGFFTHeader(file, param)
+	variable file
+	struct OMNICSPA_param &param
+	FBinRead /B=3 /U/F=3 file, param.AFFTHeader.NumPoints // 0
+	FBinRead /B=3 /U/F=3 file, param.AFFTHeader.NumScans // 4
+	FBinRead /B=3 /F=4 file, param.AFFTHeader.Noise // 8
+	FBinRead /B=3 /F=4 file, param.AFFTHeader.InterpPeak // 12
+	FBinRead /B=3 /U/F=3 file, param.AFFTHeader.FinalPeakPos // 16
+	FBinRead /B=3 /F=4 file, param.AFFTHeader.Laser // 20
 end
