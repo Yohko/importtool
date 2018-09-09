@@ -297,7 +297,8 @@ end
 
 static function OMNICSPA_read_wave(file, w)
 	variable file
-	wave &w
+	//wave &w // IgorPro 8 has an issue with this
+	wave w
 	FBinRead /B=3/F=4 file, w
 end
 

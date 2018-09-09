@@ -83,7 +83,7 @@ function init_flags()
 		variable /G  $(mypath+":"+f_askforwaveprefix)	 		= 0	// Ask for Name to be added in front of every wave
 	endif
 	if(exists(mypath+":"+f_onlyDET)!=2)
-		variable /G  $(mypath+":"+f_onlyDET)				= 0			// export just the detector (only for Dsets)
+		variable /G  $(mypath+":"+f_onlyDET)				= 1			// export just the detector (only for Dsets)
 	endif
 	if(exists(mypath+":"+f_divbyTF)!=2)
 		variable /G  $(mypath+":"+f_divbyTF) 				= 1			// create a new wave and devide Detector by Transmission function

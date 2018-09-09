@@ -211,7 +211,7 @@ function Vamas_load_data([optfile])
 	string numspecregions = ""
 	if ((cmpstr("MAP",exp_mode) == 0) || (cmpstr("MAPD",exp_mode) == 0) || (cmpstr("NORM",exp_mode) == 0) || (cmpstr("SDP",exp_mode) == 0) )
 		headercomment += "number of spectral regions: " + loader_readline_str(filewave) + "\r"
-    	endif
+	endif
 
 	if ((cmpstr("MAP",exp_mode) == 0) || (cmpstr("MAPD",exp_mode) == 0))
 		headercomment += "number of analysis positions: " + loader_readline_str(filewave) + "\r"

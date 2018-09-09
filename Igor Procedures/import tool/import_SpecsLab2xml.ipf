@@ -633,7 +633,8 @@ end
 
 static function SpecsXML_readstructsafterseq(givenstruct, savewave, savepos, myRegionInfo, length, name)
 	struct xmlstruct &givenstruct
-	wave /Z &savewave
+	//wave /Z &savewave // IgorPro 8 has an issue with this
+	wave /Z savewave
 	variable &savepos
 	struct RegionInfo &myRegionInfo
 	variable length
@@ -667,7 +668,8 @@ static function /S SpecsXML_checktype(givenstruct, givenseq, givenenum, savewave
 	struct xmlstruct &givenstruct
 	struct xmlsequence &givenseq
 	struct xmlenum &givenenum
-	wave /Z &savewave
+	//wave /Z &savewave // IgorPro 8 has an issue with this
+	wave /Z savewave
 	variable &savepos
 	struct RegionInfo &myRegionInfo
 	string str
@@ -704,7 +706,8 @@ end
 
 static function SpecsXML_readparamstruct(givenstruct, savewave, savepos, myRegionInfo, str)
 	struct xmlstruct &givenstruct
-	wave /Z &savewave
+	//wave /Z &savewave // IgorPro 8 has an issue with this
+	wave /Z savewave
 	variable &savepos
 	struct RegionInfo &myRegionInfo
 	string str
@@ -939,7 +942,8 @@ end
 
 static function SpecsXML_readsq(seq, savewave, savepos, myRegionInfo)
 	struct xmlsequence &seq
-	wave /Z &savewave
+	//wave /Z &savewave // IgorPro 8 has an issue with this
+	wave /Z savewave
 	variable &savepos
 	struct RegionInfo &myRegionInfo
 	
@@ -1123,7 +1127,8 @@ end
 
 static function SpecsXML_readstruct(givenstruct, savewave, savepos, myRegionInfo)
 	struct xmlstruct &givenstruct
-	wave /Z &savewave
+	//wave /Z &savewave // IgorPro 8 has an issue with this
+	wave /Z savewave // IgorPro 8 has an issue with this
 	variable &savepos
 	struct RegionInfo &myRegionInfo
 	struct xmlsequence myseq
@@ -1496,7 +1501,8 @@ end
 
 
 static function SpecsXML_counts(savewave, savepos, length, myRegionInfo)
-	wave &savewave
+	//wave &savewave // IgorPro 8 has an issue with this
+	wave savewave
 	variable &savepos
 	variable length
 	struct RegionInfo &myRegionInfo

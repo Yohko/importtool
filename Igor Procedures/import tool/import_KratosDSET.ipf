@@ -1109,7 +1109,7 @@ static function KratosDSET_resetDsetobject(Dsetobject) // 1298 known objects
 	//KratosDSET_initaddobject(Dsetobject,3178,0,"Sample name","","","")//AID_sample_bar_sample_name
 	KratosDSET_initaddobject(Dsetobject,3179,5,"Sample Bias","","","")//AID_sample_bias
 	KratosDSET_initaddobject(Dsetobject,3180,3,"Start Spellman X.Gun Source","","2=F_SS_XRAY_PSU_SOURCE_3","")//AID_ss_xgun_active_source
-	//KratosDSET_initaddobject(Dsetobject,3181,0,"Region Comment","","","")//AID_region_comment
+	KratosDSET_initaddobject(Dsetobject,3181,6,"Region Comment","","","")//AID_region_comment
 	//KratosDSET_initaddobject(Dsetobject,3182,0,"Magnet Scale Factor","","","")//AID_magnet_scale_factor
 	//KratosDSET_initaddobject(Dsetobject,3183,0,"Magnet Scale Factor Enabled","","","")//AID_magnet_scale_factor_enabled
 	//KratosDSET_initaddobject(Dsetobject,3184,0,"ESCAK1 Aperture name","","","")//AID_escak1_analyser_aperture_name
