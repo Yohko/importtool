@@ -166,7 +166,7 @@ function Vamas_load_data([optfile])
 			break
 		endif
 		if(strsearch(key,"VAMAS",0)==0)
-			Debugprintf2("Found beginning of non standard Vamas file. trying to import!!",0)
+			Debugprintf2("Found beginning of non standard Vamas file. Trying to import!",0)
 			break
 		endif
 		key=""
@@ -299,7 +299,7 @@ function Vamas_load_data([optfile])
 				includew[j]=inclusionlist[j]
 			endfor
 		endif
-		if(Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment,i, cor_var, param)==-1)
+		if(Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_mode,blk_fue, headercomment,i, cor_var, param) == -1)
 			loaderend(importloader)
 			return -1
 		endif
@@ -508,7 +508,7 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 			x_step = loader_readline_num(filewave)
 		else
 			cor_var = loader_readline_num(filewave)
-			if(numtype(cor_var)!=0)
+			if(numtype(cor_var)!=0 || cor_var == 0)
 				Debugprintf2("Error opening Vamas file (cor_var)!",0)
 				return -1
 			endif
@@ -597,6 +597,9 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 		return -1
 	endif
 	variable cur_blk_steps = loader_readline_num(filewave)
+	if(cur_blk_steps == 0)
+		return -1
+	endif
 	if(Vamas_skip_lines(filewave, 2 * cor_var)==-1) // min & max ordinate
 		return -1
 	endif
@@ -660,8 +663,9 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 				tmpd=loader_readline_num(filewave)
 				if(numtype(tmpd)==2)
 					// some VMS files have empty lines here, CasaXPS still loads these files properly
-					Debugprintf2("Nummeric error in countlist, trying to skip line!",2)
+					Debugprintf2("Nummeric error in countlist at position "+num2str(filewave.line)+", trying to skip line!",2)
 					i-=1
+					continue
 				endif
 				ycols[n][col]=tmpd
 		
