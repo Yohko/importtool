@@ -383,7 +383,8 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 		tech = loader_readline_str(filewave)
 		note ycols, "tech: " + tech
 		if(FindListItem(tech, techs, ";")==-1)
-			Debugprintf2("Tech. has an invalid value: "+tech,0)
+			Debugprintf2("Tech. has an invalid value: "+tech+"at line "+num2str(filewave.line),0)
+			return -1
 		endif
 	endif
 
@@ -609,17 +610,20 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 
 	//<expression> ? <TRUE> : <FALSE>
 	xdim = (param.first_end_x>=param.last_end_x) ? param.first_end_x : param.last_end_x
-	ydim = (param.first_end_y>=param.last_end_y) ? param.first_end_x : param.last_end_x
+	ydim = (param.first_end_y>=param.last_end_y) ? param.first_end_y : param.last_end_y
 	xdim -=(param.first_start_x-1)
 	ydim -=(param.first_start_y-1)
-
 	string ycols_name = nameofwave(ycols)
 	ycols_name = param.waveprefix+ycols_name
 	strswitch(scan_mode)
 		case "MAPPING":
-			Redimension/N=(xdim,ydim) ycols
-			for(j=0;j<ydim;j+=1)
-				for(i=0;i<xdim;i+=1)
+			if(xdim*ydim!=cur_blk_steps)
+				Debugprintf2("Error. xdim*ydim != cur_blk_steps.",0)
+				return -1
+			endif
+			Redimension/N=(ydim,xdim) ycols
+			for(j=0;j<xdim;j+=1)
+				for(i=0;i<ydim;i+=1)
 					tmpd=loader_readline_num(filewave)
 					ycols[i][j]=tmpd
 				endfor
@@ -663,7 +667,7 @@ static function Vamas_read_block(filewave, includew,exp_mode,exp_var_cnt, scan_m
 				tmpd=loader_readline_num(filewave)
 				if(numtype(tmpd)==2)
 					// some VMS files have empty lines here, CasaXPS still loads these files properly
-					Debugprintf2("Nummeric error in countlist at position "+num2str(filewave.line)+", trying to skip line!",2)
+					Debugprintf2("Error in countlist at position "+num2str(filewave.line)+", trying to skip line!",2)
 					i-=1
 					continue
 				endif
