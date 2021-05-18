@@ -529,6 +529,10 @@ static function BIOLOGICmpr_read_datamodule(file, mprhdr)
 			BIOLOGICmpr_read_types(file, types,n_columns, 2)
 			mybinread(file, 405-5-2*n_columns)
 			break
+		case 3:
+			BIOLOGICmpr_read_types(file, types,n_columns, 2)
+			mybinread(file, 405-5-11-n_columns)
+			break
 		default:
 			Debugprintf2("Unknown version for data module: "+num2str(mprhdr.version),0)
 			return -1
